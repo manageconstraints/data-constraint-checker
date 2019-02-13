@@ -55,13 +55,31 @@ def checkConstraints(output)
 	files.each do |k, v|
 		for line in v
 			if line.start_with?"+"
-				#puts "line #{line}"
-				if (line.include?("add_column") or line.include?("change_column") )and !line.include?"default"
+                #puts "line #{line}"
+                # check if changing/adding column or changing multiples columns (table)
+                if (line.include?("add_column") or line.include?("change_column") or
+                    line.include?("change_table")) and !line.include?("default")
 					if line.include?("null: false") or line.include?("null => false")
 						puts "hit line #{line}"
 						results[k] = v
-						puts "results: #{results.length}"
-					end
+                        puts "results: #{results.length}"
+                    end
+                # check if changing column null constraints
+                elsif (line.include?("change_column_null") and !line.include?("default"))
+                    puts "hit line #{line}"
+                    results[k] = v
+                    puts "results: #{results.length}"
+                # check if validates was not present before
+                elsif (line.include?("validates_presence_of") or line.include?("evaluate_condition") \
+                       or line.include?("validate") or line.include?("validates_associated") \
+                       or line.include?("validates_confirmation_of") or line.include?("validates_each") \
+                       or line.include?("validates_exclusion_of") or line.include?("validates_form_of") \
+                       or line.include?("validates_inclusion_of") or line.include?("valudates_length_of") \
+                       or line.include?("validates_numericality_of") or line.include?("validates_uniqueness_of")) \
+                       and !line.include?("default")
+                    puts "hit line #{line}"
+                    results[k] = v
+                    puts "results: #{results.length}"
 				end
 			end
 		end
