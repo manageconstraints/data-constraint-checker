@@ -56,6 +56,12 @@ def checkConstraints(output)
 		add = {}
 		delete =  {}
 		for line in v
+			if line.include?"def down"
+				break
+			end
+			if line.start_with?"+" and line.include?"create_table :"
+				break
+			end
 			if line.start_with?"+"
 				begin
 					str = line[1..-1].strip
@@ -85,7 +91,7 @@ def checkConstraints(output)
 						next
 					end
 				end
-				if line.include?"def down"
+				if line.include?"def down" or line.include?"def self.down"
 					break
 				end
 			end
@@ -93,7 +99,13 @@ def checkConstraints(output)
 				if line.include?"class "
 					break
 				end
-				if line.include?"validates :" or line.include?"validate :" or line.include?"validates_presence_of :"
+				if line.include?"validates :" or line.include?"validate :" or line.include?"validates_presence_of :" \
+					or line.include?("validate") or line.include?("validates_associated") \
+					or line.include?("validates_confirmation_of") or line.include?("validates_each") \
+					or line.include?("validates_exclusion_of") or line.include?("validates_form_of") \
+					or line.include?("validates_inclusion_of") or line.include?("validates_length_of") \
+					or line.include?("validates_numericality_of") or line.include?("validates_uniqueness_of")
+                    
 					if results[k]
 						next
 					end

@@ -1,0 +1,6 @@
+validates
+validates_exclusion_of
+validates_inclusion_of
+validates_format_of 
+validates_length_of
+validates_presence_of
