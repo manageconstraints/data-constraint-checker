@@ -8,4 +8,8 @@ class Class_class
 		@ast = nil
 		@constraints = []
 	end
+	def add_constraints(constraints)
+		@constraints += constraints
+		puts "@constraints.size #{@constraints.length}"
+	end
 end

@@ -11,7 +11,7 @@ def os_walk(dir)
   end
   [root, files, dirs]
 end
-def read_ruby_files(application_dir=nil,version=nil)
+def read_ruby_files(application_dir=nil,version='')
 	
 	if application_dir and version
 		$app_dir = application_dir

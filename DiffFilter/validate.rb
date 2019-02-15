@@ -2,8 +2,8 @@ class Constraint
 	attr_accessor :table, :column, :type, :if, :unless, :allow_nil, :allow_blank
 	#type: model from validate function / db migration file 
 	def initialize(table, column, type)
-		@table = table
 		@column = column
+		@table = table
 		@type = type
 	end
 
@@ -14,12 +14,12 @@ class Length_constraint < Constraint
 end
 
 class Format_constraint < Constraint
-	attr_accessor :with_constraint, :on_condition
+	attr_accessor :with_format, :on_condition
 
 end
 
 class Inclusion_constraint < Constraint
-	
+
 end
 
 class Exclusion_constraint < Constraint
