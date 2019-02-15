@@ -6,10 +6,15 @@ class Class_class
 		@name = nil
 		@upper_class_name = nil
 		@ast = nil
-		@constraints = []
+		@constraints = {}
 	end
 	def add_constraints(constraints)
-		@constraints += constraints
+		constraints.each do |constraint|
+			puts "constraint #{constraint.class}"
+			column = constraint.column
+			@constraints[column] = [] unless @constraints[column]
+			@constraints[column] << constraint
+		end
 		puts "@constraints.size #{@constraints.length}"
 	end
 	def getConstraints

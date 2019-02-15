@@ -17,7 +17,7 @@ class Constraint
 			@column == old_constraint.column and \
 			@type == old_constraint.type and \
 			@if_cond == old_constraint.if_cond and \
-			@unless_cond == old_constraint.unless_cond and \ 
+			@unless_cond == old_constraint.unless_cond and \
 			@allow_blank == old_constraint.allow_blank and \
 			@allow_nil == old_constraint.allow_nil
 			return true
@@ -68,7 +68,13 @@ class Format_constraint < Constraint
 		end
 	end
 	def is_same(old_constraint)
-		return constraint == old_constraint
+		if super
+			if self.with_format == old_constraint.with_format and \
+				self.on_condition == old_constraint.on_condition 
+				return true
+			end
+		end
+		return false
 	end
 end
 
@@ -81,7 +87,12 @@ class Inclusion_constraint < Constraint
 		end
 	end
 	def is_same(old_constraint)
-		return constraint == old_constraint
+		if super
+			if self.range == old_constraint.range
+				return true
+			end
+		end
+		return false
 	end
 end
 
@@ -94,7 +105,12 @@ class Exclusion_constraint < Constraint
 		end
 	end
 	def is_same(old_constraint)
-		return constraint == old_constraint
+		if super
+			if self.range == old_constraint.range
+				return true
+			end
+		end
+		return false
 	end
 end
 
