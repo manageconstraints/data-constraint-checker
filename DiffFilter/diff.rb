@@ -20,14 +20,14 @@ def findCommits(commits, directory,target="db/migrate/*")
 			k = "#{c1} vs #{c2}"
 			v = output.lines
 			outputs[k] = v
-			puts "length: #{v.length}"	
+			#puts "length: #{v.length}"	
 			cnt += 1
 			print "cnt : #{cnt} " if cnt%1000 == 0
 			files = checkConstraints(v)
 			if files.length > 0
 				puts "cmd #{cmd}"
-				puts "version: #{k}"
 				files.each do |fn, con|
+					puts "version: #{k}"
 					puts "filename: #{fn}"
 					puts "con: #{con.join}"
 				end
@@ -53,8 +53,67 @@ def checkConstraints(output)
 	#puts "files.length: #{files.length}"
 	results = {}
 	files.each do |k, v|
+		add = {}
+		delete =  {}
 		for line in v
+			if line.include?"def down"
+				break
+			end
+			if line.start_with?"+" and line.include?"create_table :"
+				break
+			end
 			if line.start_with?"+"
+<<<<<<< HEAD
+				begin
+					str = line[1..-1].strip
+					add[str] = true
+				rescue
+				end
+			end
+			if line.start_with?"-"
+				begin
+					str = line[1..-1].strip
+					delete[str] = true
+				rescue
+				end
+			end
+		end
+		add.each do |line, value|
+			if delete[line]
+				# if the string also occurs in delete contents, it means there is no change in the content
+				next
+			end
+			if k.include?("/db/migrate")
+				if (line.include?("add_column") or line.include?("change_column") )and !line.include?"default"
+					if line.include?("null: false") or line.include?("null => false")
+						puts "hit line #{line}"
+						results[k] = v
+						puts "results: #{results.length}"
+						next
+					end
+				end
+				if line.include?"def down" or line.include?"def self.down"
+					break
+				end
+			end
+			if k.include?"/models/" 
+				if line.include?"class "
+					break
+				end
+				if line.include?"validates :" or line.include?"validate :" or line.include?"validates_presence_of :" \
+					or line.include?("validate") or line.include?("validates_associated") \
+					or line.include?("validates_confirmation_of") or line.include?("validates_each") \
+					or line.include?("validates_exclusion_of") or line.include?("validates_form_of") \
+					or line.include?("validates_inclusion_of") or line.include?("validates_length_of") \
+					or line.include?("validates_numericality_of") or line.include?("validates_uniqueness_of")
+                    
+					if results[k]
+						next
+					end
+					results[k] = v
+					puts "hit line #{line}"
+					next
+				end
                 #puts "line #{line}"
                 # check if changing/adding column or changing multiples columns (table)
                 if (line.include?("add_column") or line.include?("change_column") or
@@ -70,16 +129,7 @@ def checkConstraints(output)
                     results[k] = v
                     puts "results: #{results.length}"
                 # check if validates was not present before
-                elsif (line.include?("validates_presence_of") or line.include?("evaluate_condition") \
-                       or line.include?("validate") or line.include?("validates_associated") \
-                       or line.include?("validates_confirmation_of") or line.include?("validates_each") \
-                       or line.include?("validates_exclusion_of") or line.include?("validates_form_of") \
-                       or line.include?("validates_inclusion_of") or line.include?("valudates_length_of") \
-                       or line.include?("validates_numericality_of") or line.include?("validates_uniqueness_of")) \
-                       and !line.include?("default")
-                    puts "hit line #{line}"
-                    results[k] = v
-                    puts "results: #{results.length}"
+  				
 				end
 			end
 		end
