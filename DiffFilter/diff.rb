@@ -63,6 +63,7 @@ def checkConstraints(output)
 				break
 			end
 			if line.start_with?"+"
+<<<<<<< HEAD
 				begin
 					str = line[1..-1].strip
 					add[str] = true
@@ -112,6 +113,23 @@ def checkConstraints(output)
 					results[k] = v
 					puts "hit line #{line}"
 					next
+				end
+                #puts "line #{line}"
+                # check if changing/adding column or changing multiples columns (table)
+                if (line.include?("add_column") or line.include?("change_column") or
+                    line.include?("change_table")) and !line.include?("default")
+					if line.include?("null: false") or line.include?("null => false")
+						puts "hit line #{line}"
+						results[k] = v
+                        puts "results: #{results.length}"
+                    end
+                # check if changing column null constraints
+                elsif (line.include?("change_column_null") and !line.include?("default"))
+                    puts "hit line #{line}"
+                    results[k] = v
+                    puts "results: #{results.length}"
+                # check if validates was not present before
+  				
 				end
 			end
 		end
