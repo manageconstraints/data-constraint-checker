@@ -4,6 +4,7 @@ class Version
 		@app_dir = app_dir
 		@commit = commit
 		@files = {}
+		@activerecord_files = {}
 	end
 	def extract_files
 		if @app_dir and @commit 
@@ -12,10 +13,10 @@ class Version
 	end
 	def extract_constraints
 		# extract the constraints from the active record file
-		active_files = @files.select{|key, x| x.is_activerecord}
+		@activerecord_files = @files.select{|key, x| x.is_activerecord}
 		puts "@files.length: #{@files.length}"
-		puts "@active_files.length: #{active_files.length}"
-		active_files.each do |key, file|
+		puts "@activerecord_files.length: #{@activerecord_files.length}"
+		@activerecord_files.each do |key, file|
 			puts "#{key} #{file.getConstraints.length}"
 		end
 	end
@@ -40,6 +41,17 @@ class Version
 			if not_active_files.length == length
 				break
 			end
+		end
+	end
+	def get_activerecord_file
+		return @activerecord_files
+	end
+	def compare_constraints(old_version)
+		newly_added
+		@activerecord_files.each do |key, file|
+			constraints = file.getConstraints
+			old_file = old_version.get_activerecord_files[key]
+			next unless old_file
 		end
 	end
 end
