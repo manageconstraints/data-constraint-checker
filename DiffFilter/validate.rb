@@ -5,7 +5,7 @@ class Constraint
 		@column = column
 		@table = table
 		@type = type
-		puts "\tcreate new constraint #{self.class.name}"
+		puts "\tcreate new constraint #{self.class.name} #{table} #{column} "
 	end
 
 end

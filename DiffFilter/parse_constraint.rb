@@ -44,11 +44,12 @@ def parse_validate_constraint_function(table, funcname, ast)
 	if funcname == "validates"
 		constraints += parse_validates(table, funcname, ast)
 	elsif funcname.include?"_"
-		column = nil
+		columns = []
 		dic = {}
 		ast.children.each do |child|
 			if child.type.to_s == 'symbol_literal'
 				column = handle_symbol_literal_node(child)
+				columns << column
 			end
 			puts "child.type.to_s #{child.type.to_s} #{child.source}"
 			if child.type.to_s == "list"
@@ -70,36 +71,39 @@ def parse_validate_constraint_function(table, funcname, ast)
 		if dic["allow_nil"] and dic["allow_nil"].source == "true"
 			allow_nil = true
 		end
-		if column
+		if columns.length > 0
 			if funcname == "validates_exclusion_of"
-				constraint = Exclusion_constraint.new(table, column, type, allow_nil, allow_blank)
-				constraint.parse(dic)
-				constraints << constraint
+				columns.each do |column|
+					constraint = Exclusion_constraint.new(table, column, type, allow_nil, allow_blank)
+					constraint.parse(dic)
+					constraints << constraint
+				end
 			end
 			if funcname == "validates_inclusion_of"
-				constraint = Exclusion_constraint.new(table, column, type, allow_nil, allow_blank)
-				constraint.parse(dic)
-				constraints << constraint
+				columns.each do |column|
+					constraint = Inclusion_constraint.new(table, column, type, allow_nil, allow_blank)
+					constraint.parse(dic)
+					constraints << constraint
+				end
 			end
 			if funcname == "validates_presence_of"
-				ast.children.each do |child|
+				columns.each do |column|
 					constraint = Presence_constraint.new(table, column, type, allow_nil, allow_blank)
 					constraints << constraint
 				end
 			end
 			if funcname == "validates_length_of"
-				constraint = Length_constraint.new(table, column, type, allow_nil, allow_blank)
-				constraint.parse(dic)
-				constraints << constraint
+				columns.each do |column|
+					constraint = Length_constraint.new(table, column, type, allow_nil, allow_blank)
+					constraint.parse(dic)
+					constraints << constraint
+				end
 			end
 			if funcname == "validates_format_of"
-				ast.children.each do |child|
-					if child.type.to_s == 'symbol_literal'
-						column = handle_symbol_literal_node(child)
-						constraint = Format_constraint.new(table, column, type, allow_nil, allow_blank)
-						constraint.parse(dic)
-						constraints << constraint
-					end
+				columns.each do |column|
+					constraint = Format_constraint.new(table, column, type, allow_nil, allow_blank)
+					constraint.parse(dic)
+					constraints << constraint
 				end
 			end
 		end
@@ -142,6 +146,22 @@ def parse_validates(table, funcname, ast)
 			  				constraint.parse(dic)
 			  				constraints << constraint
 			  			end
+					end
+				end
+				if cur_constr == "inclusion"
+					cur_value = cur_value_ast.source
+					columns.each do |c|
+						constraint = Inclusion_constraint.new(table, c, type)
+						constraint.range = cur_value
+						constraints << constraints
+					end
+				end				
+				if cur_constr == "exclusion"
+					cur_value = cur_value_ast.source
+					columns.each do |c|
+						constraint = Exclusion_constraint.new(table, c, type)
+						constraint.range = cur_value
+						constraints << constraints
 					end
 				end
   			end

@@ -12,4 +12,7 @@ class Class_class
 		@constraints += constraints
 		puts "@constraints.size #{@constraints.length}"
 	end
+	def getConstraints
+		return @constraints
+	end
 end
