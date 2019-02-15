@@ -23,6 +23,8 @@ def extract_commits(directory)
 end
 versions = extract_commits(application_dir)
 version = versions[-1]
+version.extract_files
+version.annotate_model_class
 version.extract_constraints
 
 

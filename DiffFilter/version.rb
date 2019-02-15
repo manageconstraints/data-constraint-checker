@@ -5,11 +5,13 @@ class Version
 		@commit = commit
 		@files = {}
 	end
-	def extract_constraints
+	def extract_files
 		if @app_dir and @commit 
 			@files = read_ruby_files(@app_dir, commit)
 		end
-		self.annotate_model_class
+	end
+	def extract_constraints
+		# extract the constraints from the active record file
 		active_files = @files.select{|key, x| x.is_activerecord}
 		puts "@files.length: #{@files.length}"
 		puts "@active_files.length: #{active_files.length}"
