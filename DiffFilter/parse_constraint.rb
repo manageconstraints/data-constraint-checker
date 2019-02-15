@@ -72,8 +72,14 @@ def parse_validate_constraint_function(table, funcname, ast)
 		end
 		if column
 			if funcname == "validates_exclusion_of"
+				constraint = Exclusion_constraint.new(table, column, type, allow_nil, allow_blank)
+				constraint.parse(dic)
+				constraints << constraint
 			end
 			if funcname == "validates_inclusion_of"
+				constraint = Exclusion_constraint.new(table, column, type, allow_nil, allow_blank)
+				constraint.parse(dic)
+				constraints << constraint
 			end
 			if funcname == "validates_presence_of"
 				ast.children.each do |child|
