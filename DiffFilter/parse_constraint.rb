@@ -153,7 +153,7 @@ def parse_validates(table, funcname, ast)
 					columns.each do |c|
 						constraint = Inclusion_constraint.new(table, c, type)
 						constraint.range = cur_value
-						constraints << constraints
+						constraints << constraint
 					end
 				end				
 				if cur_constr == "exclusion"
@@ -161,7 +161,7 @@ def parse_validates(table, funcname, ast)
 					columns.each do |c|
 						constraint = Exclusion_constraint.new(table, c, type)
 						constraint.range = cur_value
-						constraints << constraints
+						constraints << constraint
 					end
 				end
   			end
