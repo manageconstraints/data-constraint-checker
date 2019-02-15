@@ -62,6 +62,14 @@ def parse_validate_constraint_function(table, funcname, ast)
 				end
 			end
 		end
+		allow_blank = false
+		allow_nil = false
+		if dic["allow_blank"] and dic["allow_blank"].source == "true"
+			allow_blank = true
+		end
+		if dic["allow_nil"] and dic["allow_nil"].source == "true"
+			allow_nil = true
+		end
 		if column
 			if funcname == "validates_exclusion_of"
 			end
@@ -69,26 +77,21 @@ def parse_validate_constraint_function(table, funcname, ast)
 			end
 			if funcname == "validates_presence_of"
 				ast.children.each do |child|
-					constraint = Presence_constraint.new(table, column, type)
+					constraint = Presence_constraint.new(table, column, type, allow_nil, allow_blank)
 					constraints << constraint
 				end
 			end
 			if funcname == "validates_length_of"
-				constraint = Length_constraint.new(table, column, type)
-				if dic["in"]
-					range = dic["in"].source
-					constraint.range = range
-				end
-				if dic["maximum"]
-					maximum = 
-				end
-
+				constraint = Length_constraint.new(table, column, type, allow_nil, allow_blank)
+				constraint.parse(dic)
+				constraints << constraint
 			end
 			if funcname == "validates_format_of"
 				ast.children.each do |child|
 					if child.type.to_s == 'symbol_literal'
 						column = handle_symbol_literal_node(child)
-						constraint = Format_constraint.new(table, column, type)
+						constraint = Format_constraint.new(table, column, type, allow_nil, allow_blank)
+						constraint.parse(dic)
 						constraints << constraint
 					end
 				end
@@ -104,10 +107,9 @@ end
 def parse_validates(table, funcname, ast)
 	type = "validate"
 	constraints = []
-  	puts " \thandle validates function"
-		columns = []
-		cur_constrs = []
-		ast.children.each do |child|
+	columns = []
+	cur_constrs = []
+	ast.children.each do |child|
   		if child.type.to_s == 'symbol_literal'
   			column = handle_symbol_literal_node(child)
   			columns << column
@@ -129,15 +131,11 @@ def parse_validates(table, funcname, ast)
 				if cur_constr == "format"
 					if cur_value_ast.type.to_s == "hash"
 						dic = handle_hash_node(cur_value_ast)
-						if dic["with"]
-							with_format = dic["with"].source
-							puts "with_format #{with_format}"
-							columns.each do |c|
-								constraint = Format_constraint.new(table, c, type)
-				  				constraint.with_format = with_format
-				  				constraints << constraint
-				  			end
-						end
+						columns.each do |c|
+							constraint = Format_constraint.new(table, c, type)
+			  				constraint.parse(dic)
+			  				constraints << constraint
+			  			end
 					end
 				end
   			end
@@ -196,5 +194,5 @@ def handle_symbol_literal_node(symbol)
 end
 
 def handle_label_node(label)
-	return symbol[0].source
+	return label[0]
 end
