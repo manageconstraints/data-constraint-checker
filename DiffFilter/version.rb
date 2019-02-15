@@ -47,7 +47,7 @@ class Version
 		return @activerecord_files
 	end
 	def compare_constraints(old_version)
-		newly_added
+		newly_added_constraints = []
 		@activerecord_files.each do |key, file|
 			constraints = file.getConstraints
 			old_file = old_version.get_activerecord_files[key]
