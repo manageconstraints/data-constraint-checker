@@ -23,23 +23,35 @@ def read_ruby_files(application_dir=nil,version='')
 
 	root, files, dirs = os_walk($app_dir)
 	model_classes = {}
+	model_files = []
+	migration_files = []
 	for filename in files
 		filename = filename.to_s
 		#puts "filename: #{filename}"
-		contents = open(filename).read
 		if filename.include?("app/models/")
-			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-			$cur_class = Class_class.new(filename)
-			$cur_class.ast = ast
-			#parse_model_constraint_file(ast)		
-			model_classes[$cur_class.class_name] = $cur_class.dup	
+			model_files << filename
 		end
 		if filename.include?("db/migrate/")
-			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-			$cur_class = Class_class.new(filename)
-			$cur_class.ast = ast
-			parse_db_constraint_file(ast)
+			migration_files  << filename
 		end
+	end
+	model_files.each do |filename|
+		contents = open(filename).read
+		ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+		$cur_class = Class_class.new(filename)
+		$cur_class.ast = ast
+		parse_model_constraint_file(ast)		
+		model_classes[$cur_class.class_name] = $cur_class.dup
+	end
+	$model_classes = model_classes
+	puts "********migration_files:********"
+	puts migration_files
+	migration_files.each do |filename|
+		contents = open(filename).read
+		ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+		$cur_class = Class_class.new(filename)
+		$cur_class.ast = ast
+		parse_db_constraint_file(ast)
 	end
 	return model_classes
 end

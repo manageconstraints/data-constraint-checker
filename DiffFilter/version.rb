@@ -46,6 +46,12 @@ class Version
 	def get_activerecord_files
 		return @activerecord_files
 	end
+	def print_columns
+		puts "---------------columns-----------------"
+		get_activerecord_files.each do |key, file|
+			puts "#{key} #{file.getColumns.length}"
+		end
+	end
 	def compare_constraints(old_version)
 		newly_added_constraints = []
 		@activerecord_files.each do |key, file|

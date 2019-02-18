@@ -267,27 +267,46 @@ def handle_change_table(ast)
 end
 
 def handle_add_column(ast)
-	children = ast.children
-	puts "ast.source #{ast.source}"
-	table = nil
-	column = nil
-	if children[0].type.to_s == "symbol_literal"
-		table = handle_symbol_literal_node(children[0])
-	end
-	if children[1].type.to_s == "symbol_literal"
-		column = handle_symbol_literal_node(children[1])
-	end
-
-	puts "table: #{table} column: #{column}"
+	handle_change_column(ast)
 end
 
 def handle_change_column(ast)
 	children = ast.children
+	puts "ast.source #{ast.source}"
 	table = nil
-	if children[0].type.to_s == "symbol_literal"
+	column_name = nil
+	column_type = nil
+	if children[0] and children[0].type.to_s == "symbol_literal"
 		table = handle_symbol_literal_node(children[0])
 	end
-	puts "table: #{table}"
+	if children[1] and children[1].type.to_s == "symbol_literal"
+		column_name = handle_symbol_literal_node(children[1])
+	end
+	if children[2] and children[2].type.to_s == "symbol_literal"
+		column_type = handle_symbol_literal_node(children[2])
+	end
+	dic = {}
+	if children[3] and children[3].type.to_s == "list"
+		children[3].children.each do |child|
+			if child.type.to_s == "assoc"
+				key, value = handle_assoc_node(child)
+				dic[key] = value
+			end
+		end
+	end
+	class_name = convert_tablename(table)
+	if table and column_name and column_type and $model_classes[class_name] 
+		table_class = $model_classes[class_name]
+		column = Column.new(table_class, column_name, column_type, $cur_class)
+		columns = table_class.getColumns
+		if columns[column_name]
+			# existing columns
+			column.prev_column =  columns[column_name]
+		end
+		table_class.addColumn(column)
+		puts "create new column #{table_class.class_name} #{column_name} #{column_type}"
+	end
+	puts "table: #{table} column: #{column} column_type: #{column_type}"
 end
 
 def handle_create_table(ast)
