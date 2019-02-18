@@ -26,7 +26,7 @@ version = versions[-1]
 version.extract_files
 version.annotate_model_class
 version.extract_constraints
-
+version.print_columns
 old_version = versions[100]
 old_version.extract_files
 old_version.annotate_model_class

@@ -18,6 +18,9 @@ class Version
 		puts "@activerecord_files.length: #{@activerecord_files.length}"
 		@activerecord_files.each do |key, file|
 			puts "#{key} #{file.getConstraints.length}"
+			file.getConstraints.each do |k, constraint|
+				puts "\t#{constraint.column}"
+			end
 		end
 	end
 	def annotate_model_class
@@ -50,6 +53,9 @@ class Version
 		puts "---------------columns-----------------"
 		get_activerecord_files.each do |key, file|
 			puts "#{key} #{file.getColumns.length}"
+			file.getColumns.each do |key, column|
+				puts "\t#{column.column_name}"
+			end
 		end
 	end
 	def compare_constraints(old_version)

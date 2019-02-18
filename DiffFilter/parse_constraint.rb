@@ -68,7 +68,7 @@ def parse_db_constraint_file(ast)
 			handle_create_table(ast[1])
 		end
 		if funcname == "change_column"
-			handle_change_column(ast[1])
+			handle_change_column(ast)
 		end
 		if funcname == "change_table"
 			handle_change_table(ast[1])
@@ -304,10 +304,18 @@ def handle_change_column(ast)
 			column.prev_column =  columns[column_name]
 		end
 		table_class.addColumn(column)
-		puts "create new column #{table_class.class_name} #{column_name} #{column_type}"
+		puts "create new column #{column.class.name} #{table_class.class_name} #{column_name} #{column_type}"
 	end
 	puts "table: #{table} column: #{column} column_type: #{column_type}"
 end
 
 def handle_create_table(ast)
+	table_name = nil
+	if ast[1].type.to_s = "symbol_literal"
+		table_name = handle_symbol_literal_node(ast[1])
+	end
+	if ast[2].type.to_s = "do_block"
+		ast[2].children.each do |child|
+		end
+	end
 end
