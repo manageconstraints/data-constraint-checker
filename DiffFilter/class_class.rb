@@ -11,9 +11,8 @@ class Class_class
 	def add_constraints(constraints)
 		constraints.each do |constraint|
 			puts "constraint #{constraint.class}"
-			column = constraint.column
-			@constraints[column] = [] unless @constraints[column]
-			@constraints[column] << constraint
+			key = "#{constraint.column}-#{constraint.class.name}"
+			@constraints[key] = constraint
 		end
 		puts "@constraints.size #{@constraints.length}"
 	end

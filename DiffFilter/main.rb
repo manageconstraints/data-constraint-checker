@@ -27,5 +27,14 @@ version.extract_files
 version.annotate_model_class
 version.extract_constraints
 
+old_version = versions[100]
+old_version.extract_files
+old_version.annotate_model_class
+old_version.extract_constraints
+
+ncs = version.compare_constraints(old_version)
+ncs.each do|nc|
+	nc.self_print
+end
 
 

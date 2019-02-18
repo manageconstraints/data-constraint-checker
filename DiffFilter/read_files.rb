@@ -31,10 +31,10 @@ def read_ruby_files(application_dir=nil,version='')
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = Class_class.new(filename)
 			$cur_class.ast = ast
-			parse_model_constraint_file(ast)		
+			#parse_model_constraint_file(ast)		
 			model_classes[$cur_class.class_name] = $cur_class.dup	
 		end
-		if filename.include?("app/db/migrate/")
+		if filename.include?("db/migrate/")
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = Class_class.new(filename)
 			$cur_class.ast = ast

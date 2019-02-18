@@ -1,5 +1,5 @@
 class Constraint
-	attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank
+	attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column
 	#type: model from validate function / db migration file 
 	def initialize(table, column, type, allow_nil=false, allow_blank=false)
 		@column = column
@@ -9,7 +9,7 @@ class Constraint
 		@unless_cond = nil 
 		@allow_blank = allow_blank
 		@allow_nil = allow_nil
-		puts "\tcreate new constraint #{self.class.name} #{table} #{column} "
+		@is_new_column = false
 	end
 	def is_same(old_constraint)
 		if old_constraint.class == self.class
@@ -23,6 +23,9 @@ class Constraint
 			return true
 		end
 		return false 
+	end
+	def self_print
+		puts "#{self.class.name} #{table} #{column} "
 	end
 end
 

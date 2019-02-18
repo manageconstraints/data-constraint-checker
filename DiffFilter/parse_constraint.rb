@@ -35,7 +35,46 @@ def parse_model_constraint_file(ast)
 end
 
 def parse_db_constraint_file(ast)
-
+	if ast.type.to_s == 'list'
+		ast.children.each do |child|
+			parse_db_constraint_file(child)
+		end
+	end
+	if ast.type.to_s == 'class'
+		puts "ast.children #{ast.children[0].source}"
+		c3 = ast.children[2]
+		if c3
+			puts "c3: #{c3.type}"
+			parse_db_constraint_file(c3)
+		end
+	end
+	if ast.type.to_s == "def" or ast.type.to_s == "defs"
+		funcname = ast[0].source
+		if ast[1] and ast[1].type.to_s == "period"
+			funcname = ast[2].source
+		end
+		puts "funcname: #{funcname} "
+		if !funcname.include?"down"
+			parse_db_constraint_file(ast[-1])
+		end
+	end
+	if ast.type.to_s == "command"
+		funcname = ast[0].source 
+		puts "callname: #{funcname}"
+		if funcname == "add_column"
+			handle_add_column(ast[1])
+		end
+		if funcname == "create_table"
+			handle_create_table(ast[1])
+		end
+		if funcname == "change_column"
+			handle_change_column(ast[1])
+		end
+		if funcname == "change_table"
+			handle_change_table(ast[1])
+		end
+		
+	end
 end
 
 def parse_validate_constraint_function(table, funcname, ast)
@@ -221,4 +260,35 @@ end
 
 def handle_label_node(label)
 	return label[0]
+end
+
+def handle_change_table(ast)
+
+end
+
+def handle_add_column(ast)
+	children = ast.children
+	puts "ast.source #{ast.source}"
+	table = nil
+	column = nil
+	if children[0].type.to_s == "symbol_literal"
+		table = handle_symbol_literal_node(children[0])
+	end
+	if children[1].type.to_s == "symbol_literal"
+		column = handle_symbol_literal_node(children[1])
+	end
+
+	puts "table: #{table} column: #{column}"
+end
+
+def handle_change_column(ast)
+	children = ast.children
+	table = nil
+	if children[0].type.to_s == "symbol_literal"
+		table = handle_symbol_literal_node(children[0])
+	end
+	puts "table: #{table}"
+end
+
+def handle_create_table(ast)
 end
