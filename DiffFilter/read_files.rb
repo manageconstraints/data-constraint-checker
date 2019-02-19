@@ -42,6 +42,7 @@ def read_ruby_files(application_dir=nil,version='')
 		$cur_class.ast = ast
 		parse_model_constraint_file(ast)		
 		model_classes[$cur_class.class_name] = $cur_class.dup
+		puts "\t\tAADD #{$cur_class.class_name} into model_classes #{$cur_class}"
 	end
 	$model_classes = model_classes
 	puts "********migration_files:********"

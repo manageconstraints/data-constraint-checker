@@ -65,13 +65,13 @@ def parse_db_constraint_file(ast)
 			handle_add_column(ast[1])
 		end
 		if funcname == "create_table"
-			handle_create_table(ast[1])
+			handle_create_table(ast)
 		end
 		if funcname == "change_column"
-			handle_change_column(ast)
+			handle_change_column(ast[1])
 		end
 		if funcname == "change_table"
-			handle_change_table(ast[1])
+			handle_change_table(ast)
 		end
 		
 	end
@@ -311,11 +311,43 @@ end
 
 def handle_create_table(ast)
 	table_name = nil
-	if ast[1].type.to_s = "symbol_literal"
-		table_name = handle_symbol_literal_node(ast[1])
-	end
-	if ast[2].type.to_s = "do_block"
-		ast[2].children.each do |child|
+	puts "handle_create\n#{ast.source}"
+	puts "ast[1] #{ast[1].source} #{ast[1].type.to_s}"
+	if ast[1].type.to_s == "list"
+		symbol_node = ast[1][0]
+		table_name = handle_symbol_literal_node(symbol_node)
+		class_name = convert_tablename(table_name)
+		puts "class_name: #{class_name}"
+		table_class = $model_classes[class_name]
+		unless table_class
+			puts "||||||||||=||||||||||"
+			return 
+		end
+		columns = table_class.getColumns
+		#puts "table_name: #{table_name}"
+		if ast[2].type.to_s == "do_block"
+			ast[2].children.each do |child|
+				if child.type.to_s == 'list'
+					child.children.each do |c|
+						if c.type.to_s == "command_call"
+							column_type = c[2].source
+							if column_type == "references"
+								column_type = "string"
+							end
+							if c[3].type.to_s == "list"
+								column_name = handle_symbol_literal_node(c[3][0])
+								column = Column.new(table_class, column_name, column_type, $cur_class)
+								if columns[column_name]
+									# existing columns
+									column.prev_column =  columns[column_name]
+								end
+								table_class.addColumn(column)
+							end
+						end
+					end
+				end
+			end
 		end
 	end
+
 end
