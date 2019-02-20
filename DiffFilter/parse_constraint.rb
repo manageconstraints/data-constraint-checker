@@ -29,7 +29,7 @@ def parse_model_constraint_file(ast)
 		if $validate_apis.include?funcname
 			puts "funcname #{funcname} #{ast.source}"
 			constraints = parse_validate_constraint_function($cur_class.class_name, funcname, ast[1])
-			$cur_class.add_constraints(constraints) if constraints.length > 0
+			$cur_class.addConstraints(constraints) if constraints.length > 0
 		end
 	end
 end
@@ -305,12 +305,8 @@ def handle_change_column(ast)
 		end
 		table_class.addColumn(column)
 		puts "create new column #{column.class.name} #{table_class.class_name} #{column_name} #{column_type}"
-		if !dic["default"] and dic["null"]
-			null = dic["null"].source
-			if null == "false"
-				constraint = Presence_constraint.new(class_name, column_name, "db")			
-			end
-		end
+		constraints = create_constraints(class_name, column_name, column_type, "db", dic)
+		table_class.addConstraints(constraints)
 	end
 	puts "table: #{table} column: #{column} column_type: #{column_type}"
 end
@@ -360,13 +356,8 @@ def handle_create_table(ast)
 								end
 								puts "-----------dic---------"
 								puts dic
-								if !dic["default"] and dic["null"]
-									null = dic["null"].source
-									if null == 'false'
-										constraint = Presence_constraint.new(class_name, column_name, "db")
-										puts "*****create new presence constraint*****"
-									end
-								end
+								constraints = create_constraints(class_name, column_name, column_type, "db", dic)
+								table_class.addConstraints(constraints)
 							end
 						end
 					end
@@ -375,4 +366,23 @@ def handle_create_table(ast)
 		end
 	end
 
+end
+
+def create_constraints(class_name, column_name, column_type, type, dic)
+	constraints = []
+	if !dic["default"] and dic["null"]
+		null = dic["null"].source
+		if null == "false"
+			constraint = Presence_constraint.new(class_name, column_name, type)			
+			constraints << constraint
+		end
+	end
+	# 
+	if dic['limit']
+		limit = dic["limit"].source
+		constraint = Length_constraint.new(class_name, column_name, type)
+		constraint.maximum = limit
+		constraints << constraint
+	end
+	return constraints
 end
