@@ -34,6 +34,7 @@ old_version.extract_constraints
 
 ncs = version.compare_constraints(old_version)
 ncs.each do|nc|
+	puts "****DIFF****"
 	nc.self_print
 end
 
