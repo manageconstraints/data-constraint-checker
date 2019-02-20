@@ -263,7 +263,7 @@ def handle_label_node(label)
 end
 
 def handle_change_table(ast)
-
+	handle_create_table(ast)
 end
 
 def handle_add_column(ast)
@@ -305,6 +305,12 @@ def handle_change_column(ast)
 		end
 		table_class.addColumn(column)
 		puts "create new column #{column.class.name} #{table_class.class_name} #{column_name} #{column_type}"
+		if !dic["default"] and dic["null"]
+			null = dic["null"].source
+			if null == "false"
+				constraint = Presence_constraint.new(class_name, column_name, "db")			
+			end
+		end
 	end
 	puts "table: #{table} column: #{column} column_type: #{column_type}"
 end
@@ -320,8 +326,7 @@ def handle_create_table(ast)
 		puts "class_name: #{class_name}"
 		table_class = $model_classes[class_name]
 		unless table_class
-			puts "||||||||||=||||||||||"
-			return 
+			return
 		end
 		columns = table_class.getColumns
 		#puts "table_name: #{table_name}"
@@ -334,14 +339,34 @@ def handle_create_table(ast)
 							if column_type == "references"
 								column_type = "string"
 							end
-							if c[3].type.to_s == "list"
-								column_name = handle_symbol_literal_node(c[3][0])
+							column_ast = c[3]
+							puts "column_ast: #{column_ast.class}"
+							if column_ast.class.name == "YARD::Parser::Ruby::AstNode" and  column_ast.type.to_s == "list"
+								column_name = handle_symbol_literal_node(column_ast[0])
 								column = Column.new(table_class, column_name, column_type, $cur_class)
 								if columns[column_name]
 									# existing columns
 									column.prev_column =  columns[column_name]
 								end
 								table_class.addColumn(column)
+								dic = {}
+								if column_ast[1].class.name == "YARD::Parser::Ruby::AstNode" and column_ast[1].type and column_ast[1].type.to_s == "list"
+									column_ast[1].children.each do |cc|
+										if cc.type.to_s == "assoc"
+											key, value = handle_assoc_node(cc)
+											dic[key] = value
+										end
+									end
+								end
+								puts "-----------dic---------"
+								puts dic
+								if !dic["default"] and dic["null"]
+									null = dic["null"].source
+									if null == 'false'
+										constraint = Presence_constraint.new(class_name, column_name, "db")
+										puts "*****create new presence constraint*****"
+									end
+								end
 							end
 						end
 					end
