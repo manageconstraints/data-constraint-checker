@@ -73,6 +73,10 @@ def parse_db_constraint_file(ast)
 		if funcname == "change_table"
 			handle_change_table(ast)
 		end
+		if funcname == "change_column_null"
+			handle_change_column_null(ast)
+		end
+
 		
 	end
 end
@@ -368,7 +372,31 @@ def handle_create_table(ast)
 	end
 
 end
-
+def handle_change_column_null(ast)
+	puts "++++++++++handle_change_column_null++++++++++"
+	if ast[1].type.to_s == "list"
+		table_name = nil
+		column_name = nil
+		null = true
+		table_class = nil
+		class_name = nil
+		if ast[1][0].type.to_s == "symbol_literal"
+			table_name = handle_symbol_literal_node(ast[1][0])
+			class_name = convert_tablename(table_name)
+			table_class = $model_classes[class_name]
+		end
+		if ast[1][1].type.to_s == "symbol_literal"
+			column_name = handle_symbol_literal_node(ast[1][0])
+		end
+		if ast[1][2].type.to_s == "var_ref"
+			null = ast[1][2].source
+		end
+		if class_name and table_class and column_name and null == "false"
+			constraint = Presence_constraint.new(class_name, column_name, "db")
+			table_class.addConstraints([constraint])
+		end
+	end
+end
 def create_constraints(class_name, column_name, column_type, type, dic)
 	constraints = []
 	if !dic["default"] and dic["null"]

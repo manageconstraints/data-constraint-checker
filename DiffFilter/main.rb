@@ -45,4 +45,4 @@ def traverse_all_versions(application_dir, interval)
 		end
 	end
 end
-traverse_all_versions(application_dir, 10)
+traverse_all_versions(application_dir, 1000)
