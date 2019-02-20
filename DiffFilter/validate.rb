@@ -25,7 +25,7 @@ class Constraint
 		return false 
 	end
 	def self_print
-		puts "#{self.class.name} #{table} #{column} "
+		puts "#{self.class.name} #{table} #{column} #{type}"
 	end
 end
 

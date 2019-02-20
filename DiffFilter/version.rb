@@ -60,21 +60,30 @@ class Version
 	end
 	def compare_constraints(old_version)
 		newly_added_constraints = []
+		changed_constraints = []
 		@activerecord_files.each do |key, file|
 			old_file = old_version.get_activerecord_files[key]
 			# if the old file doesn't exist, which means it's newly created
 			next unless old_file
 			constraints = file.getConstraints
 			old_constrants = old_file.getConstraints
-			constraints.each do |column_keywords, constraint|
-				if old_constrants[column_keywords] 
-
+			constraints.each do |column_keyword, constraint|
+				if old_constrants[column_keyword] 
+					if !constraint.is_same(old_constrants[column_keyword])
+						changed_constraints << constraint
+					end
 				else
 					newly_added_constraints << constraint
 				end
 
 			end
 		end
-		return newly_added_constraints
+		return newly_added_constraints,changed_constraints
+	end
+	def build
+		self.extract_files
+		self.annotate_model_class
+		self.extract_constraints
+		self.print_columns
 	end
 end
