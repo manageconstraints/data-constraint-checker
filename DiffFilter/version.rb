@@ -38,7 +38,7 @@ class Version
 				key = file.upper_class_name
 				if @files[key] and @files[key].is_activerecord
 					file.is_activerecord = true
-					not_active_files.remove(file)
+					not_active_files.delete(file)
 				end
 			end
 			if not_active_files.length == length

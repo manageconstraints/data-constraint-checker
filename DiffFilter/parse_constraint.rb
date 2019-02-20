@@ -17,8 +17,8 @@ def parse_model_constraint_file(ast)
 		if c2 and (c2.type.to_s == 'var_ref' or c2.type.to_s == 'const_path_ref')
 			$cur_class.upper_class_name = c2.source
 		end
-		puts "filename: #{$cur_class.filename} "
-		puts "classname: #{$cur_class.class_name} upper_class_name: #{$cur_class.upper_class_name}"
+		# puts"filename: #{$cur_class.filename} "
+		# puts"classname: #{$cur_class.class_name} upper_class_name: #{$cur_class.upper_class_name}"
 		c3 = ast.children[2]
 		if c3
 			parse_model_constraint_file(c3)
@@ -27,7 +27,7 @@ def parse_model_constraint_file(ast)
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
 		if $validate_apis.include?funcname
-			puts "funcname #{funcname} #{ast.source}"
+			# puts"funcname #{funcname} #{ast.source}"
 			constraints = parse_validate_constraint_function($cur_class.class_name, funcname, ast[1])
 			$cur_class.addConstraints(constraints) if constraints.length > 0
 		end
@@ -41,10 +41,10 @@ def parse_db_constraint_file(ast)
 		end
 	end
 	if ast.type.to_s == 'class'
-		puts "ast.children #{ast.children[0].source}"
+		# puts"ast.children #{ast.children[0].source}"
 		c3 = ast.children[2]
 		if c3
-			puts "c3: #{c3.type}"
+			# puts"c3: #{c3.type}"
 			parse_db_constraint_file(c3)
 		end
 	end
@@ -53,14 +53,14 @@ def parse_db_constraint_file(ast)
 		if ast[1] and ast[1].type.to_s == "period"
 			funcname = ast[2].source
 		end
-		puts "funcname: #{funcname} "
+		# puts"funcname: #{funcname} "
 		if !funcname.include?"down"
 			parse_db_constraint_file(ast[-1])
 		end
 	end
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
-		puts "callname: #{funcname}"
+		# puts"callname: #{funcname}"
 		if funcname == "add_column"
 			handle_add_column(ast[1])
 		end
@@ -90,7 +90,7 @@ def parse_validate_constraint_function(table, funcname, ast)
 				column = handle_symbol_literal_node(child)
 				columns << column
 			end
-			puts "child.type.to_s #{child.type.to_s} #{child.source}"
+			# puts"child.type.to_s #{child.type.to_s} #{child.source}"
 			if child.type.to_s == "list"
 				child.each do |c|
 					if c.type.to_s == 'assoc'
@@ -209,6 +209,7 @@ def parse_validates(table, funcname, ast)
 	return constraints
 end
 def convert_tablename(name)
+	return nil unless name
 	_name = Array.new
 	_word_list = Array.new
 	name.split('').each do |c|
@@ -250,7 +251,7 @@ def handle_assoc_node(child)
 		key = handle_label_node(child[0])
 	end
 	value = child[1]
-	#puts "key: #{key} value: #{value.source}"
+	## puts"key: #{key} value: #{value.source}"
 	return key,value
 end 
 
@@ -272,7 +273,7 @@ end
 
 def handle_change_column(ast)
 	children = ast.children
-	puts "ast.source #{ast.source}"
+	# puts"ast.source #{ast.source}"
 	table = nil
 	column_name = nil
 	column_type = nil
@@ -304,28 +305,28 @@ def handle_change_column(ast)
 			column.prev_column =  columns[column_name]
 		end
 		table_class.addColumn(column)
-		puts "create new column #{column.class.name} #{table_class.class_name} #{column_name} #{column_type}"
+		# puts"create new column #{column.class.name} #{table_class.class_name} #{column_name} #{column_type}"
 		constraints = create_constraints(class_name, column_name, column_type, "db", dic)
 		table_class.addConstraints(constraints)
 	end
-	puts "table: #{table} column: #{column} column_type: #{column_type}"
+	# puts"table: #{table} column: #{column} column_type: #{column_type}"
 end
 
 def handle_create_table(ast)
 	table_name = nil
-	puts "handle_create\n#{ast.source}"
-	puts "ast[1] #{ast[1].source} #{ast[1].type.to_s}"
+	# puts"handle_create\n#{ast.source}"
+	# puts"ast[1] #{ast[1].source} #{ast[1].type.to_s}"
 	if ast[1].type.to_s == "list"
 		symbol_node = ast[1][0]
 		table_name = handle_symbol_literal_node(symbol_node)
 		class_name = convert_tablename(table_name)
-		puts "class_name: #{class_name}"
+		# puts"class_name: #{class_name}"
 		table_class = $model_classes[class_name]
 		unless table_class
 			return
 		end
 		columns = table_class.getColumns
-		#puts "table_name: #{table_name}"
+		## puts"table_name: #{table_name}"
 		if ast[2].type.to_s == "do_block"
 			ast[2].children.each do |child|
 				if child.type.to_s == 'list'
@@ -336,7 +337,7 @@ def handle_create_table(ast)
 								column_type = "string"
 							end
 							column_ast = c[3]
-							puts "column_ast: #{column_ast.class}"
+							# puts"column_ast: #{column_ast.class}"
 							if column_ast.class.name == "YARD::Parser::Ruby::AstNode" and  column_ast.type.to_s == "list"
 								column_name = handle_symbol_literal_node(column_ast[0])
 								column = Column.new(table_class, column_name, column_type, $cur_class)
@@ -354,8 +355,8 @@ def handle_create_table(ast)
 										end
 									end
 								end
-								puts "-----------dic---------"
-								puts dic
+								# puts"-----------dic---------"
+								# putsdic
 								constraints = create_constraints(class_name, column_name, column_type, "db", dic)
 								table_class.addConstraints(constraints)
 							end
@@ -381,7 +382,7 @@ def create_constraints(class_name, column_name, column_type, type, dic)
 	if dic['limit']
 		limit = dic["limit"].source
 		constraint = Length_constraint.new(class_name, column_name, type)
-		constraint.maximum = limit
+		constraint.max_value = limit
 		constraints << constraint
 	end
 	return constraints

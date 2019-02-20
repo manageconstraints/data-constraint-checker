@@ -51,14 +51,18 @@ class Length_constraint < Constraint
 	end
 	def is_same(old_constraint)
 		if super
-			if self.max_value = old_constraint.maximum and \
-				self.min_value = old_constraint.min_value and \
-				self.range = old_constraint.range and \
-				self.is_constraint = old_constraint.is_constraint
+			if self.max_value == old_constraint.max_value and \
+				self.min_value == old_constraint.min_value and \
+				self.range == old_constraint.range and \
+				self.is_constraint == old_constraint.is_constraint
 				return true
 			end
 		end
 		return false
+	end
+	def self_print
+		super
+		puts "\t#{max_value} #{min_value} #{range} #{is_constraint}" 
 	end
 end
 
@@ -79,6 +83,10 @@ class Format_constraint < Constraint
 		end
 		return false
 	end
+	def self_print
+		super
+		puts "\t#{with_format}"
+	end
 end
 
 class Inclusion_constraint < Constraint
@@ -97,6 +105,10 @@ class Inclusion_constraint < Constraint
 		end
 		return false
 	end
+	def self_print
+		super
+		puts "\t#{range}"
+	end
 end
 
 class Exclusion_constraint < Constraint
@@ -114,6 +126,10 @@ class Exclusion_constraint < Constraint
 			end
 		end
 		return false
+	end
+	def self_print
+		super
+		puts "\t#{range}"
 	end
 end
 
