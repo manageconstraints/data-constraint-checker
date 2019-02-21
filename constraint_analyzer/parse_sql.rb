@@ -14,5 +14,9 @@ def parse_sql(ast)
 end
 # use pg query to handle sql query string
 def parse_sql_string(sql)
+	sql_ast = PgQuery.parse(sql)
+	tree = sql_ast[0]['RawStmt']['stmt']
+	if tree['UpdateStmt']
+	end
 end
 
