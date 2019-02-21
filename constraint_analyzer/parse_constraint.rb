@@ -77,7 +77,7 @@ def parse_db_constraint_file(ast)
 			handle_change_column_null(ast)
 		end
 		if funcname == "execute"
-			parse_sql(ast)
+			parse_sql(ast[1])
 		end
 		
 	end
