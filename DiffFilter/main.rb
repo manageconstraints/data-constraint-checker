@@ -4,6 +4,7 @@ load 'read_files.rb'
 load 'class_class.rb'
 load 'helper.rb'
 load 'version.rb'
+require 'pg_query'
 application_dir = "/Users/jwy/Research/lobsters-ori/"
 load_validate_api
 #read_ruby_files(application_dir)
@@ -45,4 +46,4 @@ def traverse_all_versions(application_dir, interval)
 		end
 	end
 end
-traverse_all_versions(application_dir, 1000)
+traverse_all_versions(application_dir, 10)
