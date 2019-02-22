@@ -50,6 +50,6 @@ def handle_cross_line_string(sql)
 			sql = ""
 		end
 		return sql
-	end
+	end 
 	return ""
 end
