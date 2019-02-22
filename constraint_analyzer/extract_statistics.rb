@@ -19,15 +19,20 @@ def extract_commits(directory, interval=5)
 end
 def traverse_all_versions(application_dir, interval)
 	versions = extract_commits(application_dir, interval)
+	app_name = application_dir.split("/")[-1]
 	versions[0].build
-	output = open('../log/output.log', 'w')
-	output.write("Total commits: #{versions.length}")
+	output = open("../log/output_#{app_name}.log", 'w')
+	output.write("Total commits: #{versions.length}\n")
+	cnt = 0
 	for i in 1...versions.length
 		#puts "=============#{i}============="
 		old_version = versions[i-1]
 		version = versions[i]
 		version.build
 		ncs, ccs = version.compare_constraints(old_version)
+		if ncs.length > 0 or ccs.length > 0
+			cnt += 1
+		end
 		model_ncs = ncs.select{|x| x.type == 'validate'}
 		db_ncs = ncs.select{|x| x.type == "db"}
 		model_ccs = ccs.select{|x| x.type == 'validate'}
@@ -46,6 +51,8 @@ def traverse_all_versions(application_dir, interval)
 			#puts "****DIFF****"
 			#nc.self_print
 		end
+		versions[i-1] = nil
 	end
+	output.write("cnt: #{cnt}\n")
 	output.close
 end
