@@ -10,7 +10,7 @@ def extract_commits(directory, interval=5)
 	commits.each do |commit|
 		if i % interval == 0
 			version = Version.new(directory, commit)
-			version.build
+			#version.build
 			versions << version
 		end
 		i += 1
@@ -19,9 +19,11 @@ def extract_commits(directory, interval=5)
 end
 def traverse_all_versions(application_dir, interval)
 	versions = extract_commits(application_dir, interval)
+	versions[0].build
 	version = versions[-1]
 	for i in 1...versions.length
 		#puts "=============#{i}============="
+		versions[i].build
 		old_version = versions[i-1]
 		version = versions[i]
 		ncs, ccs = version.compare_constraints(old_version)

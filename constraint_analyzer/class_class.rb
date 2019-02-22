@@ -11,11 +11,11 @@ class Class_class
 	end
 	def addConstraints(constraints)
 		constraints.each do |constraint|
-			puts "constraint #{constraint.class}"
+			# puts"constraint #{constraint.class}"
 			key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
 			@constraints[key] = constraint
 		end
-		puts "@constraints.size #{@constraints.length}"
+		# puts"@constraints.size #{@constraints.length}"
 	end
 	def getConstraints
 		return @constraints
