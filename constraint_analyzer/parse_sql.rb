@@ -7,6 +7,9 @@ def parse_sql(ast)
 			query_node = string_literal_node[0]
 			if query_node.type.to_s == "string_content"
 				sql = query_node.source
+				if sql.start_with?"<-"
+					sql = handle_cross_line_string(sql)
+				end
 				return parse_sql_string(sql)
 			end
 		end
@@ -34,4 +37,12 @@ def parse_sql_string(sql)
 		end
 	end
 	return table_name, columns
+end
+
+def handle_cross_line_string(sql)
+
+	if sql.start_with?'<-'
+		return sql.lines[1...-1].join
+	end
+	return ""
 end
