@@ -18,7 +18,6 @@ end
 # use pg query to handle sql query string
 def parse_sql_string(sql)
 	sql_ast = PgQuery.parse(sql)
-	puts "sql: #{sql}"
 	tree = sql_ast.tree[0]['RawStmt']['stmt']
 	table_name = nil 
 	columns =[]

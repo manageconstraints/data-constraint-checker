@@ -37,22 +37,27 @@ def read_ruby_files(application_dir=nil,version='')
 	end
 	model_files.each do |filename|
 		contents = open(filename).read
-		ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-		$cur_class = Class_class.new(filename)
-		$cur_class.ast = ast
-		parse_model_constraint_file(ast)		
-		model_classes[$cur_class.class_name] = $cur_class.dup
-		puts "\t\tAADD #{$cur_class.class_name} into model_classes #{$cur_class}"
+		begin 
+			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+			$cur_class = Class_class.new(filename)
+			$cur_class.ast = ast
+			parse_model_constraint_file(ast)		
+			model_classes[$cur_class.class_name] = $cur_class.dup
+		rescue
+		end
 	end
 	$model_classes = model_classes
 	puts "********migration_files:********"
 	puts migration_files
 	migration_files.each do |filename|
 		contents = open(filename).read
-		ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-		$cur_class = Class_class.new(filename)
-		$cur_class.ast = ast
-		parse_db_constraint_file(ast)
+		begin 
+			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+			$cur_class = Class_class.new(filename)
+			$cur_class.ast = ast
+			parse_db_constraint_file(ast)
+		rescue
+		end
 	end
 	return model_classes
 end

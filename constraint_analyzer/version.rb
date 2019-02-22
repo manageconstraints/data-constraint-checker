@@ -14,12 +14,12 @@ class Version
 	def extract_constraints
 		# extract the constraints from the active record file
 		@activerecord_files = @files.select{|key, x| x.is_activerecord}
-		puts "@files.length: #{@files.length}"
-		puts "@activerecord_files.length: #{@activerecord_files.length}"
+		# puts"@files.length: #{@files.length}"
+		# puts"@activerecord_files.length: #{@activerecord_files.length}"
 		@activerecord_files.each do |key, file|
-			puts "#{key} #{file.getConstraints.length}"
+			# puts"#{key} #{file.getConstraints.length}"
 			file.getConstraints.each do |k, constraint|
-				puts "\t#{constraint.column}"
+				# puts"\t#{constraint.column}"
 			end
 		end
 	end
@@ -50,11 +50,11 @@ class Version
 		return @activerecord_files
 	end
 	def print_columns
-		puts "---------------columns-----------------"
+		# puts"---------------columns-----------------"
 		get_activerecord_files.each do |key, file|
-			puts "#{key} #{file.getColumns.length}"
+			# puts"#{key} #{file.getColumns.length}"
 			file.getColumns.each do |key, column|
-				puts "\t#{column.column_name}"
+				# puts"\t#{column.column_name}"
 			end
 		end
 	end
