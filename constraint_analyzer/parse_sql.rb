@@ -42,7 +42,14 @@ end
 def handle_cross_line_string(sql)
 
 	if sql.start_with?'<-'
-		return sql.lines[1...-1].join
+		sql = sql.lines[1...-1].join
+		begin 
+			PgQuery.parse(sql)
+		rescue
+			puts "Illegal query reset to null"
+			sql = ""
+		end
+		return sql
 	end
 	return ""
 end
