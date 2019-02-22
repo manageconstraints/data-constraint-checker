@@ -20,22 +20,23 @@ end
 def traverse_all_versions(application_dir, interval)
 	versions = extract_commits(application_dir, interval)
 	versions[0].build
-	version = versions[-1]
+	output = open('../log/output.log', 'w')
+	output.write("Total commits: #{versions.length}")
 	for i in 1...versions.length
 		#puts "=============#{i}============="
-		versions[i].build
 		old_version = versions[i-1]
 		version = versions[i]
+		version.build
 		ncs, ccs = version.compare_constraints(old_version)
-		model_ncs = ncs.select{|x| x.type == 'model'}
+		model_ncs = ncs.select{|x| x.type == 'validate'}
 		db_ncs = ncs.select{|x| x.type == "db"}
-		model_ccs = ccs.select{|x| x.type == 'model'}
+		model_ccs = ccs.select{|x| x.type == 'validate'}
 		db_ccs = ccs.select{|x| x.type == "db"}
 		c1 = model_ncs.length
 		c2 = db_ncs.length
 		c3 = model_ccs.length
 		c4 = db_ccs.length
-		puts "#{c1} #{c2} #{c3} #{c4}"
+		output.write("#{ncs.length} #{c1} #{c2} #{ccs.length} #{c3} #{c4}\n")
 		ncs.each do|nc|
 			#puts "****New****"
 			#nc.self_print
@@ -46,4 +47,5 @@ def traverse_all_versions(application_dir, interval)
 			#nc.self_print
 		end
 	end
+	output.close
 end
