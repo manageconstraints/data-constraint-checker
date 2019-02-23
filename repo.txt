@@ -1,0 +1,12 @@
+https://github.com/discourse/discourse.git
+https://github.com/lobsters/lobsters.git
+https://github.com/gitlabhq/gitlabhq.git
+https://github.com/redmine/redmine
+https://github.com/spree/spree
+https://github.com/drhenner/ror_ecommerce
+https://github.com/fulcrum-agile/fulcrum
+https://github.com/TracksApp/tracks
+https://github.com/seven1m/onebody
+https://github.com/diaspora/diaspora.git
+https://github.com/falling-fruit/falling-fruit.git
+https://github.com/openstreetmap/openstreetmap-website.git
