@@ -1,0 +1,12 @@
+discourse
+lobsters
+gitlabhq
+redmine
+spree
+ror_ecommerce
+fulcrum
+tracks
+onebody
+diaspora
+falling-fruit
+openstreetmap-website
