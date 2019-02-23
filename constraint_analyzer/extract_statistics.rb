@@ -3,7 +3,7 @@ def extract_commits(directory, interval=5)
 	# reset to the most up to date commit
 	`cd #{directory}; git checkout master`
 	commits = `python commits.py #{directory}`
-	commits = commits.lines.reverse
+	commits = commits.lines
 	puts "commits.length: #{commits.length}"
 	versions = []
 	i = 0
@@ -26,10 +26,10 @@ def traverse_all_versions(application_dir, interval)
 	cnt = 0
 	for i in 1...versions.length
 		#puts "=============#{i}============="
-		old_version = versions[i-1]
+		new_version = versions[i-1]
 		version = versions[i]
 		version.build
-		ncs, ccs = version.compare_constraints(old_version)
+		ncs, ccs = new_version.compare_constraints(version)
 		if ncs.length > 0 or ccs.length > 0
 			cnt += 1
 		end

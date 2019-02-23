@@ -11,4 +11,8 @@ if ARGV[0]
 	application_dir = ARGV[0]
 	puts "application_dir #{application_dir}"
 end
-traverse_all_versions(application_dir, 1)
+interval = 1
+if ARGV[1]
+	interval = ARGV[1].to_i
+end
+traverse_all_versions(application_dir, interval)
