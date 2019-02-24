@@ -19,7 +19,7 @@ def read_ruby_files(application_dir=nil,version='')
 		puts "application dir not defined or version number is not defined"
 		return 
 	end
-	`cd #{$app_dir}; git checkout #{version}`
+	`cd #{$app_dir};git stash; git checkout #{version}`
 
 	root, files, dirs = os_walk($app_dir)
 	model_classes = {}
