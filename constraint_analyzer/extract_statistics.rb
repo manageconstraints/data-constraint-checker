@@ -23,8 +23,8 @@ def extract_commits(directory, interval=5)
 	return versions
 end
 def traverse_all_versions(application_dir, interval)
-	return if versions.length <= 0
 	versions = extract_commits(application_dir, interval)
+	return if versions.length <= 0
 	app_name = application_dir.split("/")[-1]
 	versions[0].build
 	output = open("../log/output_#{app_name}.log", 'w')
