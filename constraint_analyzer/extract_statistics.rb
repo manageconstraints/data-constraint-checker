@@ -2,8 +2,13 @@
 def extract_commits(directory, interval=5)
 	# reset to the most up to date commit
 	`cd #{directory}; git checkout master`
-	commits = `python commits.py #{directory}`
-	commits = commits.lines
+	tags = `cd #{directory}; git tag`
+	if tags
+		commits = tags.lines.reverse.map{|x| x.strip}
+	else
+		commits = `python commits.py #{directory}`
+		commits = commits.lines
+	end
 	puts "commits.length: #{commits.length}"
 	versions = []
 	i = 0
