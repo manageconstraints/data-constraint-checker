@@ -224,6 +224,15 @@ def parse_validates(table, funcname, ast)
 						constraints << constraint
 					end
 				end
+				if cur_constr == "confirmation"
+					cur_value = cur_value_ast.source
+					if cur_value == "false"
+						columns.each do |c|
+							constraint = Confirmation_constraint.new(table, c, type)
+							constraints << constraint
+						end
+					end
+				end
   			end
   		end
 	end

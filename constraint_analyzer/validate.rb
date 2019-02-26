@@ -200,3 +200,5 @@ class Numericality_constraint < Constraint
 		super
 	end
 end
+def Confirmation_constraint << Constraint
+end
