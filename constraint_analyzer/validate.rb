@@ -142,9 +142,26 @@ class Absence_constraint < Constraint
 end
 
 class Uniqueness_constraint < Constraint
-
+	attr_accessor :scope
+	def parse(dic)
+		@scope = []
+		if dic["scope"]
+			scope_ast = dic["scope"]
+			if scope_ast.type.to_s == "symbol_literal"
+				column = handle_symbol_literal_node(scope_ast)
+				scope << column
+			end
+			if scope_ast.type.to_s == "array"
+				scope = handle_array_node(scope_ast)
+			end
+		end
+	end
+	def self_print
+		super
+		puts scope
+	end
 end
 
 class Numericality_constraint < Constraint 
-	
+
 end

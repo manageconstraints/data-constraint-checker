@@ -61,25 +61,7 @@ def parse_db_constraint_file(ast)
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
 		# puts"callname: #{funcname}"
-		if funcname == "add_column"
-			handle_add_column(ast[1])
-		end
-		if funcname == "create_table"
-			handle_create_table(ast)
-		end
-		if funcname == "change_column"
-			handle_change_column(ast[1])
-		end
-		if funcname == "change_table"
-			handle_change_table(ast)
-		end
-		if funcname == "change_column_null"
-			handle_change_column_null(ast)
-		end
-		if funcname == "execute"
-			parse_sql(ast[1])
-		end
-		
+		parse_db_constraint_function(nil, nil, funcname)
 	end
 end
 
@@ -151,12 +133,38 @@ def parse_validate_constraint_function(table, funcname, ast)
 					constraints << constraint
 				end
 			end
+			if funcname == "validates_uniqueness_of"
+				columns.each do |column|
+					constraint = Uniqueness_constraint.new(table, column, type, allow_nil, allow_blank)
+					constraint.parse(dic)
+					constraints << constraint
+				end
+			end
 		end
 	end
 	return constraints
 end
 
 def parse_db_constraint_function(table, funcname, ast)
+	if funcname == "add_column"
+		handle_add_column(ast[1])
+	end
+	if funcname == "create_table"
+		handle_create_table(ast)
+	end
+	if funcname == "change_column"
+		handle_change_column(ast[1])
+	end
+	if funcname == "change_table"
+		handle_change_table(ast)
+	end
+	if funcname == "change_column_null"
+		handle_change_column_null(ast)
+	end
+	if funcname == "execute"
+		parse_sql(ast[1])
+	end
+		
 end
 
 def parse_validates(table, funcname, ast)
@@ -235,39 +243,6 @@ def convert_tablename(name)
 	return temp_name
 end
 
-def handle_hash_node(node)
-	dic = {}
-	node.children.each do |child|
-		if child.type.to_s == "assoc"
-			key, value = handle_assoc_node(child)
-			if key and value
-				dic[key] = value
-			end
-		end
-	end
-	return dic
-end
-def handle_assoc_node(child)
-	key = nil
-	value = nil
-	if child[0].type.to_s == "symbol_literal"
-		key = handle_symbol_literal_node(child[0])
-	end
-	if child[0].type.to_s == "label"
-		key = handle_label_node(child[0])
-	end
-	value = child[1]
-	## puts"key: #{key} value: #{value.source}"
-	return key,value
-end 
-
-def handle_symbol_literal_node(symbol)
-	return symbol[0][0].source
-end
-
-def handle_label_node(label)
-	return label[0]
-end
 
 def handle_change_table(ast)
 	handle_create_table(ast)

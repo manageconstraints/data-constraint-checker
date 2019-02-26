@@ -5,6 +5,7 @@ load 'class_class.rb'
 load 'helper.rb'
 load 'version.rb'
 load 'extract_statistics.rb'
+load 'ast_handler.rb'
 application_dir = "/Users/jwy/Research/lobsters-ori/"
 load_validate_api
 if ARGV[0]
