@@ -203,4 +203,28 @@ class Numericality_constraint < Constraint
 	end
 end
 class Confirmation_constraint < Constraint
+	attr_accessor :case_sensitive
+	def initialize(table, column, type, allow_nil=false, allow_blank=false)
+		super(table, column, type, allow_nil=false, allow_blank=false)
+		@case_sensitive = true
+	end
+	def is_same(old_constraint)
+		if super
+			if old_constraint.case_sensitive == @case_sensitive
+				return true
+			end
+		end
+		return false
+	end
+	def parse(dic)
+		if dic["case_sensitive"]&.source == "false"
+			@case_sensitive = false
+		else
+			@case_sensitive = true
+		end
+	end
+	def self_print
+		super
+		puts self.case_sensitive
+	end
 end

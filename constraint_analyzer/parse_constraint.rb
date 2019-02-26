@@ -233,7 +233,15 @@ def parse_validates(table, funcname, ast)
 							constraint = Confirmation_constraint.new(table, c, type)
 							constraints << constraint
 						end
+					elsif cur_value_ast.type.to_s == "hash"
+						dic2 = handle_hash_node(cur_value_ast)
+						columns.each do |c|
+							constraint = Confirmation_constraint.new(table, c, type)
+							constraint.parse(dic2)
+							constraints << constraint
+						end
 					end
+
 				end
   			end
   		end
