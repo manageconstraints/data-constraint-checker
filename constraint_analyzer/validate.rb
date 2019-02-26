@@ -149,10 +149,10 @@ class Uniqueness_constraint < Constraint
 			scope_ast = dic["scope"]
 			if scope_ast.type.to_s == "symbol_literal"
 				column = handle_symbol_literal_node(scope_ast)
-				scope << column
+				@scope << column
 			end
 			if scope_ast.type.to_s == "array"
-				scope = handle_array_node(scope_ast)
+				@scope = handle_array_node(scope_ast)
 			end
 		end
 	end
@@ -160,8 +160,43 @@ class Uniqueness_constraint < Constraint
 		super
 		puts scope
 	end
+	def is_same(old_constraint)
+		if super
+			return @scope == old_constraint.scope
+		end
+		return false
+	end
 end
 
 class Numericality_constraint < Constraint 
-
+	attr_accessor :only_integer, :greater_than, :greater_than_or_equal_to, :equal_to, :less_than, :less_than_or_equal_to, :is_odd, :is_even
+	def parse(dic)
+		if dic["only_integer"]&.source == "true"
+			@only_integer = true
+		end
+		@greater_than = dic["greater_than"]&.source
+		@greater_than_or_equal_to = dic["greater_than_or_equal_to"]&.source
+		@equal_to = dic["equal_to"]&.source
+		@less_than = dic["less_than"]&.source
+		@less_than_or_equal_to = dic["less_than_or_equal_to"]&.source
+		@is_odd = dic["odd"].source
+		@is_even = dic["even"].source
+	end
+	def is_same(old_constraint)
+		attributes = self.instance_variables.map{|x| x[2..-1]}
+		if super
+			return @only_integer == old_constraint.only_integer and \
+			@greater_than == old_constraint.greater_than and \
+			@greater_than_or_equal_to	== old_constraint.greater_than_or_equal_to and \
+			@equal_to == old_constraint.equal_to and \
+			@less_than == old_constraint.less_than and \
+			@less_than_or_equal_to == old_constraint.less_than_or_equal_to and \
+			@is_odd == old_constraint.is_odd	and \
+			@is_even == old_constraint.is_odd
+		end
+		return false
+	end
+	def self_print
+		super
+	end
 end

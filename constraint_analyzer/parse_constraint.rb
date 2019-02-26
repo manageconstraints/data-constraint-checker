@@ -140,6 +140,13 @@ def parse_validate_constraint_function(table, funcname, ast)
 					constraints << constraint
 				end
 			end
+			if funcname == "validates_numericality_of"
+				columns.each do |column|
+					constraint = Numericality_constraint.new(table, column, type, allow_nil, allow_blank)
+					constraint.parse(dic)
+					constraints << constraint
+				end
+			end
 		end
 	end
 	return constraints
