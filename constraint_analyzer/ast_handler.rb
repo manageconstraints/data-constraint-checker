@@ -16,6 +16,9 @@ def handle_assoc_node(child)
 	if child[0].type.to_s == "symbol_literal"
 		key = handle_symbol_literal_node(child[0])
 	end
+	if child[0].type.to_s == "string_literal"
+		key = handle_string_literal_node(child[0])
+	end
 	if child[0].type.to_s == "label"
 		key = handle_label_node(child[0])
 	end
@@ -41,9 +44,19 @@ def handle_array_node(ast)
 					column = handle_symbol_literal_node(child)
 					scope << column
 				end
+				if child.type.to_s == "string_literal"
+					column = handle_string_literal_node(child)
+					scope << column
+				end
 			end
 		end
 		return scope
 	end
 	return nil
+end
+def handle_string_literal_node(ast)
+	if ast.type.to_s == "string_literal"
+		column = ast[0].source
+		return column
+	end
 end

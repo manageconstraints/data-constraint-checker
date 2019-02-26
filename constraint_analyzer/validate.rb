@@ -142,7 +142,11 @@ class Absence_constraint < Constraint
 end
 
 class Uniqueness_constraint < Constraint
-	attr_accessor :scope
+	attr_accessor :scope, :case_sensitive
+	def initialize(table, column, type, allow_nil=false, allow_blank=false)
+		super(table, column, type, allow_nil=false, allow_blank=false)
+		@case_sensitive = true
+	end
 	def parse(dic)
 		@scope = []
 		if dic["scope"]
@@ -154,6 +158,9 @@ class Uniqueness_constraint < Constraint
 			if scope_ast.type.to_s == "array"
 				@scope = handle_array_node(scope_ast)
 			end
+		end
+		if dic["case_sensitive"]&.source == "false"
+			@case_sensitive = false
 		end
 	end
 	def self_print
@@ -179,8 +186,8 @@ class Numericality_constraint < Constraint
 		@equal_to = dic["equal_to"]&.source
 		@less_than = dic["less_than"]&.source
 		@less_than_or_equal_to = dic["less_than_or_equal_to"]&.source
-		@is_odd = dic["odd"].source
-		@is_even = dic["even"].source
+		@is_odd = dic["odd"]&.source
+		@is_even = dic["even"]&.source
 	end
 	def is_same(old_constraint)
 		attributes = self.instance_variables.map{|x| x[2..-1]}
@@ -217,14 +224,37 @@ class Confirmation_constraint < Constraint
 		return false
 	end
 	def parse(dic)
-		if dic["case_sensitive"]&.source == "false"
-			@case_sensitive = false
+		if  dic["case_sensitive"]&.source == "false"
+			self.case_sensitive = false
 		else
-			@case_sensitive = true
+			self.case_sensitive = true
 		end
+		puts "self case case_sensitive #{self.case_sensitive}"
 	end
 	def self_print
 		super
 		puts self.case_sensitive
+	end
+end
+class Acceptance_constraint < Constraint
+	attr_accessor :accept_condition
+	def parse(dic)
+		return unless dic
+		@accept_condition = []
+		if dic["accept"]
+			accept_condition_ast = dic["accept"]
+			puts "accept_condition_ast #{accept_condition_ast.type}"
+			if accept_condition_ast.type.to_s == "symbol_literal"
+				value = handle_symbol_literal_node(accept_condition_ast)
+				@accept_condition << value
+			end
+			if accept_condition_ast.type.to_s == "string_literal"
+				value = handle_string_literal_node(accept_condition_ast)
+				@accept_condition << value
+			end
+			if accept_condition_ast.type.to_s == "array"
+				@accept_condition = handle_array_node(accept_condition_ast)
+			end
+		end
 	end
 end

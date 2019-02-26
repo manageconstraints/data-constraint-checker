@@ -6,6 +6,12 @@ load 'helper.rb'
 load 'version.rb'
 load 'extract_statistics.rb'
 load 'ast_handler.rb'
+load 'parse_model_constraint.rb'
+load 'parse_db_constraint.rb'
+require 'yard'
+require 'active_support'
+require 'active_support/inflector'
+require 'active_support/core_ext/string'
 application_dir = "/Users/jwy/Research/lobsters-ori/"
 load_validate_api
 if ARGV[0]

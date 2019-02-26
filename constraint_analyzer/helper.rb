@@ -6,3 +6,23 @@ def load_validate_api
 	puts $validate_apis
 end
 
+def convert_tablename(name)
+	return nil unless name
+	_name = Array.new
+	_word_list = Array.new
+	name.split('').each do |c|
+		if c == '_'
+			_word_list.push(_name.join)
+			_name = Array.new
+		else
+			_name.push(c)
+		end
+	end
+	_word_list.push(_name.join)
+	_word_list.each do |w|
+		w[0] = w[0].capitalize
+	end
+	_word_list[-1] = _word_list[-1].singularize
+	temp_name = _word_list.join
+	return temp_name
+end
