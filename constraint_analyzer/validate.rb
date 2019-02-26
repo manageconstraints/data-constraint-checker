@@ -136,3 +136,15 @@ end
 class Presence_constraint < Constraint
 
 end
+
+class Absence_constraint < Constraint
+
+end
+
+class Uniqueness_constraint < Constraint
+
+end
+
+class Numericality_constraint < Constraint 
+	
+end

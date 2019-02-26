@@ -137,7 +137,7 @@ def parse_validate_constraint_function(table, funcname, ast)
 					constraints << constraint
 				end
 			end
-			if funcname == "validates_length_of"
+			if funcname == "validates_length_of" or funcname == "validates_size_of"
 				columns.each do |column|
 					constraint = Length_constraint.new(table, column, type, allow_nil, allow_blank)
 					constraint.parse(dic)
@@ -401,7 +401,7 @@ def handle_change_column_null(ast)
 end
 def create_constraints(class_name, column_name, column_type, type, dic)
 	constraints = []
-	if !dic["default"] and dic["null"]
+	if  dic["null"]
 		null = dic["null"].source
 		if null == "false"
 			constraint = Presence_constraint.new(class_name, column_name, type)			
