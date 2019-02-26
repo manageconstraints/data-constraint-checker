@@ -185,7 +185,7 @@ class Numericality_constraint < Constraint
 	def is_same(old_constraint)
 		attributes = self.instance_variables.map{|x| x[2..-1]}
 		if super
-			return @only_integer == old_constraint.only_integer and \
+			if @only_integer == old_constraint.only_integer and \
 			@greater_than == old_constraint.greater_than and \
 			@greater_than_or_equal_to	== old_constraint.greater_than_or_equal_to and \
 			@equal_to == old_constraint.equal_to and \
@@ -193,6 +193,8 @@ class Numericality_constraint < Constraint
 			@less_than_or_equal_to == old_constraint.less_than_or_equal_to and \
 			@is_odd == old_constraint.is_odd	and \
 			@is_even == old_constraint.is_odd
+				return true
+			end
 		end
 		return false
 	end
@@ -200,5 +202,5 @@ class Numericality_constraint < Constraint
 		super
 	end
 end
-def Confirmation_constraint << Constraint
+class Confirmation_constraint < Constraint
 end

@@ -179,6 +179,7 @@ def parse_validates(table, funcname, ast)
 	constraints = []
 	columns = []
 	cur_constrs = []
+	puts "ast: #{ast.children.length}"
 	ast.children.each do |child|
   		if child.type.to_s == 'symbol_literal'
   			column = handle_symbol_literal_node(child)
@@ -188,6 +189,7 @@ def parse_validates(table, funcname, ast)
   			node = child[0]
   			if node.type.to_s == "assoc"
   				cur_constr, cur_value_ast = handle_assoc_node(node)
+  				puts "cur_constr #{cur_constr}"
   				next unless cur_constr
   				if cur_constr == "presence"
 					cur_value = cur_value_ast.source
@@ -226,7 +228,7 @@ def parse_validates(table, funcname, ast)
 				end
 				if cur_constr == "confirmation"
 					cur_value = cur_value_ast.source
-					if cur_value == "false"
+					if cur_value == "true"
 						columns.each do |c|
 							constraint = Confirmation_constraint.new(table, c, type)
 							constraints << constraint
