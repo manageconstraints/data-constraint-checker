@@ -226,6 +226,16 @@ def parse_validates(table, funcname, ast)
 						constraints << constraint
 					end
 				end
+				if cur_constr == "length"
+					if cur_value_ast.type.to_s == "hash"
+						dic2 = handle_hash_node(cur_value_ast)
+						columns.each do |c|
+							constraint = Length_constraint.new(table, c, type)
+							constraint.parse(dic2)
+							constraints << constraint
+						end
+					end
+				end
 				if cur_constr == "confirmation"
 					cur_value = cur_value_ast.source
 					if cur_value == "true"
