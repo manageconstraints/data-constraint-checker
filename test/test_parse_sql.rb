@@ -31,4 +31,18 @@ class TestParseSql < Test::Unit::TestCase
     assert_equal  sql, output
     assert_equal ['email_logs', ['user_id']], parse_sql(ast[0][1])
   end
+  def test_handle_cross_string2
+    contents = "execute <<-SQL
+          ALTER TABLE distributors
+            ADD CONSTRAINT zipchk
+              CHECK (char_length(zipcode) = 5) NO INHERIT;
+        SQL"
+    output = "          ALTER TABLE distributors
+            ADD CONSTRAINT zipchk
+              CHECK (char_length(zipcode) = 5) NO INHERIT;\n"
+    ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+    sql = handle_cross_line_string(ast[0][1][0][0].source)
+    assert_equal  sql, output
+    puts "parse_sql(ast[0][1]) #{parse_sql(ast[0][1])}"
+  end
 end

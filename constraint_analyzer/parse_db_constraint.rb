@@ -137,7 +137,6 @@ def handle_create_table(ast)
 			end
 		end
 	end
-
 end
 def handle_change_column_null(ast)
 	puts "++++++++++handle_change_column_null++++++++++"

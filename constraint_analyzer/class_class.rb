@@ -29,11 +29,12 @@ class Class_class
 
 end
 class Column
-	attr_accessor :column_type,  :column_name, :file_class, :prev_column
+	attr_accessor :column_type,  :column_name, :file_class, :prev_column, :id_deleted
 	def initialize(table_class, column_name, column_type, file_class)
 		@table_class = table_class
 		@column_name = column_name
 		@column_type = column_type
+		@is_deleled = false
 	end
 	def getTableClass
 		return @table_class

@@ -35,6 +35,10 @@ def parse_sql_string(sql)
 			end
 		end
 	end
+	alter_query = tree['AlterTableStmt']
+	if alter_query
+		
+	end
 	return table_name, columns
 end
 
