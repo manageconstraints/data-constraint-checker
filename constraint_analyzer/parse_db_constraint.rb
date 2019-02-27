@@ -40,6 +40,14 @@ def parse_db_constraint_function(table, funcname, ast)
 	handle_remove_column(ast[1]) if funcname == "remove_column"
 	parse_sql(ast[1]) if funcname == "execute"
 	handle_create_join_table(ast) if funcname == "create_join_table"
+	handle_drop_table(ast) if funcname == "drop_table"
+	handle_remove_timestamps(ast) if funcname == "remove_timestamps"
+	handle_add_timestamps(ast) if funcname == "add_timestamps"
+	handle_add_index(ast) if funcname == "add_index"
+	handle_remove_index(ast) if funcname == "remove_index"
+	handle_rename_index(ast) if funcname == "rename_index"
+	handle_remove_join_table(ast) if funcname == "remove_join_table"
+	handle_change_column_default(ast) if funcname == "change_column_default"
 end
 def handle_change_table(ast)
 	handle_create_table(ast)
@@ -65,7 +73,7 @@ def handle_change_column(ast, is_deleted=false)
 	class_name = convert_tablename(table)
 	if table and column_name and column_type and $model_classes[class_name] 
 		table_class = $model_classes[class_name]
-		column = Column.new(table_class, column_name, column_type, $cur_class)
+		column = Column.new(table_class, column_name, column_type, $cur_class, dic)
 		columns = table_class.getColumns
 		column.prev_column =  columns[column_name]
 		column.is_deleted = is_deleted

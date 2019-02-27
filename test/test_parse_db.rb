@@ -65,7 +65,7 @@ class TestParseModelConstriant < Test::Unit::TestCase
   def test_add_column
     contents = "class RemovePartNumberFromProducts < ActiveRecord::Migration[5.0]
                   def change
-                    add_column :products, :part_number, :string
+                    add_column :products, :part_number, :string, default: ''
                   end
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
@@ -86,5 +86,6 @@ class TestParseModelConstriant < Test::Unit::TestCase
     assert_equal 'part_number', column.column_name
     assert_equal 'string', column.column_type
     assert_equal 'part_number', model_class.getColumns.keys[0]
+    assert_equal '', column.default_value
   end
 end
