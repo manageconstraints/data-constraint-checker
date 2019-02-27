@@ -66,24 +66,11 @@ def handle_change_column(ast)
 	table = nil
 	column_name = nil
 	column_type = nil
-	if children[0] and children[0].type.to_s == "symbol_literal"
-		table = handle_symbol_literal_node(children[0])
-	end
-	if children[1] and children[1].type.to_s == "symbol_literal"
-		column_name = handle_symbol_literal_node(children[1])
-	end
-	if children[2] and children[2].type.to_s == "symbol_literal"
-		column_type = handle_symbol_literal_node(children[2])
-	end
+	table = handle_symbol_literal_node(children[0])
+	column_name = handle_symbol_literal_node(children[1])
+	column_type = handle_symbol_literal_node(children[2])
 	dic = {}
-	if children[3] and children[3].type.to_s == "list"
-		children[3].children.each do |child|
-			if child.type.to_s == "assoc"
-				key, value = handle_assoc_node(child)
-				dic[key] = value
-			end
-		end
-	end
+	dic = extract_hash_from_list(children[3])
 	class_name = convert_tablename(table)
 	if table and column_name and column_type and $model_classes[class_name] 
 		table_class = $model_classes[class_name]
@@ -189,58 +176,36 @@ def handle_reversible(ast)
 	table_class = nil
 	class_name = nil
 	dic = {}
-	if ast[-1].type.to_s == "do_block"
-		list_ast = ast[-1][-1]
-		if list_ast&.type.to_s == "list"
-			list_ast.children.each do |child|
-				if child.type.to_s == "command"
-					puts "#{child[1].type.to_s} child1 #{child[1][0].type.to_s}"
-					if child[1].type.to_s == "list" and child[1][0].type.to_s == "symbol_literal"
-						table_name = handle_symbol_literal_node(child[1][0])
-						class_name = convert_tablename(table_name)
-						table_class = $model_classes[class_name]
-						puts "table_name : #{table_name}"
-						if child[-1].type.to_s == "do_block"
-							if child[-1][-1].type.to_s == "list"
-								child[-1][-1].children.each do |cc|
-									if cc.type.to_s == "call"
-										if cc[2].source == "up"
-											if cc[-1].type.to_s == "brace_block"
-												if cc[-1][1][0]&.type.to_s == "command_call"
-													ccc = cc[-1][1][0][-1]
-													if ccc&.type.to_s == "list"
-														if ccc[0].type.to_s == "symbol_literal"
-															column_name = handle_symbol_literal_node(ccc[0])
-														end
-														if ccc[1].type.to_s == "symbol_literal"
-															column_type = handle_symbol_literal_node(ccc[1])
-														end
-														if ccc[2] and ccc[2].type.to_s == "list"
-															ccc[2].children.each do |child|
-																if child.type.to_s == "assoc"
-																	key, value = handle_assoc_node(child)
-																	dic[key] = value
-																end
-															end
-														end
-														old_column = table_class.getColumns[column_name]
-														if column_name and table_class and column_name 
-															column = Column.new(table_class, column_name, column_type, $cur_class)
-															column.prev_column = old_column
-															table_class.addColumn(column)
-															constraints = create_constraints(class_name, column_name, column_type, "db", dic)
-															table_class.addConstraints(constraints)
-														end
-													end
-												end
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end
+	return unless ast[-1].type.to_s == "do_block"
+	list_ast = ast[-1][-1]
+	return unless list_ast&.type.to_s == "list"
+	list_ast.children.each do |child|
+		next unless child.type.to_s == "command"
+		puts "#{child[1].type.to_s} child1 #{child[1][0].type.to_s}"
+		next if !(child[1].type.to_s == "list" and child[1][0].type.to_s == "symbol_literal")
+		table_name = handle_symbol_literal_node(child[1][0])
+		class_name = convert_tablename(table_name)
+		table_class = $model_classes[class_name]
+		puts "table_name : #{table_name}"
+		next unless child[-1].type.to_s == "do_block"
+		if child[-1][-1].type.to_s == "list"
+			child[-1][-1].children.each do |cc|
+				next unless cc.type.to_s == "call"
+				next unless cc[2].source == "up"
+				next unless cc[-1].type.to_s == "brace_block"
+				next unless cc[-1][1][0]&.type.to_s == "command_call"
+				ccc = cc[-1][1][0][-1]
+				next unless ccc&.type.to_s == "list"
+				column_name = handle_symbol_literal_node(ccc[0])
+				column_type = handle_symbol_literal_node(ccc[1])
+				dic == extract_hash_from_list(ast)
+				old_column = table_class.getColumns[column_name]
+				next if !(column_name and table_class and column_name) 
+				column = Column.new(table_class, column_name, column_type, $cur_class)
+				column.prev_column = old_column
+				table_class.addColumn(column)
+				constraints = create_constraints(class_name, column_name, column_type, "db", dic)
+				table_class.addConstraints(constraints)	
 			end
 		end
 	end

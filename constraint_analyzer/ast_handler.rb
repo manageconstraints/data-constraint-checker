@@ -28,6 +28,7 @@ def handle_assoc_node(child)
 end 
 
 def handle_symbol_literal_node(symbol)
+	return unless symbol.type.to_s == "symbol_literal"
 	return symbol[0][0].source
 end
 
@@ -59,4 +60,16 @@ def handle_string_literal_node(ast)
 		column = ast[0].source
 		return column
 	end
+end
+
+def extract_hash_from_list(ast)
+	return {} unless ast.type.to_s == "list"
+	dic = {}
+	ast.children.each do |child|
+		if child.type.to_s == "assoc"
+			key, value = handle_assoc_node(child)
+			dic[key] = value
+		end
+	end
+	return dic
 end
