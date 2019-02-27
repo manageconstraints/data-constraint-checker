@@ -27,13 +27,15 @@ def parse_db_constraint_file(ast)
 	end
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
-		# puts"callname: #{funcname}"
-		parse_db_constraint_function(nil, nil, funcname)
+		puts "callname: #{funcname}"
+		parse_db_constraint_function(nil, funcname, ast)
 	end
 end
 def parse_db_constraint_function(table, funcname, ast)
 	if funcname == "add_column"
+		puts "add_column"
 		handle_add_column(ast[1])
+		puts "finish handle add-column"
 	end
 	if funcname == "create_table"
 		handle_create_table(ast)
@@ -47,6 +49,10 @@ def parse_db_constraint_function(table, funcname, ast)
 	if funcname == "change_column_null"
 		handle_change_column_null(ast)
 	end
+	if funcname == "remove_column"
+		puts "handle_remove_column #{funcname} #{ast.source}" 
+		handle_remove_column(ast[1])
+	end
 	if funcname == "execute"
 		parse_sql(ast[1])
 	end
@@ -57,11 +63,13 @@ def handle_change_table(ast)
 end
 
 def handle_add_column(ast)
-	handle_change_column(ast)
+	handle_change_column(ast, false)
 end
 
-def handle_change_column(ast)
+def handle_change_column(ast, is_deleted=false)
+	puts "handle_change_column"
 	children = ast.children
+	puts "is_deleted: #{is_deleted}"
 	# puts"ast.source #{ast.source}"
 	table = nil
 	column_name = nil
@@ -77,6 +85,7 @@ def handle_change_column(ast)
 		column = Column.new(table_class, column_name, column_type, $cur_class)
 		columns = table_class.getColumns
 		column.prev_column =  columns[column_name]
+		column.is_deleted = is_deleted
 		table_class.addColumn(column)
 		# puts"create new column #{column.class.name} #{table_class.class_name} #{column_name} #{column_type}"
 		constraints = create_constraints(class_name, column_name, column_type, "db", dic)
@@ -114,10 +123,7 @@ def handle_create_table(ast)
 					if column_ast.class.name == "YARD::Parser::Ruby::AstNode" and  column_ast.type.to_s == "list"
 						column_name = handle_symbol_literal_node(column_ast[0])
 						column = Column.new(table_class, column_name, column_type, $cur_class)
-						if columns[column_name]
-							# existing columns
-							column.prev_column =  columns[column_name]
-						end
+						column.prev_column =  columns[column_name]
 						table_class.addColumn(column)
 						dic = {}
 						if column_ast[1].class.name == "YARD::Parser::Ruby::AstNode" and column_ast[1].type and column_ast[1].type.to_s == "list"
@@ -223,4 +229,7 @@ def create_constraints(class_name, column_name, column_type, type, dic)
 		constraints << constraint
 	end
 	return constraints
+end
+def handle_remove_column(ast)
+	handle_change_column(ast, true)
 end
