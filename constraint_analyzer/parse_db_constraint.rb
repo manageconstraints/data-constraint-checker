@@ -32,31 +32,14 @@ def parse_db_constraint_file(ast)
 	end
 end
 def parse_db_constraint_function(table, funcname, ast)
-	if funcname == "add_column"
-		puts "add_column"
-		handle_add_column(ast[1])
-		puts "finish handle add-column"
-	end
-	if funcname == "create_table"
-		handle_create_table(ast)
-	end
-	if funcname == "change_column"
-		handle_change_column(ast[1])
-	end
-	if funcname == "change_table"
-		handle_change_table(ast)
-	end
-	if funcname == "change_column_null"
-		handle_change_column_null(ast)
-	end
-	if funcname == "remove_column"
-		puts "handle_remove_column #{funcname} #{ast.source}" 
-		handle_remove_column(ast[1])
-	end
-	if funcname == "execute"
-		parse_sql(ast[1])
-	end
-		
+	handle_add_column(ast[1]) if funcname == "add_column"
+	handle_create_table(ast) if funcname == "create_table"
+	handle_change_column(ast[1]) if funcname == "change_column"
+	handle_change_table(ast) if funcname == "change_table"
+	handle_change_column_null(ast) if funcname == "change_column_null"
+	handle_remove_column(ast[1]) if funcname == "remove_column"
+	parse_sql(ast[1]) if funcname == "execute"
+	handle_create_join_table(ast) if funcname == "create_join_table"
 end
 def handle_change_table(ast)
 	handle_create_table(ast)
@@ -232,4 +215,37 @@ def create_constraints(class_name, column_name, column_type, type, dic)
 end
 def handle_remove_column(ast)
 	handle_change_column(ast, true)
+end
+def handle_create_join_table(ast)
+end
+
+def handle_remove_join_table(ast)
+end
+
+def handle_add_timestamps(ast)
+end
+
+def handle_remove_timestamps(ast)
+end
+
+
+def handle_change_column_default(ast)
+end
+
+def handle_rename_table(ast)
+end
+
+def handle_drop_table(ast)
+end
+
+def handle_add_index(ast)
+end
+
+def handle_drop_index(ast)
+end
+
+def handle_rename_column(ast)
+end
+
+def handle_rename_index(ast)
 end
