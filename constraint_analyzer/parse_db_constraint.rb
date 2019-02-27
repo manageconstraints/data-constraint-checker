@@ -22,9 +22,8 @@ def parse_db_constraint_file(ast)
 			parse_db_constraint_file(ast[-1])
 		end
 	end
-	if ast.type.to_s == "fcall"
+	if ast.type.to_s == "fcall" and ast[0].source == "reversible"
 		handle_reversible(ast)
-		
 	end
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
@@ -184,7 +183,12 @@ def handle_change_column_null(ast)
 	end
 end
 def handle_reversible(ast)
-	funcname = ast[2]
+	table_name = nil
+	column_name = nil
+	null = true
+	table_class = nil
+	class_name = nil
+	dic = {}
 	if ast[-1].type.to_s == "do_block"
 		list_ast = ast[-1][-1]
 		if list_ast&.type.to_s == "list"
@@ -193,8 +197,48 @@ def handle_reversible(ast)
 					puts "#{child[1].type.to_s} child1 #{child[1][0].type.to_s}"
 					if child[1].type.to_s == "list" and child[1][0].type.to_s == "symbol_literal"
 						table_name = handle_symbol_literal_node(child[1][0])
+						class_name = convert_tablename(table_name)
+						table_class = $model_classes[class_name]
 						puts "table_name : #{table_name}"
-						return table_name
+						if child[-1].type.to_s == "do_block"
+							if child[-1][-1].type.to_s == "list"
+								child[-1][-1].children.each do |cc|
+									if cc.type.to_s == "call"
+										if cc[2].source == "up"
+											if cc[-1].type.to_s == "brace_block"
+												if cc[-1][1][0]&.type.to_s == "command_call"
+													ccc = cc[-1][1][0][-1]
+													if ccc&.type.to_s == "list"
+														if ccc[0].type.to_s == "symbol_literal"
+															column_name = handle_symbol_literal_node(ccc[0])
+														end
+														if ccc[1].type.to_s == "symbol_literal"
+															column_type = handle_symbol_literal_node(ccc[1])
+														end
+														if ccc[2] and ccc[2].type.to_s == "list"
+															ccc[2].children.each do |child|
+																if child.type.to_s == "assoc"
+																	key, value = handle_assoc_node(child)
+																	dic[key] = value
+																end
+															end
+														end
+														old_column = table_class.getColumns[column_name]
+														if column_name and table_class and column_name 
+															column = Column.new(table_class, column_name, column_type, $cur_class)
+															column.prev_column = old_column
+															table_class.addColumn(column)
+															constraints = create_constraints(class_name, column_name, column_type, "db", dic)
+															table_class.addConstraints(constraints)
+														end
+													end
+												end
+											end
+										end
+									end
+								end
+							end
+						end
 					end
 				end
 			end
@@ -202,6 +246,8 @@ def handle_reversible(ast)
 	end
 end
 def create_constraints(class_name, column_name, column_type, type, dic)
+	return [] unless dic
+	return [] unless dic.length > 0
 	constraints = []
 	if  dic["null"]
 		null = dic["null"].source
