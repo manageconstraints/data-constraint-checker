@@ -77,7 +77,7 @@ class TestParseModelConstriant < Test::Unit::TestCase
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
     $cur_class = Class_class.new("test.rb")
-    #$cur_class.ast = ast
+    $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
     assert_equal 0, model_class.getConstraints.length
@@ -87,5 +87,47 @@ class TestParseModelConstriant < Test::Unit::TestCase
     assert_equal 'string', column.column_type
     assert_equal 'part_number', model_class.getColumns.keys[0]
     assert_equal '', column.default_value
+  end
+  def test_change_column_default
+    contents1 = "class RemovePartNumberFromProducts < ActiveRecord::Migration[5.0]
+                  def change
+                      change_column_default :products, :approved, from: true, to: false
+                  end
+                end" 
+    ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
+    contents = "class RemovePartNumberFromProducts < ActiveRecord::Migration[5.0]
+                  def change
+                      add_column :products, :approved, :boolean
+                  end
+                end" 
+    ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+    
+    model_class = Class_class.new("products.rb")
+    model_class.class_name = "Product"
+    model_class.upper_class_name == "ActiveRecord::Base"
+    model_class.is_activerecord = true
+    $model_classes = {}
+    $model_classes[model_class.class_name] = model_class
+    $cur_class = Class_class.new("test.rb")
+    $cur_class.ast = ast
+    parse_db_constraint_file(ast)  
+    assert_equal 1, model_class.getColumns.length
+    assert_equal 0, model_class.getConstraints.length
+    column = model_class.getColumns.values[0]
+    assert_equal false, column&.is_deleted
+    assert_equal 'approved', column.column_name
+    assert_equal 'boolean', column.column_type
+    assert_equal nil, column.default_value
+
+    $cur_class = Class_class.new("test2.rb")
+    $cur_class.ast = ast1
+    parse_db_constraint_file(ast1)  
+    assert_equal 1, model_class.getColumns.length
+    assert_equal 0, model_class.getConstraints.length
+    column = model_class.getColumns.values[0]
+    assert_equal false, column&.is_deleted
+    assert_equal 'approved', column.column_name
+    assert_equal 'boolean', column.column_type
+    assert_equal "false", column.default_value
   end
 end

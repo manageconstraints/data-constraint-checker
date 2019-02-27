@@ -47,7 +47,7 @@ def parse_db_constraint_function(table, funcname, ast)
 	handle_remove_index(ast) if funcname == "remove_index"
 	handle_rename_index(ast) if funcname == "rename_index"
 	handle_remove_join_table(ast) if funcname == "remove_join_table"
-	handle_change_column_default(ast) if funcname == "change_column_default"
+	handle_change_column_default(ast[1]) if funcname == "change_column_default"
 end
 def handle_change_table(ast)
 	handle_create_table(ast)
@@ -238,6 +238,27 @@ end
 
 
 def handle_change_column_default(ast)
+	puts "handle_change_column_default"
+	children = ast.children
+	puts"ast.source #{ast.source} \n#{ast[0].type}"
+	table = nil
+	column_name = nil
+	column_type = nil
+	table = handle_symbol_literal_node(children[0])
+	column_name = handle_symbol_literal_node(children[1])
+	dic = {}
+	dic = extract_hash_from_list(children[-1])
+	puts "#{table} = #{column_name} = #{column_type} --- #{dic}"
+	class_name = convert_tablename(table)
+	if table and column_name and $model_classes[class_name] 
+		table_class = $model_classes[class_name]
+		columns = table_class.getColumns
+		column  = columns[column_name]
+		new_default = dic["to"].source if dic["to"].type.to_s == "var_ref" 
+		new_default = new_default ||  handle_symbol_literal_node(dic["to"]) \
+						|| handle_string_literal_node(dic["to"])
+		column.default_value = new_default
+	end
 end
 
 def handle_rename_table(ast)
