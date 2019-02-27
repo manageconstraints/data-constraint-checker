@@ -97,7 +97,7 @@ class TestParseModelConstriant < Test::Unit::TestCase
     ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
     contents = "class RemovePartNumberFromProducts < ActiveRecord::Migration[5.0]
                   def change
-                      add_column :products, :approved, :boolean
+                      add_column :products, :approved, :boolean, default: true
                   end
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
@@ -117,7 +117,7 @@ class TestParseModelConstriant < Test::Unit::TestCase
     assert_equal false, column&.is_deleted
     assert_equal 'approved', column.column_name
     assert_equal 'boolean', column.column_type
-    assert_equal nil, column.default_value
+    assert_equal "true", column.default_value
 
     $cur_class = Class_class.new("test2.rb")
     $cur_class.ast = ast1
