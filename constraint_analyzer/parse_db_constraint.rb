@@ -22,6 +22,10 @@ def parse_db_constraint_file(ast)
 			parse_db_constraint_file(ast[-1])
 		end
 	end
+	if ast.type.to_s == "fcall"
+		handle_reversible(ast)
+		
+	end
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
 		# puts"callname: #{funcname}"
@@ -176,6 +180,24 @@ def handle_change_column_null(ast)
 		if class_name and table_class and column_name and null == "false"
 			constraint = Presence_constraint.new(class_name, column_name, "db")
 			table_class.addConstraints([constraint])
+		end
+	end
+end
+def handle_reversible(ast)
+	funcname = ast[2]
+	if ast[-1].type.to_s == "do_block"
+		list_ast = ast[-1][-1]
+		if list_ast&.type.to_s == "list"
+			list_ast.children.each do |child|
+				if child.type.to_s == "command"
+					puts "#{child[1].type.to_s} child1 #{child[1][0].type.to_s}"
+					if child[1].type.to_s == "list" and child[1][0].type.to_s == "symbol_literal"
+						table_name = handle_symbol_literal_node(child[1][0])
+						puts "table_name : #{table_name}"
+						return table_name
+					end
+				end
+			end
 		end
 	end
 end
