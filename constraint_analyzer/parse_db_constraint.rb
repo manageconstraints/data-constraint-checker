@@ -116,29 +116,31 @@ def handle_create_table(ast)
 					if column_type == "references"
 						column_type = "string"
 					end
-					column_ast = c[3]
+					column_ast = c[-1]
 					# puts"column_ast: #{column_ast.class}"
 					if column_ast.class.name == "YARD::Parser::Ruby::AstNode" and  column_ast.type.to_s == "list"
 						column_name = handle_symbol_literal_node(column_ast[0]) || handle_string_literal_node(column_ast[0])
-						column = Column.new(table_class, column_name, column_type, $cur_class)
 						table_class = $model_classes[class_name]
 						table_class = $dangling_classes[class_name] if !table_class
 						if !table_class 
 							table_class = Class_class.new("")
 							$dangling_classes[class_name] = table_class
 						end
+						column = Column.new(table_class, column_name, column_type, $cur_class)
 						columns = table_class.getColumns
 						column.prev_column =  columns[column_name]
 						table_class.addColumn(column)
 						dic = {}
-						if column_ast[1].class.name == "YARD::Parser::Ruby::AstNode" and column_ast[1].type and column_ast[1].type.to_s == "list"
-							column_ast[1].children.each do |cc|
-								if cc.type.to_s == "assoc"
-									key, value = handle_assoc_node(cc)
-									dic[key] = value
-								end
-							end
-						end
+						dic = extract_hash_from_list(column_ast.children[-1])
+						# if column_ast[1].class.name == "YARD::Parser::Ruby::AstNode" and column_ast[1].type and column_ast[1].type.to_s == "list"
+						# 	column_ast[1].children.each do |cc|
+						# 		if cc.type.to_s == "assoc"
+						# 			key, value = handle_assoc_node(cc)
+						# 			dic[key] = value
+						# 		end
+						# 	end
+						# end
+						puts "dic #{dic}"
 						# puts"-----------dic---------"
 						# putsdic
 						constraints = create_constraints(class_name, column_name, column_type, "db", dic)
