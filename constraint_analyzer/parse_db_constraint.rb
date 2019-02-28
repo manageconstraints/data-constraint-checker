@@ -27,6 +27,7 @@ def parse_db_constraint_file(ast)
 	end
 	if ast.type.to_s == "fcall"
 		funcname = ast[0].source
+		puts ("fcall #{funcname}")
 		parse_db_constraint_function(nil, funcname, ast)
 	end
 	if ast.type.to_s == "command"
@@ -49,7 +50,7 @@ def parse_db_constraint_function(table, funcname, ast)
 	handle_drop_table(ast[1]) if funcname == "drop_table"
 	handle_remove_timestamps(ast) if funcname == "remove_timestamps"
 	handle_add_timestamps(ast[1]) if funcname == "add_timestamps"
-	handle_add_index(ast) if funcname == "add_index"
+	handle_add_index(ast[1]) if funcname == "add_index"
 	handle_remove_index(ast) if funcname == "remove_index"
 	handle_rename_index(ast) if funcname == "rename_index"
 	handle_remove_join_table(ast) if funcname == "remove_join_table"
@@ -333,6 +334,27 @@ def handle_drop_table(ast)
 end
 
 def handle_add_index(ast)
+	puts "handle_add_index"
+	children = ast.children
+	table_name = handle_symbol_literal_node(children[0]) ||  handle_symbol_literal_node(children[0])
+	column = handle_symbol_literal_node(children[1]) || handle_string_literal_node(children[1])
+	class_name = convert_tablename(table_name)
+	table_class = $model_classes[class_name] || $dangling_classes[class_name]
+	if !table_class
+		table_class = Class_class.new("")
+		$dangling_classes[class_name] = table_class
+	end
+	columns = []
+	columns << column if column
+	columns = handle_array_node(children[1]) unless column
+	dic = extract_hash_from_list(children[2])
+	index_name = dic["name"]&.source || handle_symbol_literal_node(dic["name"]) || handle_string_literal_node(dic["name"])
+	index_name = index_name || "#{table_name}_#{columns.join("_")}"
+	new_index = Index.new(index_name, table_name, columns)
+	if dic["unique"]&.source == "true"
+		new_index.unique = true
+	end
+	table_class.addIndex(new_index)
 end
 
 def handle_drop_index(ast)

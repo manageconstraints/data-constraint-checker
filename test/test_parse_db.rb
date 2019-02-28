@@ -14,7 +14,49 @@ require 'active_support'
 require 'active_support/inflector'
 require 'active_support/core_ext/string'
 class TestParseModelConstriant < Test::Unit::TestCase
-  def test_parse_confirmation
+  def test_create_table
+    contents = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
+                def up
+                  create_table :products do |t|
+                    t.column :name, :string, limit: 60
+                  end
+                end
+              end" 
+    ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+    model_class = Class_class.new("products.rb")
+    model_class.class_name = "Product"
+    model_class.upper_class_name == "ActiveRecord::Base"
+    model_class.is_activerecord = true
+    $model_classes = {}
+    $model_classes[model_class.class_name] = model_class
+    $cur_class = Class_class.new("test.rb")
+    $cur_class.ast = ast
+    parse_db_constraint_file(ast)  
+    assert_equal 1, model_class.getColumns.length
+    assert_equal 1, model_class.getConstraints.length
+  end
+  def test_create_table_from_fcall
+    contents = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
+                def up
+                  create_table(:products) do |t|
+                    t.column :name, :string, limit: 60
+                  end
+                end
+              end" 
+    ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+    model_class = Class_class.new("products.rb")
+    model_class.class_name = "Product"
+    model_class.upper_class_name == "ActiveRecord::Base"
+    model_class.is_activerecord = true
+    $model_classes = {}
+    $model_classes[model_class.class_name] = model_class
+    $cur_class = Class_class.new("test.rb")
+    $cur_class.ast = ast
+    parse_db_constraint_file(ast)  
+    assert_equal 1, model_class.getColumns.length
+    assert_equal 1, model_class.getConstraints.length
+  end
+  def test_parse_reversible
   	contents = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
                 def change
                   reversible do |dir|
@@ -280,5 +322,69 @@ class TestParseModelConstriant < Test::Unit::TestCase
     assert_equal 2, constraints.length
     assert_equal ["created_at-Presence_constraint-db", "updated_at-Presence_constraint-db"], constraints.keys
     assert_equal [nil, nil], columns.map{|k, v| v.default_value}
+  end
+
+  def test_handle_create_join_table
+    contents = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
+                def up
+                  create_table :products do |t|
+                    t.column :name, :string, limit: 60
+                  end
+                end
+              end" 
+    ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+    model_class = Class_class.new("products.rb")
+    model_class.class_name = "Product"
+    model_class.upper_class_name == "ActiveRecord::Base"
+    model_class.is_activerecord = true
+    $model_classes = {}
+    $model_classes[model_class.class_name] = model_class
+    $cur_class = Class_class.new("test.rb")
+    $cur_class.ast = ast
+    parse_db_constraint_file(ast)  
+    assert_equal 1, model_class.getColumns.length
+    assert_equal 1, model_class.getConstraints.length
+    contents1 = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
+                def up
+                  add_index :products, :name
+                end
+              end"
+    ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
+    $cur_class = Class_class.new("add_index.rb")
+    $cur_class.ast = ast1
+    parse_db_constraint_file(ast1) 
+    assert_equal 1, model_class.indices.size
+    temp_model_class = model_class
+    contents = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
+                def up
+                  create_table :products do |t|
+                    t.column :name, :string, limit: 60
+                  end
+                end
+              end" 
+    ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+    model_class = Class_class.new("products.rb")
+    model_class.class_name = "Product"
+    model_class.upper_class_name == "ActiveRecord::Base"
+    model_class.is_activerecord = true
+    $model_classes = {}
+    $model_classes[model_class.class_name] = model_class
+    $cur_class = Class_class.new("test.rb")
+    $cur_class.ast = ast
+    parse_db_constraint_file(ast)  
+    assert_equal 1, model_class.getColumns.length
+    assert_equal 1, model_class.getConstraints.length
+    contents1 = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
+                def up
+                  add_index(:products, :name)
+                end
+              end"
+    ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
+    $cur_class = Class_class.new("add_index.rb")
+    $cur_class.ast = ast1
+    parse_db_constraint_file(ast1) 
+    assert_equal 1, model_class.indices.size
+    assert_equal model_class.getColumns[0], temp_model_class.getColumns[0]
+    assert_equal model_class.indices[0], temp_model_class.indices[0]
   end
 end
