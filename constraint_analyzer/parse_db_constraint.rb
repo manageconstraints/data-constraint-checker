@@ -132,17 +132,6 @@ def handle_create_table(ast)
 						table_class.addColumn(column)
 						dic = {}
 						dic = extract_hash_from_list(column_ast.children[-1])
-						# if column_ast[1].class.name == "YARD::Parser::Ruby::AstNode" and column_ast[1].type and column_ast[1].type.to_s == "list"
-						# 	column_ast[1].children.each do |cc|
-						# 		if cc.type.to_s == "assoc"
-						# 			key, value = handle_assoc_node(cc)
-						# 			dic[key] = value
-						# 		end
-						# 	end
-						# end
-						puts "dic #{dic}"
-						# puts"-----------dic---------"
-						# putsdic
 						constraints = create_constraints(class_name, column_name, column_type, "db", dic)
 						table_class.addConstraints(constraints)
 					end
