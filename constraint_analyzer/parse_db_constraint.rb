@@ -25,6 +25,10 @@ def parse_db_constraint_file(ast)
 	if ast.type.to_s == "fcall" and ast[0].source == "reversible"
 		handle_reversible(ast)
 	end
+	if ast.type.to_s == "fcall"
+		funcname = ast[0].source
+		parse_db_constraint_function(nil, funcname, ast)
+	end
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
 		puts "callname: #{funcname}"
@@ -42,7 +46,7 @@ def parse_db_constraint_function(table, funcname, ast)
 	handle_create_join_table(ast) if funcname == "create_join_table"
 	handle_drop_table(ast[1]) if funcname == "drop_table"
 	handle_remove_timestamps(ast) if funcname == "remove_timestamps"
-	handle_add_timestamps(ast) if funcname == "add_timestamps"
+	handle_add_timestamps(ast[1]) if funcname == "add_timestamps"
 	handle_add_index(ast) if funcname == "add_index"
 	handle_remove_index(ast) if funcname == "remove_index"
 	handle_rename_index(ast) if funcname == "rename_index"
@@ -67,9 +71,9 @@ def handle_change_column(ast, is_deleted=false)
 	table = nil
 	column_name = nil
 	column_type = nil
-	table = handle_symbol_literal_node(children[0])
-	column_name = handle_symbol_literal_node(children[1])
-	column_type = handle_symbol_literal_node(children[2])
+	table = handle_symbol_literal_node(children[0]) || handle_string_literal_node(children[0])
+	column_name = handle_symbol_literal_node(children[1]) || handle_string_literal_node(children[1])
+	column_type = handle_symbol_literal_node(children[2]) || handle_string_literal_node(children[2])
 	dic = {}
 	dic = extract_hash_from_list(children[-1])
 	class_name = convert_tablename(table)
@@ -97,7 +101,7 @@ def handle_create_table(ast)
 	# puts"ast[1] #{ast[1].source} #{ast[1].type.to_s}"
 	if ast[1].type.to_s == "list"
 		symbol_node = ast[1][0]
-		table_name = handle_symbol_literal_node(symbol_node)
+		table_name = handle_symbol_literal_node(symbol_node) || handle_string_literal_node(symbol_node)
 		class_name = convert_tablename(table_name)
 		# puts"class_name: #{class_name}"
 		## puts"table_name: #{table_name}"
@@ -113,7 +117,7 @@ def handle_create_table(ast)
 					column_ast = c[3]
 					# puts"column_ast: #{column_ast.class}"
 					if column_ast.class.name == "YARD::Parser::Ruby::AstNode" and  column_ast.type.to_s == "list"
-						column_name = handle_symbol_literal_node(column_ast[0])
+						column_name = handle_symbol_literal_node(column_ast[0]) || handle_string_literal_node(column_ast[0])
 						column = Column.new(table_class, column_name, column_type, $cur_class)
 						table_class = $model_classes[class_name]
 						table_class = $dangling_classes[class_name] if !table_class
@@ -152,7 +156,7 @@ def handle_change_column_null(ast)
 		table_class = nil
 		class_name = nil
 		if ast[1][0].type.to_s == "symbol_literal"
-			table_name = handle_symbol_literal_node(ast[1][0])
+			table_name = handle_symbol_literal_node(ast[1][0]) || handle_string_literal_node(ast[1][0])
 			class_name = convert_tablename(table_name)
 			table_class = $model_classes[class_name]
 		end
@@ -187,7 +191,7 @@ def handle_reversible(ast)
 		next unless child.type.to_s == "command"
 		puts "#{child[1].type.to_s} child1 #{child[1][0].type.to_s}"
 		next if !(child[1].type.to_s == "list" and child[1][0].type.to_s == "symbol_literal")
-		table_name = handle_symbol_literal_node(child[1][0])
+		table_name = handle_symbol_literal_node(child[1][0]) || handle_string_literal_node(child[1][0])
 		class_name = convert_tablename(table_name)
 		table_class = $model_classes[class_name]
 		table_class = $dangling_classes[class_name] if !table_class
@@ -205,8 +209,8 @@ def handle_reversible(ast)
 				next unless cc[-1][1][0]&.type.to_s == "command_call"
 				ccc = cc[-1][1][0][-1]
 				next unless ccc&.type.to_s == "list"
-				column_name = handle_symbol_literal_node(ccc[0])
-				column_type = handle_symbol_literal_node(ccc[1])
+				column_name = handle_symbol_literal_node(ccc[0]) || handle_string_literal_node(ccc[0])
+				column_type = handle_symbol_literal_node(ccc[1]) || handle_string_literal_node(ccc[1])
 				dic == extract_hash_from_list(ast)
 				old_column = table_class.getColumns[column_name]
 				next if !(column_name and table_class and column_name) 
@@ -246,12 +250,34 @@ def handle_create_join_table(ast)
 end
 
 def handle_remove_join_table(ast)
+	# not found yet
 end
 
 def handle_add_timestamps(ast)
+	if ast.type.to_s == "arg_paren"
+		ast = ast[0]
+	end
+	children = ast.children
+	table_name = handle_symbol_literal_node(children[0]) || handle_string_literal_node(children[0])
+	dic = extract_hash_from_list(children[-1])
+	class_name = convert_tablename(table_name)
+	table_class = $model_classes[class_name] || $dangling_classes[class_name]
+	return unless table_class
+	column_type = "Timestamp"
+	name1 = "created_at"
+	name2 = "updated_at"
+	column1 = Column.new(table_class, name1, column_type, $cur_class, dic)
+	column2 = Column.new(table_class, name2, column_type, $cur_class, dic)
+	table_class.addColumn(column1)
+	table_class.addColumn(column2)
+	constraints1 = create_constraints(class_name, name1, column_type, "db", dic)
+	constraints2 = create_constraints(class_name, name2, column_type, "db", dic)
+	table_class.addConstraints(constraints1)
+	table_class.addConstraints(constraints2)
 end
 
 def handle_remove_timestamps(ast)
+	# not found yet
 end
 
 
@@ -262,8 +288,8 @@ def handle_change_column_default(ast)
 	table = nil
 	column_name = nil
 	column_type = nil
-	table = handle_symbol_literal_node(children[0])
-	column_name = handle_symbol_literal_node(children[1])
+	table = handle_symbol_literal_node(children[0]) || handle_string_literal_node(children[0])
+	column_name = handle_symbol_literal_node(children[1]) || handle_string_literal_node(children[1])
 	dic = {}
 	dic = extract_hash_from_list(children[-1])
 	puts "#{table} = #{column_name} = #{column_type} --- #{dic}"
