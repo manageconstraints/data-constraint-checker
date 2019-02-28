@@ -3,7 +3,7 @@ class Class_class
 	def initialize(filename)
 		@filename = filename
 		@is_activerecord = false
-		@name = nil
+		@class_name = nil
 		@upper_class_name = nil
 		@ast = nil
 		@constraints = {}
@@ -15,6 +15,7 @@ class Class_class
 			# puts"constraint #{constraint.class}"
 			key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
 			@constraints[key] = constraint
+			constraint.table = self.class_name
 		end
 		# puts"@constraints.size #{@constraints.length}"
 	end

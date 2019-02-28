@@ -40,7 +40,7 @@ def parse_db_constraint_function(table, funcname, ast)
 	handle_remove_column(ast[1]) if funcname == "remove_column"
 	parse_sql(ast[1]) if funcname == "execute"
 	handle_create_join_table(ast) if funcname == "create_join_table"
-	handle_drop_table(ast) if funcname == "drop_table"
+	handle_drop_table(ast[1]) if funcname == "drop_table"
 	handle_remove_timestamps(ast) if funcname == "remove_timestamps"
 	handle_add_timestamps(ast) if funcname == "add_timestamps"
 	handle_add_index(ast) if funcname == "add_index"
@@ -49,6 +49,7 @@ def parse_db_constraint_function(table, funcname, ast)
 	handle_remove_join_table(ast) if funcname == "remove_join_table"
 	handle_change_column_default(ast[1]) if funcname == "change_column_default"
 	handle_rename_table(ast[1]) if funcname == "rename_table"
+	handle_rename_column(ast[1]) if funcname == "rename_column"
 end
 def handle_change_table(ast)
 	handle_create_table(ast)
@@ -299,10 +300,19 @@ def handle_rename_table(ast)
 		new_class.addColumn(v)
 		v.table_class = new_class
 	end
+	old_class.is_deleted = true
 	new_class.addConstraints(old_class.getConstraints.values)
 end
 
 def handle_drop_table(ast)
+	children = ast.children
+	table_name = handle_symbol_literal_node(children[0]) || handle_string_literal_node(children[0])
+	class_name = convert_tablename(table_name)
+	table_class = $model_classes[class_name]
+	table_class = $dangling_classes[class_name] unless table_class
+	if table_class
+		table_class.is_deleted = true
+	end
 end
 
 def handle_add_index(ast)
@@ -312,6 +322,29 @@ def handle_drop_index(ast)
 end
 
 def handle_rename_column(ast)
+	children = ast.children
+	table_name = handle_symbol_literal_node(children[0]) || handle_string_literal_node(children[0])
+	old_column_name = handle_symbol_literal_node(children[1]) || handle_string_literal_node(children[1])
+	new_column_name = handle_symbol_literal_node(children[2]) || handle_string_literal_node(children[2])
+	class_name = convert_tablename(table_name)
+	table_class = $model_classes[class_name]
+	table_class = $dangling_classes[class_name] unless table_class
+	if table_class
+		column = table_class.getColumns[old_column_name]
+		column.column_name = new_column_name
+		constraints = table_class.getConstraints
+		new_constraints = []
+		constraints.each do |k, v|
+			prefix = "#{old_column_name}-"
+			if k.start_with?prefix
+				v.column = new_column_name
+				new_constraints << v
+				# delete the old key instead of setting it to be nil
+				constraints.delete(k)
+			end
+		end
+		table_class.addConstraints(new_constraints)
+	end
 end
 
 def handle_rename_index(ast)
