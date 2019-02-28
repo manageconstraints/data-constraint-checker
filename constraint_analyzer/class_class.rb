@@ -1,5 +1,5 @@
 class Class_class
-	attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord
+	attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord, :is_deleted
 	def initialize(filename)
 		@filename = filename
 		@is_activerecord = false
@@ -8,6 +8,7 @@ class Class_class
 		@ast = nil
 		@constraints = {}
 		@columns = {}
+		@is_deleted = false
 	end
 	def addConstraints(constraints)
 		constraints.each do |constraint|
@@ -29,7 +30,7 @@ class Class_class
 
 end
 class Column
-	attr_accessor :column_type,  :column_name, :file_class, :prev_column, :is_deleted, :default_value
+	attr_accessor :column_type,  :column_name, :file_class, :prev_column, :is_deleted, :default_value, :table_class
 	def initialize(table_class, column_name, column_type, file_class, dic={})
 		@table_class = table_class
 		@column_name = column_name
@@ -46,6 +47,7 @@ class Column
 	def parse(dic)
 		puts "dic #{dic['default']&.type}"
 		ast = dic["default"]
-		@default_value = handle_symbol_literal_node(ast) || handle_string_literal_node(ast)
+		value = dic["default"]&.source if dic["default"]&.type.to_s == "var_ref"
+		@default_value = value || handle_symbol_literal_node(ast) || handle_string_literal_node(ast)
 	end
 end

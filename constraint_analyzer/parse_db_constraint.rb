@@ -48,6 +48,7 @@ def parse_db_constraint_function(table, funcname, ast)
 	handle_rename_index(ast) if funcname == "rename_index"
 	handle_remove_join_table(ast) if funcname == "remove_join_table"
 	handle_change_column_default(ast[1]) if funcname == "change_column_default"
+	handle_rename_table(ast[1]) if funcname == "rename_table"
 end
 def handle_change_table(ast)
 	handle_create_table(ast)
@@ -69,16 +70,20 @@ def handle_change_column(ast, is_deleted=false)
 	column_name = handle_symbol_literal_node(children[1])
 	column_type = handle_symbol_literal_node(children[2])
 	dic = {}
-	dic = extract_hash_from_list(children[3])
+	dic = extract_hash_from_list(children[-1])
 	class_name = convert_tablename(table)
-	if table and column_name and column_type and $model_classes[class_name] 
-		table_class = $model_classes[class_name]
+	table_class = $model_classes[class_name]
+	table_class = $dangling_classes[class_name] if !table_class
+	if !table_class 
+		table_class = Class_class.new("")
+		$dangling_classes[class_name] = table_class
+	end
+	if table and column_name and column_type  
 		column = Column.new(table_class, column_name, column_type, $cur_class, dic)
+		column.is_deleted = is_deleted
 		columns = table_class.getColumns
 		column.prev_column =  columns[column_name]
-		column.is_deleted = is_deleted
 		table_class.addColumn(column)
-		# puts"create new column #{column.class.name} #{table_class.class_name} #{column_name} #{column_type}"
 		constraints = create_constraints(class_name, column_name, column_type, "db", dic)
 		table_class.addConstraints(constraints)
 	end
@@ -94,11 +99,6 @@ def handle_create_table(ast)
 		table_name = handle_symbol_literal_node(symbol_node)
 		class_name = convert_tablename(table_name)
 		# puts"class_name: #{class_name}"
-		table_class = $model_classes[class_name]
-		unless table_class
-			return
-		end
-		columns = table_class.getColumns
 		## puts"table_name: #{table_name}"
 		return unless ast[2].type.to_s == "do_block"
 		ast[2].children.each do |child|
@@ -114,6 +114,13 @@ def handle_create_table(ast)
 					if column_ast.class.name == "YARD::Parser::Ruby::AstNode" and  column_ast.type.to_s == "list"
 						column_name = handle_symbol_literal_node(column_ast[0])
 						column = Column.new(table_class, column_name, column_type, $cur_class)
+						table_class = $model_classes[class_name]
+						table_class = $dangling_classes[class_name] if !table_class
+						if !table_class 
+							table_class = Class_class.new("")
+							$dangling_classes[class_name] = table_class
+						end
+						columns = table_class.getColumns
 						column.prev_column =  columns[column_name]
 						table_class.addColumn(column)
 						dic = {}
@@ -148,6 +155,11 @@ def handle_change_column_null(ast)
 			class_name = convert_tablename(table_name)
 			table_class = $model_classes[class_name]
 		end
+		table_class = $dangling_classes[class_name] if !table_class
+		if !table_class 
+			table_class = Class_class.new("")
+			$dangling_classes[class_name] = table_class
+		end
 		if ast[1][1].type.to_s == "symbol_literal"
 			column_name = handle_symbol_literal_node(ast[1][0])
 		end
@@ -177,6 +189,11 @@ def handle_reversible(ast)
 		table_name = handle_symbol_literal_node(child[1][0])
 		class_name = convert_tablename(table_name)
 		table_class = $model_classes[class_name]
+		table_class = $dangling_classes[class_name] if !table_class
+		if !table_class 
+			table_class = Class_class.new("")
+			$dangling_classes[class_name] = table_class
+		end
 		puts "table_name : #{table_name}"
 		next unless child[-1].type.to_s == "do_block"
 		if child[-1][-1].type.to_s == "list"
@@ -250,7 +267,13 @@ def handle_change_column_default(ast)
 	dic = extract_hash_from_list(children[-1])
 	puts "#{table} = #{column_name} = #{column_type} --- #{dic}"
 	class_name = convert_tablename(table)
-	if table and column_name and $model_classes[class_name] 
+	table_class = $model_classes[class_name]
+	table_class = $dangling_classes[class_name] if !table_class
+	if !table_class 
+		table_class = Class_class.new("")
+		$dangling_classes[class_name] = table_class
+	end
+	if table and column_name  and table_class
 		table_class = $model_classes[class_name]
 		columns = table_class.getColumns
 		column  = columns[column_name]
@@ -262,6 +285,21 @@ def handle_change_column_default(ast)
 end
 
 def handle_rename_table(ast)
+	children = ast.children
+	old_table_name = handle_symbol_literal_node(children[0]) || handle_string_literal_node(children[0])
+	new_table_name = handle_symbol_literal_node(children[1]) || handle_string_literal_node(children[1])
+	old_class_name = convert_tablename(old_table_name)
+	new_class_name = convert_tablename(new_table_name)
+	puts "n: #{new_class_name} o: #{old_class_name}"
+	old_class = $model_classes[old_table_name]
+	old_class = $dangling_classes[old_class_name] if !old_class
+	new_class= $model_classes[new_class_name]
+	return if !(old_class and new_class)
+	old_class.getColumns.each do |k, v|
+		new_class.addColumn(v)
+		v.table_class = new_class
+	end
+	new_class.addConstraints(old_class.getConstraints.values)
 end
 
 def handle_drop_table(ast)

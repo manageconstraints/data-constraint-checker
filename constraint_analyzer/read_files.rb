@@ -47,6 +47,7 @@ def read_ruby_files(application_dir=nil,version='')
 		end
 	end
 	$model_classes = model_classes
+	$dangling_classes = {}
 	puts "********migration_files:********"
 	puts migration_files
 	migration_files.each do |filename|
