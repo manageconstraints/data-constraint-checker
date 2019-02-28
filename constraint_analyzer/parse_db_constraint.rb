@@ -36,6 +36,8 @@ def parse_db_constraint_file(ast)
 	end
 end
 def parse_db_constraint_function(table, funcname, ast)
+
+	ast[1] = ast[1][0] if ast[1].type.to_s == "arg_paren"
 	handle_add_column(ast[1]) if funcname == "add_column"
 	handle_create_table(ast) if funcname == "create_table"
 	handle_change_column(ast[1]) if funcname == "change_column"
@@ -254,9 +256,7 @@ def handle_remove_join_table(ast)
 end
 
 def handle_add_timestamps(ast)
-	if ast.type.to_s == "arg_paren"
-		ast = ast[0]
-	end
+	ast = ast[0] if ast.type.to_s == "arg_paren"
 	children = ast.children
 	table_name = handle_symbol_literal_node(children[0]) || handle_string_literal_node(children[0])
 	dic = extract_hash_from_list(children[-1])
