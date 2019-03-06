@@ -51,7 +51,7 @@ def parse_db_constraint_function(table, funcname, ast)
 	handle_remove_timestamps(ast) if funcname == "remove_timestamps"
 	handle_add_timestamps(ast[1]) if funcname == "add_timestamps"
 	handle_add_index(ast[1]) if funcname == "add_index"
-	handle_remove_index(ast) if funcname == "remove_index"
+	handle_remove_index(ast[1]) if funcname == "remove_index"
 	handle_rename_index(ast) if funcname == "rename_index"
 	handle_remove_join_table(ast) if funcname == "remove_join_table"
 	handle_change_column_default(ast[1]) if funcname == "change_column_default"
@@ -357,7 +357,7 @@ def handle_add_index(ast)
 	table_class.addIndex(new_index)
 end
 
-def handle_drop_index(ast)
+def handle_remove_index(ast)
 end
 
 def handle_rename_column(ast)

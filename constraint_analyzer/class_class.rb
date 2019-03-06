@@ -34,6 +34,7 @@ class Class_class
 	end
 end
 class Column
+	# belongs to model class which is active record
 	attr_accessor :column_type,  :column_name, :file_class, :prev_column, :is_deleted, :default_value, :table_class
 	def initialize(table_class, column_name, column_type, file_class, dic={})
 		@table_class = table_class
@@ -56,7 +57,8 @@ class Column
 	end
 end
 class Index
-	attr_accessor :name, :table_name, :columns, :unique
+	# belongs to model class which is active record
+	attr_accessor :name, :table_name, :columns, :unique, :where, :length, :order
 	def initialize(name, table_name, columns)
 		@name = name
 		@table_name = table_name
