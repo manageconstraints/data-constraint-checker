@@ -1,5 +1,4 @@
 load 'validate.rb'
-load 'parse_constraint.rb'
 load 'read_files.rb'
 load 'class_class.rb'
 load 'helper.rb'

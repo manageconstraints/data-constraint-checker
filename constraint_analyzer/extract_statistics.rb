@@ -28,17 +28,25 @@ def traverse_all_versions(application_dir, interval)
 	app_name = application_dir.split("/")[-1]
 	versions[0].build
 	output = open("../log/output_#{app_name}.log", 'w')
-	output.write("Total commits: #{versions.length}\n")
 	cnt = 0
+	sum1 = 0
+	sum2 = 0
+	sum3 = 0
+	sum4 = 0
+	sum5 = 0
+	sum6 = 0
+	sum7 = 0
+	sum8 = 0
 	for i in 1...versions.length
 		#puts "=============#{i}============="
 		new_version = versions[i-1]
 		version = versions[i]
 		version.build
-		ncs, ccs = new_version.compare_constraints(version)
+		ncs, ccs, eccs, nccs = new_version.compare_constraints(version)
 		if ncs.length > 0 or ccs.length > 0
 			cnt += 1
 		end
+
 		model_ncs = ncs.select{|x| x.type == 'validate'}
 		db_ncs = ncs.select{|x| x.type == "db"}
 		model_ccs = ccs.select{|x| x.type == 'validate'}
@@ -47,19 +55,25 @@ def traverse_all_versions(application_dir, interval)
 		c2 = db_ncs.length
 		c3 = model_ccs.length
 		c4 = db_ccs.length
-		output.write("#{ncs.length} #{c1} #{c2} #{ccs.length} #{c3} #{c4}\n")
-		ncs.each do|nc|
-			#puts "****New****"
-			#nc.self_print
-		end
-
-		ccs.each do|nc|
-			#puts "****DIFF****"
-			#nc.self_print
-		end
+		model_eccs = eccs.select{|x| x.type == 'validate'}
+		db_eccs = eccs.select{|x| x.type == "db"}
+		model_nccs = nccs.select{|x| x.type == 'validate'}
+		db_nccs = nccs.select{|x| x.type == "db"}
+		c5 = model_eccs.length
+		c6 = db_eccs.length
+		c7 = model_nccs.length
+		c8 = db_nccs.length
+		sum1 += c1
+		sum2 += c2
+		sum3 += c3
+		sum4 += c4
+		sum5 += c5
+		sum6 += c6
+		sum7 += c7
+		sum8 += c8
 		versions[i-1] = nil
 		
 	end
-	output.write("cnt: #{cnt}\n")
+	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8}")
 	output.close
 end
