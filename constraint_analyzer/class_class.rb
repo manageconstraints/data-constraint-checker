@@ -40,6 +40,7 @@ class Column
 		@table_class = table_class
 		@column_name = column_name
 		@column_type = column_type
+		@file_class = file_class
 		@is_deleted = false
 		self.parse(dic)
 	end

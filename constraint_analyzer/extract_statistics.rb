@@ -77,3 +77,12 @@ def traverse_all_versions(application_dir, interval)
 	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8}")
 	output.close
 end
+
+def find_mismatch_oneversion(directory)
+	`cd #{directory}; git checkout master`
+	commit = "master"
+	version = Version.new(directory, commit)
+	version.build
+	version.compare_self
+	puts "build successfully"
+end

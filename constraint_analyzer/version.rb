@@ -89,6 +89,30 @@ class Version
 		end
 		return newly_added_constraints,changed_constraints,existing_column_constraints,new_column_constraints
 	end
+	def compare_self
+		absent_cons = {}
+		@activerecord_files.each do |key, file|
+			constraints = file.getConstraints
+			model_cons = constraints.select{|k,v| k.include?"-validate"}
+			db_cons = constraints.select{|k,v| k.include?"-db"}
+			db_cons.each do |k, v|
+				k2 = k.gsub("-db","-validate")
+				unless model_cons[k2]
+					puts "absent:"
+					absent_cons[k] = v
+					v.self_print
+					begin
+						column_name = v.column
+						column = file.getColumns[column_name]
+						puts "column_name: #{column_name}"
+						puts "file: #{column.file_class.filename}"
+					rescue
+					end
+				end
+			end
+		end
+		puts "total absent: #{absent_cons.size}"
+	end
 	def build
 		self.extract_files
 		self.annotate_model_class
