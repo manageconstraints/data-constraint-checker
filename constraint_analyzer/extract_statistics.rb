@@ -84,5 +84,4 @@ def find_mismatch_oneversion(directory)
 	version = Version.new(directory, commit)
 	version.build
 	version.compare_self
-	puts "build successfully"
 end

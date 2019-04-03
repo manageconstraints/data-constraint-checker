@@ -108,6 +108,18 @@ class Version
 						puts "file: #{column.file_class.filename}"
 					rescue
 					end
+				else
+					v2 = model_cons[k2]
+					if v.is_a?Length_constraint
+						if (v2.max_value and v.max_value  and v2.max_value > v.max_value) 
+							puts "looser model constraint max #{v.max_value} #{v2.max_value}"
+						end
+						if (v2.min_value and v.min_value  and v2.min_value > v.min_value)
+							puts "looser model constraint min #{v.min_value} #{v2.min_value}"
+							v.self_print
+							puts "file: #{BVcolumn.file_class.filename}"
+						end
+					end
 				end
 			end
 		end

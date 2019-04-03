@@ -48,6 +48,22 @@ class Length_constraint < Constraint
 			minimum = dic["minimum"].source
 			self.min_value = minimum
 		end
+		if @range and eval(@range)
+			@range = eval(@range)
+			@min_value = @range.min
+			@max_value = @range.max
+			puts "RANGE: #{@range} #{min_value} #{max_value}"
+		end
+		if @max_value and @max_value != "nil" and @max_value.to_i
+			@max_value = @max_value.to_i
+		else
+			@max_value = nil
+		end
+		if @min_value and @min_value != "nil" and @min_value.to_i
+			@min_value = @min_value.to_i
+		else
+			@min_value = nil
+		end	 
 	end
 	def is_same(old_constraint)
 		if super
