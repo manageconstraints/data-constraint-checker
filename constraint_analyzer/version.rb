@@ -18,6 +18,7 @@ class Version
 		# puts"@activerecord_files.length: #{@activerecord_files.length}"
 		@activerecord_files.each do |key, file|
 			# puts"#{key} #{file.getConstraints.length}"
+			file.create_con_from_column_type
 			file.getConstraints.each do |k, constraint|
 				# puts"\t#{constraint.column}"
 			end
@@ -97,28 +98,31 @@ class Version
 			db_cons = constraints.select{|k,v| k.include?"-db"}
 			db_cons.each do |k, v|
 				k2 = k.gsub("-db","-validate")
+				begin
+					column_name = v.column
+					column = file.getColumns[column_name]
+					db_filename = column.file_class.filename
+				rescue
+					column_name = "nocolumn"
+					db_filename = "nofile" 
+				end
 				unless model_cons[k2]
-					puts "absent:"
 					absent_cons[k] = v
 					v.self_print
-					begin
-						column_name = v.column
-						column = file.getColumns[column_name]
-						puts "column_name: #{column_name}"
-						puts "file: #{column.file_class.filename}"
-					rescue
-					end
+					puts "absent: #{column_name} #{v.table} #{db_filename} #{v.class.name} #{@commit}"
 				else
 					v2 = model_cons[k2]
-					if v.is_a?Length_constraint
-						if (v2.max_value and v.max_value  and v2.max_value > v.max_value) 
-							puts "looser model constraint max #{v.max_value} #{v2.max_value}"
+					if v.is_a?Length_constraint				
+						if (v2.max_value and v.max_value  and v2.max_value != v.max_value) 
+							puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{db_filename} #{@commit}" 
 						end
-						if (v2.min_value and v.min_value  and v2.min_value > v.min_value)
-							puts "looser model constraint min #{v.min_value} #{v2.min_value}"
-							v.self_print
-							puts "file: #{BVcolumn.file_class.filename}"
+						if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
+							puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{db_filename} #{@commit}"
 						end
+						v.self_print
+					end
+					if not v.is_same(v2)
+						puts "mismatch constraint #{db_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
 					end
 				end
 			end

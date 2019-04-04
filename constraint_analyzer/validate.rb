@@ -25,7 +25,10 @@ class Constraint
 		return false 
 	end
 	def self_print
-		puts "#{self.class.name} #{table} #{column} #{type}"
+		puts to_string
+	end
+	def to_string
+		return "#{self.class.name} #{table} #{column} #{type}"
 	end
 end
 
@@ -77,8 +80,10 @@ class Length_constraint < Constraint
 		return false
 	end
 	def self_print
-		super
-		puts "\t#{max_value} #{min_value} #{range} #{is_constraint}" 
+		puts to_string
+	end
+	def to_string
+		return "#{super} #{max_value} #{min_value} #{range} #{is_constraint}" 
 	end
 end
 
@@ -100,8 +105,10 @@ class Format_constraint < Constraint
 		return false
 	end
 	def self_print
-		super
-		puts "\t#{with_format}"
+		puts to_string
+	end
+	def to_string
+		puts "#{super} #{with_format}"
 	end
 end
 
@@ -122,8 +129,10 @@ class Inclusion_constraint < Constraint
 		return false
 	end
 	def self_print
-		super
-		puts "\t#{range}"
+		puts to_string
+	end
+	def to_string
+		return "#{super} #{range}"
 	end
 end
 
@@ -144,8 +153,10 @@ class Exclusion_constraint < Constraint
 		return false
 	end
 	def self_print
-		super
-		puts "\t#{range}"
+		puts to_string
+	end
+	def to_string
+		return "#{super} #{range}"
 	end
 end
 
@@ -180,8 +191,10 @@ class Uniqueness_constraint < Constraint
 		end
 	end
 	def self_print
-		super
-		puts scope
+		puts to_string
+	end
+	def to_string
+		return "#{super} #{scope}"
 	end
 	def is_same(old_constraint)
 		if super
@@ -222,7 +235,10 @@ class Numericality_constraint < Constraint
 		return false
 	end
 	def self_print
-		super
+		puts to_string
+	end
+	def to_string
+		return "#{super}"
 	end
 end
 class Confirmation_constraint < Constraint
@@ -248,8 +264,10 @@ class Confirmation_constraint < Constraint
 		puts "self case case_sensitive #{self.case_sensitive}"
 	end
 	def self_print
-		super
-		puts self.case_sensitive
+		puts to_string
+	end
+	def to_string
+		puts "#{super} #{self.case_sensitive}"
 	end
 end
 class Acceptance_constraint < Constraint

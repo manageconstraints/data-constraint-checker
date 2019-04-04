@@ -32,6 +32,32 @@ class Class_class
 	def addIndex(index)
 		@indices[index.name] = index
 	end
+	def create_con_from_column_type
+		@columns.each do |k, v|
+			type = 'db'
+			column_type = v.column_type 
+			if column_type == "string" 
+				max_value = 255
+			end
+			if column_type == "text"
+				max_value = 66536
+			end
+			column_name = v.column_name
+			puts "max_value from type: #{max_value} #{column_name} #{column_type} #{@class_name}"
+			if max_value
+				constraint = Length_constraint.new(@class_name, column_name, type)
+				constraint.max_value = max_value
+				key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+				exist_con = @constraints[key]
+				if exist_con and (not exist_con.max_value || exist_con.max_value == "nil")
+					exist_con.max_value = max_value
+				end
+				if not exist_con
+					@constraints[key] = constraint
+				end
+			end
+		end
+	end
 end
 class Column
 	# belongs to model class which is active record

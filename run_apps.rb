@@ -1,13 +1,15 @@
 apps = open('app_names.txt').readlines
 apps = apps.map{|x| x.strip}
-main_folder = ARGV[0] || 'constraint_analyzer'
-app_folder = ARGV[1] || '../apps'
+main_folder = 'constraint_analyzer'
+app_folder = '../apps'
+command = ARGV[0] || "-s"
 return unless app_folder
 count = {}
 log = open("log/output.log",'w')
 apps.each do |app|
-	puts "cd #{main_folder}; ruby main.rb -a #{app_folder}/#{app} -s"
-	lines = `cd #{main_folder}; ruby main.rb -a #{app_folder}/#{app} -s`
+	execute = "cd #{main_folder}; ruby main.rb -a #{app_folder}/#{app} #{command}"
+	puts "#{execute}"
+	lines = `#{execute}`
 	log.write("======#{app}======\n")
 	log.write(lines)
 	log.write("\n")

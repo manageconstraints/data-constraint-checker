@@ -32,7 +32,9 @@ OptionParser.new do |opts|
   opts.on("-s", "--single", "whether to parse single version") do |v|
     options[:single] = true
   end
-
+  opts.on("-m", "--all_mismatch", "please specify whether you want to find all versions' mismatch") do |v|
+  	options[:mismatch] = true
+  end
 end.parse!
 
 
@@ -42,7 +44,7 @@ if options[:app]
 end
 interval = 1
 if options[:interval]
-	interval = options[:interval]
+	interval = options[:interval].to_i
 end
 if options[:tva] and options[:app] and interval
 	traverse_all_versions(application_dir, interval)
@@ -50,3 +52,7 @@ end
 if options[:single] and options[:app]
 	find_mismatch_oneversion(options[:app])
 end
+if options[:mismatch] and options[:app]
+	puts "interval parse: #{interval.class.name}"
+	find_all_mismatch(options[:app], interval)
+end 

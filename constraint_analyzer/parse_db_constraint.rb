@@ -232,7 +232,7 @@ def create_constraints(class_name, column_name, column_type, type, dic)
 	if dic['limit']
 		limit = dic["limit"].source
 		constraint = Length_constraint.new(class_name, column_name, type)
-		constraint.max_value = limit
+		constraint.max_value = limit.to_i if limit != "nil" and limit.to_i
 		constraints << constraint
 	end
 	return constraints

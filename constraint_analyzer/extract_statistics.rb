@@ -1,6 +1,7 @@
 
 def extract_commits(directory, interval=5)
 	# reset to the most up to date commit
+	puts "cd #{directory}; git checkout master"
 	`cd #{directory}; git checkout master`
 	tags = `cd #{directory}; git tag`
 	if tags
@@ -22,6 +23,7 @@ def extract_commits(directory, interval=5)
 	end
 	return versions
 end
+
 def traverse_all_versions(application_dir, interval)
 	versions = extract_commits(application_dir, interval)
 	return if versions.length <= 0
@@ -77,10 +79,17 @@ def traverse_all_versions(application_dir, interval)
 	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8}")
 	output.close
 end
-
-def find_mismatch_oneversion(directory)
-	`cd #{directory}; git checkout master`
-	commit = "master"
+def find_all_mismatch(application_dir, interval)
+	puts "interval: #{interval.class.name}"
+	versions = extract_commits(application_dir, interval)
+	return if versions.length <= 0
+	for v in versions
+		find_mismatch_oneversion(application_dir, v.commit)
+	end
+end
+# in latest version
+def find_mismatch_oneversion(directory, commit = "master")
+	`cd #{directory}; git checkout #{commit}`
 	version = Version.new(directory, commit)
 	version.build
 	version.compare_self
