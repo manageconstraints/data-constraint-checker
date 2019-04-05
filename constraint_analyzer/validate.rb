@@ -12,18 +12,23 @@ class Constraint
 		@is_new_column = false
 	end
 	def is_same(old_constraint)
+		if @type == old_constraint.type and is_same_notype(old_constraint)
+			return true
+		end
+		return false 
+	end
+	def is_same_notype(old_constraint)
 		if old_constraint.class == self.class
 			@table == old_constraint.table and \
 			@column == old_constraint.column and \
-			@type == old_constraint.type and \
 			@if_cond == old_constraint.if_cond and \
 			@unless_cond == old_constraint.unless_cond and \
 			@allow_blank == old_constraint.allow_blank and \
 			@allow_nil == old_constraint.allow_nil
 			return true
 		end
-		return false 
-	end
+		return false
+	end	
 	def self_print
 		puts to_string
 	end
@@ -68,14 +73,24 @@ class Length_constraint < Constraint
 			@min_value = nil
 		end	 
 	end
+	def is_child_same(old_constraint)
+		if self.max_value == old_constraint.max_value and \
+			self.min_value == old_constraint.min_value and \
+			self.range == old_constraint.range and \
+			self.is_constraint == old_constraint.is_constraint
+			return true
+		end
+		return false
+	end
 	def is_same(old_constraint)
-		if super
-			if self.max_value == old_constraint.max_value and \
-				self.min_value == old_constraint.min_value and \
-				self.range == old_constraint.range and \
-				self.is_constraint == old_constraint.is_constraint
-				return true
-			end
+		if super and is_child_same(old_constraint)
+			return true
+		end
+		return false
+	end
+	def is_same_notype(old_constraint)
+		if super and is_child_same(old_constraint)
+			return true
 		end
 		return false
 	end
@@ -95,14 +110,17 @@ class Format_constraint < Constraint
 			self.with_format = with_format
 		end
 	end
-	def is_same(old_constraint)
-		if super
-			if self.with_format == old_constraint.with_format and \
-				self.on_condition == old_constraint.on_condition 
-				return true
-			end
+	def is_child_same(old_constraint)
+		if self.with_format == old_constraint.with_format and \
+			self.on_condition == old_constraint.on_condition 
+			return true
 		end
-		return false
+	end
+	def is_same(old_constraint)
+		return (super and is_child_same(old_constraint))
+	end
+	def is_same_notype(old_constraint)
+		return (super and is_child_same(old_constraint))
 	end
 	def self_print
 		puts to_string
@@ -110,6 +128,7 @@ class Format_constraint < Constraint
 	def to_string
 		puts "#{super} #{with_format}"
 	end
+
 end
 
 class Inclusion_constraint < Constraint
@@ -120,13 +139,17 @@ class Inclusion_constraint < Constraint
 			self.range = range
 		end
 	end
-	def is_same(old_constraint)
-		if super
-			if self.range == old_constraint.range
-				return true
-			end
+	def is_child_same(old_constraint)
+		if self.range == old_constraint.range
+			return true
 		end
 		return false
+	end
+	def is_same(old_constraint)
+		return (super and is_child_same(old_constraint))
+	end
+	def is_same_notype(old_constraint)
+		return (super and is_child_same(old_constraint))
 	end
 	def self_print
 		puts to_string
@@ -144,13 +167,17 @@ class Exclusion_constraint < Constraint
 			self.range = range
 		end
 	end
-	def is_same(old_constraint)
-		if super
-			if self.range == old_constraint.range
-				return true
-			end
+	def is_child_same(old_constraint)
+		if self.range == old_constraint.range
+			return true
 		end
 		return false
+	end
+	def is_same(old_constraint)
+		return (super and is_child_same(old_constraint))
+	end
+	def is_same_notype(old_constraint)
+		return (super and is_child_same(old_constraint))
 	end
 	def self_print
 		puts to_string
@@ -196,11 +223,14 @@ class Uniqueness_constraint < Constraint
 	def to_string
 		return "#{super} #{scope}"
 	end
+	def is_child_same(old_constraint)	
+		return @scope == old_constraint.scope
+	end
 	def is_same(old_constraint)
-		if super
-			return @scope == old_constraint.scope
-		end
-		return false
+		return (super and is_child_same(old_constraint))
+	end
+	def is_same_notype(old_constraint)
+		return (super and is_child_same(old_constraint))
 	end
 end
 
@@ -218,21 +248,25 @@ class Numericality_constraint < Constraint
 		@is_odd = dic["odd"]&.source
 		@is_even = dic["even"]&.source
 	end
-	def is_same(old_constraint)
-		attributes = self.instance_variables.map{|x| x[2..-1]}
-		if super
-			if @only_integer == old_constraint.only_integer and \
-			@greater_than == old_constraint.greater_than and \
-			@greater_than_or_equal_to	== old_constraint.greater_than_or_equal_to and \
-			@equal_to == old_constraint.equal_to and \
-			@less_than == old_constraint.less_than and \
-			@less_than_or_equal_to == old_constraint.less_than_or_equal_to and \
-			@is_odd == old_constraint.is_odd	and \
-			@is_even == old_constraint.is_odd
-				return true
-			end
+	def is_child_same(old_constraint)
+		attributes = self.instance_variables.map{|x| x[2..-1]}	
+		if @only_integer == old_constraint.only_integer and \
+		@greater_than == old_constraint.greater_than and \
+		@greater_than_or_equal_to	== old_constraint.greater_than_or_equal_to and \
+		@equal_to == old_constraint.equal_to and \
+		@less_than == old_constraint.less_than and \
+		@less_than_or_equal_to == old_constraint.less_than_or_equal_to and \
+		@is_odd == old_constraint.is_odd	and \
+		@is_even == old_constraint.is_odd
+			return true
 		end
 		return false
+	end
+	def is_same(old_constraint)
+		return (super and is_child_same(old_constraint))
+	end
+	def is_same_notype(old_constraint)
+		return (super and is_child_same(old_constraint))
 	end
 	def self_print
 		puts to_string
@@ -247,13 +281,17 @@ class Confirmation_constraint < Constraint
 		super(table, column, type, allow_nil=false, allow_blank=false)
 		@case_sensitive = true
 	end
-	def is_same(old_constraint)
-		if super
-			if old_constraint.case_sensitive == @case_sensitive
-				return true
-			end
+	def is_child_same(old_constraint)
+		if old_constraint.case_sensitive == @case_sensitive
+			return true
 		end
 		return false
+	end
+	def is_same(old_constraint)
+		return (super and is_child_same(old_constraint))
+	end
+	def is_same_notype(old_constraint)
+		return (super and is_child_same(old_constraint))
 	end
 	def parse(dic)
 		if  dic["case_sensitive"]&.source == "false"
@@ -290,5 +328,14 @@ class Acceptance_constraint < Constraint
 				@accept_condition = handle_array_node(accept_condition_ast)
 			end
 		end
+	end
+	def is_child_same(old_constraint)
+		return self.accept_condition == old_constraint.accept_condition
+	end
+	def is_same(old_constraint)
+		return (super and is_child_same(old_constraint))
+	end
+	def is_same_notype(old_constraint)
+		return (super and is_child_same(old_constraint))
 	end
 end

@@ -122,7 +122,7 @@ class Version
 						end
 						v.self_print
 					end
-					if not v.is_same(v2)
+					if not v.is_same_notype(v2)
 						puts "mismatch constraint #{db_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
 					end
 				end

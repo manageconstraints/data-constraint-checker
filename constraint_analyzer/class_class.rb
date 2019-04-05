@@ -56,6 +56,14 @@ class Class_class
 					@constraints[key] = constraint
 				end
 			end
+			if ["float", "integer", "decimal"].include?column_type
+				constraint = Numericality_constraint.new(@class_name, column_name, type)
+				if column_type == "integer"
+					constraint.only_integer = true
+				end
+				key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+				@constraints[key] = constraint
+			end
 		end
 	end
 	def create_con_from_index
