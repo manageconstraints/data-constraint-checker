@@ -19,6 +19,7 @@ class Version
 		@activerecord_files.each do |key, file|
 			# puts"#{key} #{file.getConstraints.length}"
 			file.create_con_from_column_type
+			file.create_con_from_index
 			file.getConstraints.each do |k, constraint|
 				# puts"\t#{constraint.column}"
 			end

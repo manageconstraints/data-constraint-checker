@@ -58,6 +58,18 @@ class Class_class
 			end
 		end
 	end
+	def create_con_from_index
+		@indices.each do |k, v|
+			if v.unique
+				type = "db"
+				v.columns.each do |column|
+					constraint = Uniqueness_constraint.new(@class_name, column, type)
+					key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+					@constraints[key] = constraint
+				end	
+			end
+		end
+	end
 end
 class Column
 	# belongs to model class which is active record
