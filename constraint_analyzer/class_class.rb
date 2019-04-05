@@ -18,7 +18,7 @@ class Class_class
 			@constraints[key] = constraint
 			constraint.table = self.class_name
 		end
-		# puts"@constraints.size #{@constraints.length}"
+		puts"@constraints.size #{@constraints.length}"
 	end
 	def getConstraints
 		return @constraints

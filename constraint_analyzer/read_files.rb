@@ -46,10 +46,12 @@ def read_ruby_files(application_dir=nil,version='')
 		rescue
 		end
 	end
+	puts "finished handle model files #{model_files.length} #{model_classes.length}"
 	$model_classes = model_classes
 	$dangling_classes = {}
 	puts "********migration_files:********"
 	puts migration_files
+	cnt = 0
 	migration_files.each do |filename|
 		contents = open(filename).read
 		begin 
@@ -57,8 +59,11 @@ def read_ruby_files(application_dir=nil,version='')
 			$cur_class = Class_class.new(filename)
 			$cur_class.ast = ast
 			parse_db_constraint_file(ast)
+			cnt += 1
 		rescue
 		end
 	end
+
+	puts "finished handle migration files #{migration_files.length} #{cnt}"
 	return model_classes
 end

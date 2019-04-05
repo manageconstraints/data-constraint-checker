@@ -28,7 +28,7 @@ class Version
 	def annotate_model_class
 		not_active_files =[]
 		@files.values.each do |file|
-			if file.upper_class_name == "ActiveRecord::Base"
+			if ["ActiveRecord::Base","Spree::Base"].include?file.upper_class_name
 				file.is_activerecord = true
 			else
 				not_active_files << file
@@ -93,12 +93,20 @@ class Version
 	end
 	def compare_self
 		absent_cons = {}
+		puts "@activerecord_files: #{@activerecord_files.length}"
+		total_constraints = @activerecord_files.map{|k,v| v.getConstraints.length}.reduce(:+)
+		db_cons_num = 0
+		model_cons_num = 0
+		mm_cons_num = 0
 		@activerecord_files.each do |key, file|
 			constraints = file.getConstraints
 			model_cons = constraints.select{|k,v| k.include?"-validate"}
 			db_cons = constraints.select{|k,v| k.include?"-db"}
+			model_cons_num += model_cons.length
+			db_cons_num += db_cons.length 
 			db_cons.each do |k, v|
 				k2 = k.gsub("-db","-validate")
+				puts "k2 #{k2}"
 				begin
 					column_name = v.column
 					column = file.getColumns[column_name]
@@ -124,11 +132,12 @@ class Version
 					end
 					if not v.is_same_notype(v2)
 						puts "mismatch constraint #{db_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
+						mm_cons_num += 1
 					end
 				end
 			end
 		end
-		puts "total absent: #{absent_cons.size}"
+		puts "total absent: #{absent_cons.size} total_constraints: #{total_constraints} model_cons_num: #{model_cons_num} db_cons_num: #{db_cons_num} mm_cons_num: #{mm_cons_num}"
 	end
 	def build
 		self.extract_files

@@ -4,6 +4,13 @@ def parse_model_constraint_file(ast)
 			parse_model_constraint_file(child)
 		end
 	end
+	if ast.type.to_s == 'module'
+		if ast[1] and ast[1].type.to_s == "list"
+			ast[1].each do |child|
+				parse_model_constraint_file(child)
+			end
+		end
+	end
 	if ast.type.to_s == 'class'
 		c1 =  ast.children[0]
 		c2 = ast.children[1] 
