@@ -9,3 +9,4 @@ validates_numericality_of
 validates_uniqueness_of
 validates_size_of
 validates_acceptance_of
+ validates_confirmation_of
