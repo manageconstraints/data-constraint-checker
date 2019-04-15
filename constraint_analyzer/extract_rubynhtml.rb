@@ -31,7 +31,6 @@ start_offset = 0
 start_line = 0
 tagout_hash = {}
 if !File.exists?input_file
-  #puts"#{input_file} doesn't exist"
   exit
 end
 File.open(input_file,'r') do |f|
@@ -191,7 +190,6 @@ File.open(input_file,'r') do |f|
       else
         newLine if(a == "\n")
       end 
-
     end
    end
 end
