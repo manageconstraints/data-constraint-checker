@@ -3,11 +3,11 @@ from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
 import sys
 
-def haml2html(file):
+def haml2html(file, target):
     if not file.endswith('.haml'):
         return
     f = open(file, 'r')
-    wf = open("tmp.html.erb", 'w')
+    wf = open(target, 'w')
     c = f.read()
     #print(c)
     
@@ -23,7 +23,8 @@ def haml2html(file):
 
 def main():
     filename = sys.argv[1]
-    haml2html(filename)
+    target = sys.argv[2]
+    haml2html(filename, target)
     
 if __name__ == '__main__':
     main()

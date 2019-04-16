@@ -19,12 +19,16 @@ def read_ruby_files(application_dir=nil,version='')
 		puts "application dir not defined or version number is not defined"
 		return 
 	end
-	`cd #{$app_dir};git stash; git checkout #{version}`
+	# checkout to specified version
+	if version != ''
+		`cd #{$app_dir};git stash; git checkout #{version}`
+	end
 
 	root, files, dirs = os_walk($app_dir)
 	model_classes = {}
 	model_files = []
 	migration_files = []
+	view_files = []
 	for filename in files
 		filename = filename.to_s
 		#puts "filename: #{filename}"
@@ -33,6 +37,9 @@ def read_ruby_files(application_dir=nil,version='')
 		end
 		if filename.include?("db/migrate/")
 			migration_files  << filename
+		end
+		if filename.include?("app/views/")
+			view_files << filename
 		end
 	end
 	model_files.each do |filename|
@@ -64,6 +71,25 @@ def read_ruby_files(application_dir=nil,version='')
 		end
 	end
 
+	view_files.each do |filename|
+		erb_filename = filename
+    haml2html = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/haml2html.py")
+    extracty_erb = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/extract_rubynhtml.rb")
+		if filename.include?"haml"
+			erb_filename = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/tmp.html.erb")
+			`python3 #{haml2html} #{filename} #{erb_filename}`
+		end
+		target = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/out.rb")
+		`ruby #{extracty_erb} #{erb_filename} #{target}`
+		contents = open(target).read
+		begin 
+			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+			$cur_class = Class_class.new(filename)
+			$cur_class.ast = ast
+			parse_html_constraint_file(ast)
+		rescue
+		end
+	end
 	puts "finished handle migration files #{migration_files.length} #{cnt}"
 	return model_classes
 end

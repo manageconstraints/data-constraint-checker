@@ -5,7 +5,12 @@ def load_validate_api
 	end
 	puts $validate_apis
 end
-
+def load_html_constraint_api
+	$html_constraint_api = []
+	open("input_field").readlines.each do |line|
+		$html_constraint_api << line.strip
+	end
+end
 def convert_tablename(name)
 	return nil unless name
 	_name = Array.new
