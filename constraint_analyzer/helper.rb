@@ -1,15 +1,18 @@
 def load_validate_api
 	$validate_apis = []
-	open("validate_api").readlines.each do |line|
+	validate_api = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/validate_api")
+	open(validate_api).readlines.each do |line|
 		$validate_apis << line.strip
 	end
 	puts $validate_apis
 end
 def load_html_constraint_api
 	$html_constraint_api = []
-	open("input_field").readlines.each do |line|
+	input_field = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/input_field")
+	open(input_field).readlines.each do |line|
 		$html_constraint_api << line.strip
 	end
+	puts $html_constraint_api
 end
 def convert_tablename(name)
 	return nil unless name

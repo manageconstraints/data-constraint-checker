@@ -82,11 +82,11 @@ def read_ruby_files(application_dir=nil,version='')
 		target = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/out.rb")
 		`ruby #{extracty_erb} #{erb_filename} #{target}`
 		contents = open(target).read
-		begin 
+		begin
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+      puts "ast: #{ast.type}"
 			$cur_class = Class_class.new(filename)
-			$cur_class.ast = ast
-			parse_html_constraint_file(ast)
+      parse_html_constraint_file(ast)
 		rescue
 		end
 	end
