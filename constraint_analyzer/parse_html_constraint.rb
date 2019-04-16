@@ -28,7 +28,7 @@ def parse_html_constraint_file(ast)
 	if ast.type.to_s == "command_call"
 		funcname = ast[2]&.source
 		if $html_constraint_api.include?funcname and ast[3]&.type.to_s == "list"
-			parse_html_constraint_function(table, funcname, ast[3])
+			parse_html_constraint_function(table, funcname, ast)
 		end
 	end
 	if ast.type.to_s == "do_block"
@@ -43,20 +43,28 @@ def parse_html_constraint_file(ast)
 	end
 end
 def parse_html_constraint_function(table, funcname, ast)
-	puts "parse_html_constraint_function"
-	ast[1] = ast[1][0] if ast[1].type.to_s == "arg_paren"
+	puts "parse_html_constraint_function #{funcname}"
+  if ast.type.to_s == "command_call"
+    param_ast = ast[3]
+  else
+    param_ast = ast[1]
+    param_ast = ast[1][0] if ast[1].type.to_s == "arg_paren"
+  end
 	symbols = []
-	ast[1].children.each do |child|
-		if child.type.to_s == "symbol_literal"
-			symbol = handle_symbol_literal_node(child)
+	dic = {}
+
+  param_ast.children.each do |child|
+    puts "child #{child.type.to_s} #{child.source}"
+		if child.type.to_s == "string_literal"
+			symbol = handle_string_literal_node(child)
 			symbols << symbol
-		end
+    end
+    if child.type.to_s == "symbol_literal"
+      symbol = handle_symbol_literal_node(child)
+      symbols << symbol
+    end
 		if child.type.to_s == "list"
-			child.children.each do |c|
-				if c.type.to_s == "assoc"
-					dic = handle_assoc_node(c)
-				end
-			end
+			dic = extract_hash_from_list(child)
 		end
 	end
 	puts symbols

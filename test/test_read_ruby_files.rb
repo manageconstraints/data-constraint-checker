@@ -18,7 +18,7 @@ class TestHTMLConstraint < Test::Unit::TestCase
   def test_read_erb_files
     load_html_constraint_api
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'erb_file')
-    test_filename = application_dir+"/app/views/_edit_form.html.erb"
+    test_filename = application_dir+"/app/views/recurring_todos/_edit_form.html.erb"
     read_ruby_files(application_dir)
     assert_equal $cur_class.filename, test_filename
 

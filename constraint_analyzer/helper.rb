@@ -12,7 +12,7 @@ def load_html_constraint_api
 	open(input_field).readlines.each do |line|
 		$html_constraint_api << line.strip
 	end
-	puts $html_constraint_api
+	#puts $html_constraint_api
 end
 def convert_tablename(name)
 	return nil unless name
