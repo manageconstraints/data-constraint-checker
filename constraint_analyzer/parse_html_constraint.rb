@@ -1,5 +1,5 @@
 def parse_html_constraint_file(ast)
-	#puts "ast.type.to_s #{ast.type.to_s}"
+	puts "ast.type.to_s #{ast.type.to_s}"
 	table = ""
 	if ast.type.to_s == 'list'
 		ast.children.each do |child|
@@ -54,7 +54,7 @@ def parse_html_constraint_function(table, funcname, ast)
 	dic = {}
 
   param_ast.children.each do |child|
-    puts "child #{child.type.to_s} #{child.source}"
+    #puts "child #{child.type.to_s} #{child.source}"
 		if child.type.to_s == "string_literal"
 			symbol = handle_string_literal_node(child)
 			symbols << symbol
@@ -66,7 +66,7 @@ def parse_html_constraint_function(table, funcname, ast)
 		if child.type.to_s == "list"
 			dic = extract_hash_from_list(child)
 		end
-	end
+  end
   if field = symbols[0][/\[.8\]/]
     table = symbols[0].split("[")[0]
     column = field.gsub("[","").gsub("]","")
@@ -74,6 +74,15 @@ def parse_html_constraint_function(table, funcname, ast)
     table = $cur_class.filename.split("/")[-2]
     column = symbols[0]
   end
+
+  puts "table: #{table}"
+  if ["registrations", "sessions", "accounts"].include?table
+    table = "users"
+    if $app_dir and $app_dir.include?"onebody"
+      table = "people"
+    end
+  end
+  puts "table: #{table}"
   dic2 = {}
   dic2['maximum'] = dic['maxlength'] if dic['maxlength']
   dic2['minimum'] = dic['minlength'] if dic['minlength']
@@ -81,11 +90,21 @@ def parse_html_constraint_function(table, funcname, ast)
   puts "class_name: #{class_name}"
   table_class = $model_classes[class_name]
   puts "#{table_class == nil} | #{dic2.length} #{column}"
-  if table_class and dic2.length > 0
-    constraint = Length_constraint.new(class_name, column, "html")
-    constraint.parse(dic2)
-    table_class.addConstraints([constraint])
-    puts "Constraint: #{constraint.to_string}"
+  if table_class
+    if dic2.length > 0
+      constraint = Length_constraint.new(class_name, column, "html")
+      constraint.parse(dic2)
+      table_class.addConstraints([constraint])
+      puts "Constraint: #{constraint.to_string}"
+    end
+    if dic['pattern']
+      puts "dic[pattern] = #{dic["pattern"].source}"
+      constraint = Format_constraint.new(class_name, column, "html")
+      format = handle_string_literal_node(dic['pattern']) || handle_symbol_literal_node(dic['pattern'])
+      constraint.with_format = format
+      table_class.addConstraints([constraint])
+    end
   end
+
 
 end

@@ -15,7 +15,7 @@ def extract_commits(directory, interval=5)
 	i = 0
 	commits.each do |commit|
 		if i % interval == 0
-			version = Version.new(directory, commit)
+			version = Version_class.new(directory, commit)
 			#version.build
 			versions << version if version
 		end
@@ -26,6 +26,7 @@ end
 
 def traverse_all_versions(application_dir, interval)
 	versions = extract_commits(application_dir, interval)
+	puts "versions.length: #{versions.length}"
 	return if versions.length <= 0
 	app_name = application_dir.split("/")[-1]
 	versions[0].build
@@ -90,7 +91,7 @@ end
 # in latest version
 def find_mismatch_oneversion(directory, commit = "master")
 	`cd #{directory}; git checkout #{commit}`
-	version = Version.new(directory, commit)
+	version = Version_class.new(directory, commit)
 	version.build
 	version.compare_self
 end

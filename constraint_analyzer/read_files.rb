@@ -84,8 +84,11 @@ def read_html_file_ast(view_files)
 		haml2html = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/herbalizer")
 		extracty_erb = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/extract_rubynhtml.rb")
 		if filename.include?"haml"
-			erb_filename = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/tmp.html.erb")
-			`#{haml2html} #{filename} > #{erb_filename}`
+			formalize_script= File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/formalize_haml.rb")
+			formalized_filename = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/tmp1.html.erb")
+			erb_filename = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/tmp2.html.erb")
+			`ruby #{formalize_script} #{filename}  #{formalized_filename}; cat #{formalized_filename}`
+			`#{haml2html} #{formalized_filename} > #{erb_filename}`
 		end
 		target = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/out.rb")
 		`ruby #{extracty_erb} #{erb_filename} #{target}`

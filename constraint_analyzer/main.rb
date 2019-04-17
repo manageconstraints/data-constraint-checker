@@ -2,11 +2,12 @@ load 'validate.rb'
 load 'read_files.rb'
 load 'class_class.rb'
 load 'helper.rb'
-load 'version.rb'
 load 'extract_statistics.rb'
 load 'ast_handler.rb'
 load 'parse_model_constraint.rb'
 load 'parse_db_constraint.rb'
+load 'parse_html_constraint.rb'
+load 'version_class.rb'
 require 'optparse'
 require 'yard'
 require 'active_support'
@@ -29,6 +30,7 @@ OptionParser.new do |opts|
   end
   opts.on("-t", "--tva", "whether to traverse all") do |v|
     options[:tva] = true
+    puts "will travese_all_versions"
   end
   opts.on("-s", "--single", "whether to parse single version") do |v|
     options[:single] = true
@@ -37,7 +39,6 @@ OptionParser.new do |opts|
   	options[:mismatch] = true
   end
 end.parse!
-
 
 if options[:app]
 	application_dir = options[:app]
@@ -48,6 +49,7 @@ if options[:interval]
 	interval = options[:interval].to_i
 end
 if options[:tva] and options[:app] and interval
+  puts "travese_all_versions start"
 	traverse_all_versions(application_dir, interval)
 end
 if options[:single] and options[:app]
