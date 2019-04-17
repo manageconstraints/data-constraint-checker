@@ -5,7 +5,7 @@ require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analy
 require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/read_files.rb')
 require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/class_class.rb')
 require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/helper.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/version.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/version_class.rb')
 require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/extract_statistics.rb')
 require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/ast_handler.rb')
 require "test/unit"

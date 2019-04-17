@@ -1,6 +1,8 @@
 input = ARGV[0]
 output = ARGV[1]
-contents = open(input).read
+input_file = open(input)
+contents = input_file.read
+input_file.close
 write_contents = ""
 contents.lines.each do |line|
   if line.strip.end_with?(",")
@@ -9,4 +11,6 @@ contents.lines.each do |line|
     write_contents += line
   end
 end
-open(output, 'w').write(write_contents)
+output_file = open(output, 'w')
+output_file.write(write_contents)
+output_file.close

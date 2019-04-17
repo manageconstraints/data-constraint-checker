@@ -40,6 +40,10 @@ def traverse_all_versions(application_dir, interval)
 	sum6 = 0
 	sum7 = 0
 	sum8 = 0
+  sumh1 = 0
+  sumh2 = 0
+  sumh3 = 0
+  sumh4 = 0
 	for i in 1...versions.length
 		#puts "=============#{i}============="
 		new_version = versions[i-1]
@@ -52,20 +56,28 @@ def traverse_all_versions(application_dir, interval)
 
 		model_ncs = ncs.select{|x| x.type == 'validate'}
 		db_ncs = ncs.select{|x| x.type == "db"}
+    html_ncs = ncs.select{|x| x.type == "html"}
 		model_ccs = ccs.select{|x| x.type == 'validate'}
 		db_ccs = ccs.select{|x| x.type == "db"}
+    html_ccs = ccs.select{|x| x.type == "html"}
 		c1 = model_ncs.length
 		c2 = db_ncs.length
+    ch1 = html_ncs.length
 		c3 = model_ccs.length
 		c4 = db_ccs.length
+    ch2 = html_ccs.length
 		model_eccs = eccs.select{|x| x.type == 'validate'}
 		db_eccs = eccs.select{|x| x.type == "db"}
+    html_eccs = eccs.select{|x| x.type == "html"}
 		model_nccs = nccs.select{|x| x.type == 'validate'}
 		db_nccs = nccs.select{|x| x.type == "db"}
+    html_nccs = nccs.select{|x| x.type == "html"}
 		c5 = model_eccs.length
 		c6 = db_eccs.length
+    ch3 = html_eccs.length
 		c7 = model_nccs.length
 		c8 = db_nccs.length
+    ch4 = html_nccs.length
 		sum1 += c1
 		sum2 += c2
 		sum3 += c3
@@ -74,10 +86,14 @@ def traverse_all_versions(application_dir, interval)
 		sum6 += c6
 		sum7 += c7
 		sum8 += c8
+    sumh1 += ch1
+    sumh2 += ch2
+    sumh3 += ch3
+    sumh4 += ch4
 		versions[i-1] = nil
 		
 	end
-	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8}")
+	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8} #{sumh1} #{sumh2} #{sumh3} #{sumh4}\n")
 	output.close
 end
 def find_all_mismatch(application_dir, interval)

@@ -43,7 +43,9 @@ def read_ruby_files(application_dir=nil,version='')
 		end
 	end
 	model_files.each do |filename|
-		contents = open(filename).read
+    file = open(filename)
+    contents = file.read
+    file.close
 		begin 
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = Class_class.new(filename)
@@ -60,8 +62,10 @@ def read_ruby_files(application_dir=nil,version='')
 	puts migration_files
 	cnt = 0
 	migration_files.each do |filename|
-		contents = open(filename).read
-		begin 
+    file = open(filename)
+		contents = file.read
+    file.close
+		begin
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = Class_class.new(filename)
 			$cur_class.ast = ast
@@ -92,7 +96,9 @@ def read_html_file_ast(view_files)
 		end
 		target = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/out.rb")
 		`ruby #{extracty_erb} #{erb_filename} #{target}`
-		contents = open(target).read
+		file = open(target)
+		contents = file.read
+		file.close
 		begin
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = Class_class.new(filename)
