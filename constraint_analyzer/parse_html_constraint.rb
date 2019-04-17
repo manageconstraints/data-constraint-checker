@@ -1,9 +1,9 @@
 def parse_html_constraint_file(ast)
-	puts "ast.type.to_s #{ast.type.to_s}"
+	#puts "ast.type.to_s #{ast.type.to_s}"
 	table = ""
 	if ast.type.to_s == 'list'
 		ast.children.each do |child|
-			puts "child.type.to_s #{child.type.to_s}"
+			#puts "child.type.to_s #{child.type.to_s}"
 			parse_html_constraint_file(child)
 		end
 	end
@@ -67,7 +67,25 @@ def parse_html_constraint_function(table, funcname, ast)
 			dic = extract_hash_from_list(child)
 		end
 	end
-	puts symbols
-	puts dic
+  if field = symbols[0][/\[.8\]/]
+    table = symbols[0].split("[")[0]
+    column = field.gsub("[","").gsub("]","")
+  else
+    table = $cur_class.filename.split("/")[-2]
+    column = symbols[0]
+  end
+  dic2 = {}
+  dic2['maximum'] = dic['maxlength'] if dic['maxlength']
+  dic2['minimum'] = dic['minlength'] if dic['minlength']
+  class_name = convert_tablename(table)
+  puts "class_name: #{class_name}"
+  table_class = $model_classes[class_name]
+  puts "#{table_class == nil} | #{dic2.length} #{column}"
+  if table_class and dic2.length > 0
+    constraint = Length_constraint.new(class_name, column, "html")
+    constraint.parse(dic2)
+    table_class.addConstraints([constraint])
+    puts "Constraint: #{constraint.to_string}"
+  end
 
 end

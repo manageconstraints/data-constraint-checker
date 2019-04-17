@@ -16,18 +16,44 @@ require 'active_support/inflector'
 require 'active_support/core_ext/string'
 class TestHTMLConstraint < Test::Unit::TestCase
   def test_read_erb_files
-    load_html_constraint_api
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'erb_file')
-    test_filename = application_dir+"/app/views/recurring_todos/_edit_form.html.erb"
     read_ruby_files(application_dir)
+    test_filename = application_dir + "/app/views/recurring_todos/_edit_form.html.erb"
     assert_equal $cur_class.filename, test_filename
-
   end
   def test_read_haml_files
-    load_html_constraint_api
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'haml_file')
-    test_filename = application_dir+"/app/views/edit.html.haml"
+    test_filename = application_dir + "/app/views/people/_form_basics.haml"
     read_ruby_files(application_dir)
     assert_equal $cur_class.filename, test_filename
   end
+  def test_parse_html_erb_file
+    puts "test_parse_html_erb_file"
+    application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'erb_file')
+    test_filename = application_dir+"/app/views/recurring_todos/_edit_form.html.erb"
+    load_html_constraint_api
+    table_class = Class_class.new("app/views/recurring_todo.rb")
+    table_class.class_name = "RecurringTodo"
+    column = Column.new(table_class, 'description', 'string', nil, {})
+    table_class.addColumn(column)
+    $model_classes = {}
+    $model_classes["RecurringTodo"] = table_class
+    read_html_file_ast([test_filename])
+    assert_equal table_class.getConstraints.size, 1
+  end
+  def test_parse_haml_file
+    puts "test_parse_haml_file"
+    application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'haml_file')
+    test_filename = application_dir + "/app/views/people/_form_basics.haml"
+    load_html_constraint_api
+    table_class = Class_class.new("app/views/people/_form_basics.haml")
+    table_class.class_name = "Person"
+    column = Column.new(table_class, 'description', 'string', nil, {})
+    table_class.addColumn(column)
+    $model_classes = {}
+    $model_classes["Person"] = table_class
+    read_html_file_ast([test_filename])
+    assert_equal table_class.getConstraints.size, 1
+  end
+
 end

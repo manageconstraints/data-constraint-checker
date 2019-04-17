@@ -24,6 +24,7 @@ def read_ruby_files(application_dir=nil,version='')
 		`cd #{$app_dir};git stash; git checkout #{version}`
 	end
 
+  puts "$application_dir #{$app_dir}"
 	root, files, dirs = os_walk($app_dir)
 	model_classes = {}
 	model_files = []
@@ -31,7 +32,6 @@ def read_ruby_files(application_dir=nil,version='')
 	view_files = []
 	for filename in files
 		filename = filename.to_s
-		#puts "filename: #{filename}"
 		if filename.include?("app/models/")
 			model_files << filename
 		end
@@ -70,26 +70,32 @@ def read_ruby_files(application_dir=nil,version='')
 		rescue
 		end
 	end
+	puts "finished handle migration files #{migration_files.length} #{cnt}"
 
+	read_html_file_ast(view_files)
+
+	return model_classes
+end
+
+def read_html_file_ast(view_files)
 	view_files.each do |filename|
+    puts "filenmae: #{filename}"
 		erb_filename = filename
-    haml2html = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/haml2html.py")
-    extracty_erb = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/extract_rubynhtml.rb")
+		haml2html = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/herbalizer")
+		extracty_erb = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/extract_rubynhtml.rb")
 		if filename.include?"haml"
 			erb_filename = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/tmp.html.erb")
-			`python3 #{haml2html} #{filename} #{erb_filename}`
+			`#{haml2html} #{filename} > #{erb_filename}`
 		end
 		target = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/out.rb")
 		`ruby #{extracty_erb} #{erb_filename} #{target}`
 		contents = open(target).read
 		begin
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-      puts "ast: #{ast.type}"
 			$cur_class = Class_class.new(filename)
-      parse_html_constraint_file(ast)
+      puts "$cur_class #{$cur_class.filename}"
+			parse_html_constraint_file(ast)
 		rescue
 		end
 	end
-	puts "finished handle migration files #{migration_files.length} #{cnt}"
-	return model_classes
 end

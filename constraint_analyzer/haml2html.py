@@ -18,6 +18,7 @@ def haml2html(file, target):
     json = urlopen(request).read().decode()
     soup = BeautifulSoup(json,"html.parser")
     tag = soup.find(id = 'erb')
+    print tag.string
     wf.write(tag.string)
     wf.close
 
