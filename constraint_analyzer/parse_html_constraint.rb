@@ -1,5 +1,5 @@
 def parse_html_constraint_file(ast)
-	puts "ast.type.to_s #{ast.type.to_s}"
+	#puts "ast.type.to_s #{ast.type.to_s}"
 	table = ""
 	if ast.type.to_s == 'list'
 		ast.children.each do |child|
@@ -43,7 +43,7 @@ def parse_html_constraint_file(ast)
 	end
 end
 def parse_html_constraint_function(table, funcname, ast)
-	puts "parse_html_constraint_function #{funcname}"
+	#puts "parse_html_constraint_function #{funcname}"
   if ast.type.to_s == "command_call"
     param_ast = ast[3]
   else
@@ -75,33 +75,36 @@ def parse_html_constraint_function(table, funcname, ast)
     column = symbols[0]
   end
 
-  puts "table: #{table}"
   if ["registrations", "sessions", "accounts"].include?table
     table = "users"
     if $app_dir and $app_dir.include?"onebody"
       table = "people"
     end
   end
-  puts "table: #{table}"
+  #puts "table: #{table}"
   dic2 = {}
   dic2['maximum'] = dic['maxlength'] if dic['maxlength']
   dic2['minimum'] = dic['minlength'] if dic['minlength']
   class_name = convert_tablename(table)
-  puts "class_name: #{class_name}"
+  #puts "class_name: #{class_name}"
   table_class = $model_classes[class_name]
-  puts "#{table_class == nil} | #{dic2.length} #{column}"
+  #puts "#{table_class == nil} | #{dic2.length} #{column}"
   if table_class
     if dic2.length > 0
       constraint = Length_constraint.new(class_name, column, "html")
       constraint.parse(dic2)
       table_class.addConstraints([constraint])
-      puts "Constraint: #{constraint.to_string}"
+      #puts "Constraint: #{constraint.to_string}"
     end
     if dic['pattern']
-      puts "dic[pattern] = #{dic["pattern"].source}"
+      #puts "dic[pattern] = #{dic["pattern"].source}"
       constraint = Format_constraint.new(class_name, column, "html")
       format = handle_string_literal_node(dic['pattern']) || handle_symbol_literal_node(dic['pattern'])
       constraint.with_format = format
+      table_class.addConstraints([constraint])
+    end
+    if dic['required']
+      constraint = Presence_constraint.new(class_name, column, "html")
       table_class.addConstraints([constraint])
     end
   end
