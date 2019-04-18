@@ -83,7 +83,7 @@ end
 
 def read_html_file_ast(view_files)
 	view_files.each do |filename|
-    puts "filenmae: #{filename}"
+    #puts "filenmae: #{filename}"
 		erb_filename = filename
 		haml2html = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/herbalizer")
 		extract_erb = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/extract_rubynhtml.rb")

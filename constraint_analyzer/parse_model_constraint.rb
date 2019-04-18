@@ -40,7 +40,7 @@ end
 
 
 def parse_validate_constraint_function(table, funcname, ast)
-	type = "validate"
+	type = Constraint::MODEL
 	constraints = []
 	if funcname == "validates" or funcname == "validates!"
 		constraints += parse_validates(table, funcname, ast)

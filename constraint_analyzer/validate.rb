@@ -1,4 +1,7 @@
 class Constraint
+	DB = "db"
+	MODEL = "validate"
+	HTML = "html"
 	attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column
 	#type: model from validate function / db migration file 
 	def initialize(table, column, type, allow_nil=false, allow_blank=false)

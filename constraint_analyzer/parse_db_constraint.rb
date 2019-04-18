@@ -92,7 +92,7 @@ def handle_change_column(ast, is_deleted=false)
 		columns = table_class.getColumns
 		column.prev_column =  columns[column_name]
 		table_class.addColumn(column)
-		constraints = create_constraints(class_name, column_name, column_type, "db", dic)
+		constraints = create_constraints(class_name, column_name, column_type, Constraint::DB, dic)
 		table_class.addConstraints(constraints)
 	end
 	# puts"table: #{table} column: #{column} column_type: #{column_type}"
@@ -133,7 +133,7 @@ def handle_create_table(ast)
 						table_class.addColumn(column)
 						dic = {}
 						dic = extract_hash_from_list(column_ast.children[-1])
-						constraints = create_constraints(class_name, column_name, column_type, "db", dic)
+						constraints = create_constraints(class_name, column_name, column_type, Constraint::DB, dic)
 						table_class.addConstraints(constraints)
 					end
 				end
@@ -166,7 +166,7 @@ def handle_change_column_null(ast)
 			null = ast[1][2].source
 		end
 		if class_name and table_class and column_name and null == "false"
-			constraint = Presence_constraint.new(class_name, column_name, "db")
+			constraint = Presence_constraint.new(class_name, column_name, Constraint::DB)
 			table_class.addConstraints([constraint])
 		end
 	end
@@ -211,7 +211,7 @@ def handle_reversible(ast)
 				column = Column.new(table_class, column_name, column_type, $cur_class)
 				column.prev_column = old_column
 				table_class.addColumn(column)
-				constraints = create_constraints(class_name, column_name, column_type, "db", dic)
+				constraints = create_constraints(class_name, column_name, column_type, Constraint::DB, dic)
 				table_class.addConstraints(constraints)	
 			end
 		end
@@ -262,8 +262,8 @@ def handle_add_timestamps(ast)
 	column2 = Column.new(table_class, name2, column_type, $cur_class, dic)
 	table_class.addColumn(column1)
 	table_class.addColumn(column2)
-	constraints1 = create_constraints(class_name, name1, column_type, "db", dic)
-	constraints2 = create_constraints(class_name, name2, column_type, "db", dic)
+	constraints1 = create_constraints(class_name, name1, column_type, Constraint::DB, dic)
+	constraints2 = create_constraints(class_name, name2, column_type, Constraint::DB, dic)
 	table_class.addConstraints(constraints1)
 	table_class.addConstraints(constraints2)
 end

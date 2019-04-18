@@ -49,7 +49,8 @@ def traverse_all_versions(application_dir, interval)
 		new_version = versions[i-1]
 		version = versions[i]
 		version.build
-		ncs, ccs, eccs, nccs = new_version.compare_constraints(version)
+		ncs, ccs, eccs, nccs, nmhcs = new_version.compare_constraints(version)
+    # nmhcs => not matched html constraints with previous html/validate constraints
 		if ncs.length > 0 or ccs.length > 0
 			cnt += 1
 		end

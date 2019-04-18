@@ -71,10 +71,15 @@ class TestHTMLConstraint < Test::Unit::TestCase
     $model_classes = {}
     $model_classes["User"] = table_class
     read_html_file_ast([test_filename])
-    assert_equal table_class.getConstraints.size, 3
-    assert_equal table_class.getConstraints.values[0].with_format, "[A-Za-z0-9_]+"
-    assert_equal table_class.getConstraints.values[1].with_format, "......+"
-    assert_equal table_class.getConstraints.values[2].with_format, "......+"
+    constraints = table_class.getConstraints
+    format_constraints = constraints.select{|k, x| x.class.name == "Format_constraint"}.map{|k,v| v}
+    presence_constraints = constraints.values.select{|x| x.class.name == "Presence_constraint"}
+    puts "constraints.length #{constraints.length}"
+    assert_equal presence_constraints.size, 4
+    assert_equal format_constraints.size, 3
+    assert_equal format_constraints[0].with_format, "[A-Za-z0-9_]+"
+    assert_equal format_constraints[1].with_format, "......+"
+    assert_equal format_constraints[2].with_format, "......+"
   end
 
 end

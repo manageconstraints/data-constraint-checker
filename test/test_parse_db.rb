@@ -13,7 +13,7 @@ require 'yard'
 require 'active_support'
 require 'active_support/inflector'
 require 'active_support/core_ext/string'
-class TestParseModelConstriant < Test::Unit::TestCase
+class TestParseDBConstriant < Test::Unit::TestCase
   def test_create_table
     contents = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
                 def up

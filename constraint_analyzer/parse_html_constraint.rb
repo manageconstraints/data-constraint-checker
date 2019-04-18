@@ -1,5 +1,5 @@
 def parse_html_constraint_file(ast)
-	#puts "ast.type.to_s #{ast.type.to_s}"
+	puts "ast.type.to_s #{ast.type.to_s}"
 	table = ""
 	if ast.type.to_s == 'list'
 		ast.children.each do |child|
@@ -91,20 +91,20 @@ def parse_html_constraint_function(table, funcname, ast)
   #puts "#{table_class == nil} | #{dic2.length} #{column}"
   if table_class
     if dic2.length > 0
-      constraint = Length_constraint.new(class_name, column, "html")
+      constraint = Length_constraint.new(class_name, column, Constraint::HTML)
       constraint.parse(dic2)
       table_class.addConstraints([constraint])
       #puts "Constraint: #{constraint.to_string}"
     end
     if dic['pattern']
       #puts "dic[pattern] = #{dic["pattern"].source}"
-      constraint = Format_constraint.new(class_name, column, "html")
+      constraint = Format_constraint.new(class_name, column, Constraint::HTML)
       format = handle_string_literal_node(dic['pattern']) || handle_symbol_literal_node(dic['pattern'])
       constraint.with_format = format
       table_class.addConstraints([constraint])
     end
     if dic['required']
-      constraint = Presence_constraint.new(class_name, column, "html")
+      constraint = Presence_constraint.new(class_name, column, Constraint::HTML)
       table_class.addConstraints([constraint])
     end
   end

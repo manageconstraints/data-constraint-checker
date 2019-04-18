@@ -65,6 +65,7 @@ class Version_class
 		changed_constraints = []
 		existing_column_constraints = []
 		new_column_constraints = []
+		not_match_html_constraints = []
 		@activerecord_files.each do |key, file|
 			old_file = old_version.get_activerecord_files[key]
 			# if the old file doesn't exist, which means it's newly created
@@ -76,6 +77,9 @@ class Version_class
 				if old_constrants[column_keyword] 
 					if !constraint.is_same(old_constrants[column_keyword])
 						changed_constraints << constraint
+						if not is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
+							not_match_html_constraints << constraint
+						end
 					end
 				else
 					newly_added_constraints << constraint
@@ -85,11 +89,23 @@ class Version_class
 					else
 						new_column_constraints << constraint
 					end
+					if not is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
+						not_match_html_constraints << constraint
+					end
 				end
-
 			end
 		end
-		return newly_added_constraints,changed_constraints,existing_column_constraints,new_column_constraints
+		return newly_added_constraints,changed_constraints,existing_column_constraints,new_column_constraints,not_match_html_constraints
+	end
+  def is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
+		key = column_keyword.gsub("-html", "-validate")
+		key2 = column_keyword.gsub("-html", "-db")
+		old_model_constraint =  old_constraints[key]
+		old_db_constraint = old_constraints[key2]
+		if  constraint.is_same_notype(old_model_constraint) or constraint.is_same_notype(old_db_constraint)
+			return true
+		end
+		return false
 	end
 	def compare_self
 		absent_cons = {}

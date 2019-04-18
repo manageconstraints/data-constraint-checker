@@ -45,7 +45,7 @@ class TestParseModelConstriant < Test::Unit::TestCase
     c = parse_validate_constraint_function("Person", "validates",ast[0][1])
   	assert_equal 1, c.length
   	assert_equal c[0]&.class.name, 'Length_constraint'
-  	assert_equal c[0]&.min_value, '2'
+  	assert_equal c[0]&.min_value, 2
   end
   def test_parse_numericality1
   	contents = "validates :games_played, numericality: { only_integer: true }"
