@@ -20,6 +20,7 @@ class Version_class
 			# puts"#{key} #{file.getConstraints.length}"
 			file.create_con_from_column_type
 			file.create_con_from_index
+			file.create_con_from_format
 			file.getConstraints.each do |k, constraint|
 				# puts"\t#{constraint.column}"
 			end

@@ -78,6 +78,14 @@ class Class_class
 			end
 		end
 	end
+	def create_con_from_format
+		@constraints.each do |k, v|
+			if v.is_a?Format_constraint and format = v.format
+				constraint = derive_length_constraint_from_format(v)
+				self.addConstraints([constraint])
+			end
+		end
+	end
 end
 class Column
 	# belongs to model class which is active record
