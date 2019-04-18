@@ -71,13 +71,13 @@ class Version_class
 			# if the old file doesn't exist, which means it's newly created
 			next unless old_file
 			constraints = file.getConstraints
-			old_constrants = old_file.getConstraints
+			old_constraints = old_file.getConstraints
 			old_columns = old_file.getColumns
 			constraints.each do |column_keyword, constraint|
-				if old_constrants[column_keyword] 
-					if !constraint.is_same(old_constrants[column_keyword])
+				if old_constraints[column_keyword]
+					if !constraint.is_same(old_constraints[column_keyword])
 						changed_constraints << constraint
-						if not is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
+						if constraint.type == Constraint::HTML and not is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
 							not_match_html_constraints << constraint
 						end
 					end
@@ -89,7 +89,7 @@ class Version_class
 					else
 						new_column_constraints << constraint
 					end
-					if not is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
+					if constraint.type == Constraint::HTML and not is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
 						not_match_html_constraints << constraint
 					end
 				end
@@ -98,8 +98,8 @@ class Version_class
 		return newly_added_constraints,changed_constraints,existing_column_constraints,new_column_constraints,not_match_html_constraints
 	end
   def is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
-		key = column_keyword.gsub("-html", "-validate")
-		key2 = column_keyword.gsub("-html", "-db")
+		key = column_keyword.gsub(Constraint::HTML, Constraint::MODEL)
+		key2 = column_keyword.gsub(Constraint::HTML, Constraint::DB)
 		old_model_constraint =  old_constraints[key]
 		old_db_constraint = old_constraints[key2]
 		if  constraint.is_same_notype(old_model_constraint) or constraint.is_same_notype(old_db_constraint)

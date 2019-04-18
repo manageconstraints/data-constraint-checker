@@ -31,6 +31,9 @@ def traverse_all_versions(application_dir, interval)
 	app_name = application_dir.split("/")[-1]
 	versions[0].build
 	output = open("../log/output_#{app_name}.log", 'w')
+  log_dir = "../log/#{app_name}_log/"
+  `mkdir #{log_dir} -p`
+  output_html_constraints = open("#{log_dir}/html_constraints.log", 'a+')
 	cnt = 0
 	sum1 = 0
 	sum2 = 0
@@ -92,10 +95,16 @@ def traverse_all_versions(application_dir, interval)
     sumh3 += ch3
     sumh4 += ch4
 		versions[i-1] = nil
-		
+    output_html_constraints.write("======#{new_version.commit} vs #{version.commit}=====\n")
+    nmhcs.each do |c|
+      output_html_constraints.write(c.to_string)
+      output_html_constraints.write("\n------------------\n")
+    end
+    output_html_constraints.write("=========================================\n")
 	end
 	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8} #{sumh1} #{sumh2} #{sumh3} #{sumh4}\n")
 	output.close
+  output_html_constraints.close
 end
 def find_all_mismatch(application_dir, interval)
 	puts "interval: #{interval.class.name}"
