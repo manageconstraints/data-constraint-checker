@@ -114,13 +114,18 @@ class Version_class
 		total_constraints = @activerecord_files.map{|k,v| v.getConstraints.length}.reduce(:+)
 		db_cons_num = 0
 		model_cons_num = 0
+		html_cons_num = 0
 		mm_cons_num = 0
+    absent_cons2 = {}
+    mm_cons_num2 = 0
 		@activerecord_files.each do |key, file|
 			constraints = file.getConstraints
-			model_cons = constraints.select{|k,v| k.include?"-validate"}
-			db_cons = constraints.select{|k,v| k.include?"-db"}
+			model_cons = constraints.select{|k,v| k.include?"-#{Constraint::MODEL}"}
+			db_cons = constraints.select{|k,v| k.include?"-#{Constraint::DB}"}
+			html_cons = constraints.select{|k,v| k.include?"-#{Constraint::HTML}"}
 			model_cons_num += model_cons.length
-			db_cons_num += db_cons.length 
+			db_cons_num += db_cons.length
+			html_cons_num += html_cons.length
 			db_cons.each do |k, v|
 				k2 = k.gsub("-db","-validate")
 				puts "k2 #{k2}"
@@ -152,10 +157,45 @@ class Version_class
 						mm_cons_num += 1
 					end
 				end
+      end
+
+			model_cons.each do |k, v|
+				k2 = k.gsub("-#{Constraint::MODEL}","-#{Constraint::HTML}")
+				puts "k2 #{k2}"
+				begin
+					column_name = v.column
+					column = file.getColumns[column_name]
+					model_filename = column.file_class.filename
+				rescue
+					column_name = "nocolumn"
+          model_filename = "nofile"
+				end
+				unless html_cons[k2]
+          absent_cons2[k] = v
+					v.self_print
+					puts "absent2: #{column_name} #{v.table} #{model_filename} #{v.class.name} #{@commit}"
+				else
+					v2 = html_cons[k2]
+					if v.is_a?Length_constraint
+						if (v2.max_value and v.max_value  and v2.max_value != v.max_value)
+							puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{model_filename} #{@commit}"
+						end
+						if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
+							puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{model_filename} #{@commit}"
+						end
+						v.self_print
+					end
+					if not v.is_same_notype(v2)
+						puts "mismatch constraint #{model_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
+            mm_cons_num2 += 1
+					end
+				end
 			end
 		end
 		puts "total absent: #{absent_cons.size} total_constraints: #{total_constraints} model_cons_num: #{model_cons_num} db_cons_num: #{db_cons_num} mm_cons_num: #{mm_cons_num}"
-	end
+    puts "total absent2: #{absent_cons2.size} total_constraints: #{total_constraints} html_cons_num: #{html_cons_num} model_cons_num: #{model_cons_num}  mm_cons_num2: #{mm_cons_num2}"
+
+  end
 	def build
 		self.extract_files
 		self.annotate_model_class
