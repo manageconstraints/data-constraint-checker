@@ -86,6 +86,10 @@ def read_html_file_ast(view_files)
     #puts "filenmae: #{filename}"
 		erb_filename = filename
 		haml2html = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/herbalizer")
+		os = `uname -a`
+		if os.include?"Linux"
+			haml2html = "python3 #{File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/haml2html.py")}"
+		end
 		extract_erb = File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/extract_rubynhtml.rb")
     base = filename.gsub("/","_").gsub(".", "")
     if filename.include?"haml"
