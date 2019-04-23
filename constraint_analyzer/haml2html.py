@@ -4,8 +4,6 @@ from bs4 import BeautifulSoup
 import sys
 
 def haml2html(file):
-    if not file.endswith('.haml'):
-        return
     f = open(file, 'r')
     c = f.read()
 
@@ -16,7 +14,9 @@ def haml2html(file):
     json = urlopen(request).read().decode()
     soup = BeautifulSoup(json,"html.parser")
     tag = soup.find(id = 'erb')
+    #print("results")
     print(tag.string)
+    #print("results finished")
 def main():
     filename = sys.argv[1]
     haml2html(filename)

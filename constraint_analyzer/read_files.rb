@@ -97,7 +97,10 @@ def read_html_file_ast(view_files)
       formalized_filename = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/#{base}1.html.erb")
 			erb_filename = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/#{base}2.html.erb")
 			`ruby #{formalize_script} #{filename}  #{formalized_filename};`
+			#puts "formalized_filename #{open(formalized_filename).read}"
+			#puts "#{haml2html} #{formalized_filename} > #{erb_filename}"
 			`#{haml2html} #{formalized_filename} > #{erb_filename}`
+			#puts "contents #{open(erb_filename).read}"
       `rm #{formalized_filename}`
 		end
 		target = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/#{base}.rb")
@@ -108,7 +111,9 @@ def read_html_file_ast(view_files)
       next
     end
 		file.close
-    `rm #{erb_filename}` if filename.include?"haml"
+		if erb_filename.include?"haml"
+    	`rm #{erb_filename}` 
+    end
     `rm #{target}`
 		begin
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
