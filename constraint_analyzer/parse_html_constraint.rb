@@ -67,7 +67,7 @@ def parse_html_constraint_function(table, funcname, ast)
 			dic = extract_hash_from_list(child)
 		end
   end
-  if field = symbols[0][/\[.8\]/]
+  if field = symbols[0][/\[.*\]/]
     table = symbols[0].split("[")[0]
     column = field.gsub("[","").gsub("]","")
   else

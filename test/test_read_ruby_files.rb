@@ -40,6 +40,8 @@ class TestHTMLConstraint < Test::Unit::TestCase
     $model_classes["RecurringTodo"] = table_class
     read_html_file_ast([test_filename])
     assert_equal table_class.getConstraints.size, 1
+    constraint = table_class.getConstraints.values[0]
+    assert_equal "description", constraint.column
   end
   def test_parse_haml_file
     puts "test_parse_haml_file"

@@ -1,0 +1,60 @@
+<%= form_for(resource, url: registration_path(resource_name), html: {class: "form-horizontal block-form", autocomplete: "off"}) do |f| %>
+  <fieldset>
+    <% if mobile %>
+      <legend>
+        <%= image_tag("branding/logos/header-logo2x.png", height: 40, width: 40) %>
+        <%= t("aspects.aspect_stream.make_something") %>
+      </legend>
+    <% end %>
+    <% if mobile %>
+      <%= f.label :email, t("registrations.new.email"), class: "control-label", id: "emailLabel" %>
+    <% else %>
+      <%= f.label :email, t("registrations.new.email"), class: "sr-only control-label", id: "emailLabel" %>
+      <i class="entypo-mail"></i>
+    <% end %>
+    <%= f.email_field :email,                    autofocus:   true,                    class:       "input-block-level form-control",                    data:        {content: t("users.edit.your_email_private")},                    placeholder: t("registrations.new.email"),                    required:    true,                    title:       t("registrations.new.enter_email"),                    aria:        {labelledby: "emailLabel"} %>
+    <% if mobile %>
+      <label class="control-label" for="user_username" id="usernameLabel">
+        <%= t("registrations.new.username") %>
+      </label>
+    <% else %>
+      <label class="sr-only control-label" for="user_username" id="usernameLabel">
+        <%= t("registrations.new.username") %>
+      </label>
+      <i class="entypo-user"></i>
+    <% end %>
+    <%= f.text_field :username,                   class:       "input-block-level form-control",                   placeholder: t("registrations.new.username"),                   title:       t("registrations.new.enter_username"),                   required:    true,                   pattern:     "[A-Za-z0-9_]+",                   aria:        {labelledby: "usernameLabel"} %>
+    <% if mobile %>
+      <label class="control-label" for="user_password" id="passwordLabel">
+        <%= t("registrations.new.password") %>
+      </label>
+    <% else %>
+      <label class="sr-only control-label" for="user_password" id="passwordLabel">
+        <%= t("registrations.new.password") %>
+      </label>
+      <i class="entypo-lock"></i>
+    <% end %>
+    <%= f.password_field :password,                       class:       "input-block-level form-control",                       placeholder: t("registrations.new.password"),                       title:       t("registrations.new.enter_password"),                       required:    true,                       pattern:     "......+",                       aria:        {labelledby: "passwordLabel"} %>
+    <% if mobile %>
+      <label class="control-label" for="user_password_confirmation" id="passwordConfirmationLabel">
+        <%= t("registrations.new.password_confirmation") %>
+      </label>
+    <% else %>
+      <label class="sr-only control-label" for="user_password_confirmation" id="passwordConfirmationLabel">
+        <%= t("registrations.new.password_confirmation") %>
+      </label>
+      <i class="entypo-lock"></i>
+    <% end %>
+    <%= f.password_field :password_confirmation,                       class:       "input-block-level form-control",                       placeholder: t("registrations.new.password_confirmation"),                       title:       t("registrations.new.enter_password_again"),                       required:    true,                       pattern:     "......+",                       aria:        {labelledby: "passwordConfirmationLabel"} %>
+    <% if AppConfig.settings.captcha.enable? %>
+      <%= show_simple_captcha object: "user",                            code_type: "numeric",                            class: "simple-captcha-image",                            input_html: {class: "form-control captcha-input"} %>
+    <% end %>
+    <%= invite_hidden_tag(invite) %>
+  </fieldset>
+  <% if AppConfig.settings.terms.enable? %>
+    <p class="terms text-center" id="terms">
+      <%= t('registrations.new.terms', terms_link: link_to(t('registrations.new.terms_link'), terms_path, target: "_blank")).html_safe %>
+    </p>
+  <% end %>
+  <%= f.submit t("registrations.new.sign_up"), class: "btn btn-block btn-large btn-primary",    data: {disable_with: t("registrations.new.submitting")} %>
+<% end %>
