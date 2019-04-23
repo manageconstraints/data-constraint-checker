@@ -7,7 +7,6 @@ def haml2html(file):
     if not file.endswith('.haml'):
         return
     f = open(file, 'r')
-    wf = open(file.replace('html.haml', 'html.erb').replace('haml', 'html.erb'), 'w')
     c = f.read()
 
     url = 'https://haml2erb.org/' # Set destination URL here
