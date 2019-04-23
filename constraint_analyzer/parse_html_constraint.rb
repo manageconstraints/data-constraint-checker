@@ -94,7 +94,7 @@ def parse_html_constraint_function(table, funcname, ast)
       constraint = Length_constraint.new(class_name, column, Constraint::HTML)
       constraint.parse(dic2)
       table_class.addConstraints([constraint])
-      #puts "Constraint: #{constraint.to_string}"
+      puts "Add html Constraint: #{constraint.to_string}"
     end
     if dic['pattern']
       #puts "dic[pattern] = #{dic["pattern"].source}"
@@ -102,10 +102,12 @@ def parse_html_constraint_function(table, funcname, ast)
       format = handle_string_literal_node(dic['pattern']) || handle_symbol_literal_node(dic['pattern'])
       constraint.with_format = format
       table_class.addConstraints([constraint])
+      puts "Add html Constraint: #{constraint.to_string}"
     end
     if dic['required']
       constraint = Presence_constraint.new(class_name, column, Constraint::HTML)
       table_class.addConstraints([constraint])
+      puts "Add html Constraint: #{constraint.to_string}"
     end
   end
 

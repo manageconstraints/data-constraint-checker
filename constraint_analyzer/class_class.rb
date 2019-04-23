@@ -79,12 +79,14 @@ class Class_class
 		end
 	end
 	def create_con_from_format
-		@constraints.each do |k, v|
-			if v.is_a?Format_constraint and format = v.format
+		cons = []
+    @constraints.each do |k, v|
+			if v.is_a?Format_constraint and format = v.with_format
 				constraint = derive_length_constraint_from_format(v)
-				self.addConstraints([constraint])
+        cons << constraint
 			end
-		end
+    end
+    self.addConstraints(cons)
 	end
 end
 class Column

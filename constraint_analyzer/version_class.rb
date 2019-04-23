@@ -78,7 +78,7 @@ class Version_class
 				if old_constraints[column_keyword]
 					if !constraint.is_same(old_constraints[column_keyword])
 						changed_constraints << constraint
-						if constraint.type == Constraint::HTML and not is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
+						if constraint.type == Constraint::HTML and (not is_html_constraint_match_validate(old_constraints, column_keyword, constraint))
 							not_match_html_constraints << constraint
 						end
 					end
@@ -90,7 +90,7 @@ class Version_class
 					else
 						new_column_constraints << constraint
 					end
-					if constraint.type == Constraint::HTML and not is_html_constraint_match_validate(old_constraints, column_keyword, constraint)
+					if constraint.type == Constraint::HTML and (not is_html_constraint_match_validate(old_constraints, column_keyword, constraint))
 						not_match_html_constraints << constraint
 					end
 				end

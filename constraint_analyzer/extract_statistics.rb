@@ -32,8 +32,10 @@ def traverse_all_versions(application_dir, interval)
 	versions[0].build
 	output = open("../log/output_#{app_name}.log", 'w')
   log_dir = "../log/#{app_name}_log/"
-  `mkdir #{log_dir} -p`
-  output_html_constraints = open("#{log_dir}/html_constraints.log", 'a+')
+  if not File.exist?log_dir
+    `mkdir #{log_dir}`
+  end
+  output_html_constraints = open("#{log_dir}/html_constraints.log", 'w')
 	cnt = 0
 	sum1 = 0
 	sum2 = 0
@@ -47,6 +49,7 @@ def traverse_all_versions(application_dir, interval)
   sumh2 = 0
   sumh3 = 0
   sumh4 = 0
+  start = Time.now
 	for i in 1...versions.length
 		#puts "=============#{i}============="
 		new_version = versions[i-1]
@@ -58,24 +61,24 @@ def traverse_all_versions(application_dir, interval)
 			cnt += 1
 		end
 
-		model_ncs = ncs.select{|x| x.type == 'validate'}
-		db_ncs = ncs.select{|x| x.type == "db"}
-    html_ncs = ncs.select{|x| x.type == "html"}
-		model_ccs = ccs.select{|x| x.type == 'validate'}
-		db_ccs = ccs.select{|x| x.type == "db"}
-    html_ccs = ccs.select{|x| x.type == "html"}
+		model_ncs = ncs.select{|x| x.type == Constraint::MODEL}
+		db_ncs = ncs.select{|x| x.type == Constraint::DB}
+    html_ncs = ncs.select{|x| x.type == Constraint::HTML}
+		model_ccs = ccs.select{|x| x.type == Constraint::MODEL}
+		db_ccs = ccs.select{|x| x.type == Constraint::DB}
+    html_ccs = ccs.select{|x| x.type == Constraint::HTML}
 		c1 = model_ncs.length
 		c2 = db_ncs.length
     ch1 = html_ncs.length
 		c3 = model_ccs.length
 		c4 = db_ccs.length
     ch2 = html_ccs.length
-		model_eccs = eccs.select{|x| x.type == 'validate'}
-		db_eccs = eccs.select{|x| x.type == "db"}
-    html_eccs = eccs.select{|x| x.type == "html"}
-		model_nccs = nccs.select{|x| x.type == 'validate'}
-		db_nccs = nccs.select{|x| x.type == "db"}
-    html_nccs = nccs.select{|x| x.type == "html"}
+		model_eccs = eccs.select{|x| x.type == Constraint::MODEL}
+		db_eccs = eccs.select{|x| x.type == Constraint::DB}
+    html_eccs = eccs.select{|x| x.type == Constraint::HTML}
+		model_nccs = nccs.select{|x| x.type == Constraint::MODEL}
+		db_nccs = nccs.select{|x| x.type == Constraint::DB}
+    html_nccs = nccs.select{|x| x.type == Constraint::HTML}
 		c5 = model_eccs.length
 		c6 = db_eccs.length
     ch3 = html_eccs.length
@@ -101,6 +104,8 @@ def traverse_all_versions(application_dir, interval)
       output_html_constraints.write("\n------------------\n")
     end
     output_html_constraints.write("=========================================\n")
+    puts "Duration: #{Time.now - start}"
+    start = Time.now
 	end
 	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8} #{sumh1} #{sumh2} #{sumh3} #{sumh4}\n")
 	output.close

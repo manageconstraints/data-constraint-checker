@@ -129,7 +129,7 @@ class Format_constraint < Constraint
 		puts to_string
 	end
 	def to_string
-		puts "#{super} #{with_format}"
+		return "#{super} #{with_format}"
 	end
 
 end

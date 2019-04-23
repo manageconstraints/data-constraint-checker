@@ -38,7 +38,7 @@ def derive_length_constraint_from_format(constraint)
 	return nil unless constraint.is_a?Format_constraint
 	format = constraint.with_format
   min_value, max_value = derive_length_from_format(format)
-	len_constraint = Length_constraint.new(constraint.table, constraint.column, Constraint::HTML)
+	len_constraint = Length_constraint.new(constraint.table, constraint.column, constraint.type)
   len_constraint.min_value = min_value
   len_constraint.max_value = max_value if max_value > 0
 	return len_constraint

@@ -7,6 +7,9 @@ return unless app_folder
 count = {}
 log = open("log/output.log",'w')
 apps.each do |app|
+	if app.start_with?'#'
+		next
+	end
 	execute = "cd #{main_folder}; ruby main.rb -a #{app_folder}/#{app} #{command}"
 	puts "#{execute}"
 	lines = `#{execute}`
