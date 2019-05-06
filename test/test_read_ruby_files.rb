@@ -43,6 +43,23 @@ class TestHTMLConstraint < Test::Unit::TestCase
     constraint = table_class.getConstraints.values[0]
     assert_equal "description", constraint.column
   end
+  def test_parse_html_erb_file2
+    puts "test_parse_html_erb_file"
+    application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'erb_file2')
+    test_filename = application_dir+"/app/views/todos/_edit_form.rhtml"
+    load_html_constraint_api
+    table_class = Class_class.new("app/views/todos/_edit_form.rhtml")
+    table_class.class_name = "Todo"
+    column = Column.new(table_class, 'description', 'string', nil, {})
+    table_class.addColumn(column)
+    $model_classes = {}
+    $model_classes["Todo"] = table_class
+    read_html_file_ast([test_filename])
+    assert_equal table_class.getConstraints.size, 1
+    constraint = table_class.getConstraints.values[0]
+    assert_equal "description", constraint.column
+    assert_equal "Todo", constraint.table
+  end
   def test_parse_haml_file
     puts "test_parse_haml_file"
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'haml_file')

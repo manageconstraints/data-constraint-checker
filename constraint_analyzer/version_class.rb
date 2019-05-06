@@ -16,6 +16,7 @@ class Version_class
 		@activerecord_files = @files.select{|key, x| x.is_activerecord}
 		# puts"@files.length: #{@files.length}"
 		# puts"@activerecord_files.length: #{@activerecord_files.length}"
+
 		@activerecord_files.each do |key, file|
 			# puts"#{key} #{file.getConstraints.length}"
 			file.create_con_from_column_type
@@ -33,7 +34,9 @@ class Version_class
       validation_constraints = constraints.select{|k,v| k.include?Constraint::MODEL}
       uniqueness_constraints = validation_constraints.select{|k,v| v.instance_of?Uniqueness_constraint and v.case_sensitive == false}
       puts "uniqueness_constraints #{uniqueness_constraints.size}"
+
       columns = file.getColumns
+      puts "Columns #{file.class_name} #{columns.map{|k,v| v.column_name}.join(" ,")}" if columns.size > 0
       uniqueness_constraints.each do |k, v|
         column_name = v.column
         if columns[column_name]

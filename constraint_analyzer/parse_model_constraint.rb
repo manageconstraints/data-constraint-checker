@@ -146,108 +146,111 @@ def parse_validates(table, funcname, ast)
   			columns << column
   		end
   		if child.type.to_s == 'list'
-  			node = child[0]
-  			if node.type.to_s == "assoc"
-  				cur_constr, cur_value_ast = handle_assoc_node(node)
-  				puts "cur_constr #{cur_constr}"
-  				next unless cur_constr
-				if cur_value_ast.type.to_s == "hash"
-					dic = handle_hash_node(cur_value_ast)
-				end
-  				if cur_constr == "presence"
-					cur_value = cur_value_ast.source
-					if cur_value == "true"
-						columns.each do |c|
-			  			constraint = Presence_constraint.new(table, c, type)
-			  			constraints << constraint
-						end
-					end
-				end
-				if cur_constr == "format"
-					if dic
-						columns.each do |c|
-							constraint = Format_constraint.new(table, c, type)
-			  				constraint.parse(dic)
-			  				constraints << constraint
-			  			end
-					end
-				end
-				if cur_constr == "inclusion"
-					cur_value = cur_value_ast.source
-					columns.each do |c|
-						constraint = Inclusion_constraint.new(table, c, type)
-						constraint.range = cur_value
-						constraints << constraint
-					end
-				end				
-				if cur_constr == "exclusion"
-					cur_value = cur_value_ast.source
-					columns.each do |c|
-						constraint = Exclusion_constraint.new(table, c, type)
-						constraint.range = cur_value
-						constraints << constraint
-					end
-				end
-				if cur_constr == "length"
-					if dic
-						columns.each do |c|
-							constraint = Length_constraint.new(table, c, type)
-							constraint.parse(dic)
-							constraints << constraint
-						end
-					end
-				end
-				if cur_constr == "numericality"
-					if cur_value_ast&.source == "true"
-						dic = {}
-					end	
-					if dic
-						columns.each do |c|
-							constraint = Numericality_constraint.new(table, c, type)
-							constraint.parse(dic)
-							constraints << constraint
-						end
-					end
-				end
-				if cur_constr == "uniqueness"
-					if cur_value_ast.source == "true"
-						dic = {}
-					end
-					if dic
-						columns.each do |c|
-							constraint = Uniqueness_constraint.new(table, c, type)
-							constraint.parse(dic)
-							constraints << constraint
-						end
-					end
-				end
-				if cur_constr == "acceptance"
-					if cur_value_ast.source == "true"
-						dic = {}
-					end
-					if dic
-						columns.each do |c|
-							constraint = Acceptance_constraint.new(table, c, type)
-							constraint.parse(dic)
-							constraints << constraint
-						end
-					end
-				end
-				if cur_constr == "confirmation"
-					cur_value = cur_value_ast.source
-					if cur_value == "true"
-						dic = {}
-					end
-					if dic
-						columns.each do |c|
-							constraint = Confirmation_constraint.new(table, c, type)
-							constraint.parse(dic)
-							constraints << constraint
-						end
-					end
-				end
-  			end
-  		end
+				child.each do |c|
+          node = c
+          if node.type.to_s == "assoc"
+            cur_constr, cur_value_ast = handle_assoc_node(node)
+            puts "cur_constr #{cur_constr}"
+            next unless cur_constr
+          if cur_value_ast.type.to_s == "hash"
+            dic = handle_hash_node(cur_value_ast)
+          end
+            if cur_constr == "presence"
+            cur_value = cur_value_ast.source
+            if cur_value == "true"
+              columns.each do |c|
+                constraint = Presence_constraint.new(table, c, type)
+                constraints << constraint
+              end
+            end
+          end
+          if cur_constr == "format"
+            if dic
+              columns.each do |c|
+                constraint = Format_constraint.new(table, c, type)
+                  constraint.parse(dic)
+                  constraints << constraint
+                end
+            end
+          end
+          if cur_constr == "inclusion"
+            cur_value = cur_value_ast.source
+            columns.each do |c|
+              constraint = Inclusion_constraint.new(table, c, type)
+              constraint.range = cur_value
+              constraints << constraint
+            end
+          end
+          if cur_constr == "exclusion"
+            cur_value = cur_value_ast.source
+            columns.each do |c|
+              constraint = Exclusion_constraint.new(table, c, type)
+              constraint.range = cur_value
+              constraints << constraint
+            end
+          end
+          if cur_constr == "length"
+            if dic
+              columns.each do |c|
+                constraint = Length_constraint.new(table, c, type)
+                constraint.parse(dic)
+                constraints << constraint
+              end
+            end
+          end
+          if cur_constr == "numericality"
+            if cur_value_ast&.source == "true"
+              dic = {}
+            end
+            if dic
+              columns.each do |c|
+                constraint = Numericality_constraint.new(table, c, type)
+                constraint.parse(dic)
+                constraints << constraint
+              end
+            end
+          end
+          if cur_constr == "uniqueness"
+            if cur_value_ast.source == "true"
+              dic = {}
+            end
+            if dic
+              columns.each do |c|
+                constraint = Uniqueness_constraint.new(table, c, type)
+                constraint.parse(dic)
+                constraints << constraint
+              end
+            end
+          end
+          if cur_constr == "acceptance"
+            if cur_value_ast.source == "true"
+              dic = {}
+            end
+            if dic
+              columns.each do |c|
+                constraint = Acceptance_constraint.new(table, c, type)
+                constraint.parse(dic)
+                constraints << constraint
+              end
+            end
+          end
+          if cur_constr == "confirmation"
+            cur_value = cur_value_ast.source
+            if cur_value == "true"
+              dic = {}
+            end
+            if dic
+              columns.each do |c|
+                constraint = Confirmation_constraint.new(table, c, type)
+                constraint.parse(dic)
+                constraints << constraint
+              end
+            end
+          end
+          end
+        end
+
+      end
 	end
 	return constraints
 end

@@ -30,14 +30,27 @@ class TestParseModelConstriant < Test::Unit::TestCase
   	assert_equal c[0]&.class.name, 'Confirmation_constraint'
   end
 
-  def test_parse_confirmation_with_hash
-  	contents = "validates :email, confirmation: { case_sensitive: false }" 
- 	ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+  def test_parse_multiple_constraints
+  	contents = "validates :email,
+													 :format => { :with => /\A[^@ ]+@[^@ ]+\.[^@ ]+\Z/ },
+													 :uniqueness => { :case_sensitive => false }"
+ 		ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
     c = parse_validate_constraint_function("Person", "validates",ast[0][1])
-  	assert_equal 1, c.length
-  	assert_equal c[0]&.class.name, 'Confirmation_constraint'
-  	assert_equal false, c[0]&.case_sensitive
+  	assert_equal c[0]&.class.name, 'Format_constraint'
+		assert_equal c[1]&.class.name, 'Uniqueness_constraint'
+  	assert_equal false, c[1]&.case_sensitive
+    assert_equal 2, c.length
+
   end
+
+	def test_parse_confirmation_with_hash
+		contents = "validates :email, confirmation: { case_sensitive: false }"
+		ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+		c = parse_validate_constraint_function("Person", "validates",ast[0][1])
+		assert_equal 1, c.length
+		assert_equal c[0]&.class.name, 'Confirmation_constraint'
+		assert_equal false, c[0]&.case_sensitive
+	end
 
   def test_parse_length_with_hash
   	contents = "validates :name, length: { minimum: 2 }"

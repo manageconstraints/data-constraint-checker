@@ -37,7 +37,10 @@ def read_ruby_files(application_dir=nil,version='')
 		end
 		if filename.include?("db/migrate/")
 			migration_files  << filename
-		end
+    end
+    if filename.include?("db/schema.rb")
+      migration_files = [filename]
+    end
 		if filename.include?("app/views/")
 			view_files << filename
 		end
