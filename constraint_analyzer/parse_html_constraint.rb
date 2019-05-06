@@ -74,6 +74,10 @@ def parse_html_constraint_function(table, funcname, ast)
     table = $cur_class.filename.split("/")[-2]
     column = symbols[0]
   end
+  if symbols.length == 2
+    table = symbols[0]
+    column = symbols[1]
+  end
 
   if ["registrations", "sessions", "accounts"].include?table
     table = "users"

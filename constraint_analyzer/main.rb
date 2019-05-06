@@ -1,13 +1,14 @@
-load 'validate.rb'
-load 'read_files.rb'
-load 'class_class.rb'
-load 'helper.rb'
-load 'extract_statistics.rb'
-load 'ast_handler.rb'
-load 'parse_model_constraint.rb'
-load 'parse_db_constraint.rb'
-load 'parse_html_constraint.rb'
-load 'version_class.rb'
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_sql.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/validate.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_model_constraint.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_html_constraint.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_db_constraint.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/read_files.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/class_class.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/helper.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/version_class.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/extract_statistics.rb')
+require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/ast_handler.rb')
 require 'optparse'
 require 'yard'
 require 'active_support'
