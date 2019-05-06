@@ -8,7 +8,7 @@ class Version_class
 	end
 	def extract_files
 		if @app_dir and @commit 
-			@files = read_ruby_files(@app_dir, commit)
+			@files = read_ruby_files(@app_dir, @commit)
 		end
 	end
 	def extract_constraints
@@ -25,6 +25,23 @@ class Version_class
 				# puts"\t#{constraint.column}"
 			end
 		end
+	end
+  def extract_case_insensitive_columns
+    ci_columns = []
+    @activerecord_files.each do |key, file|
+      constraints = file.getConstraints
+      validation_constraints = constraints.select{|k,v| k.include?Constraint::MODEL}
+      uniqueness_constraints = validation_constraints.select{|k,v| v.instance_of?Uniqueness_constraint and v.case_sensitive == false}
+      puts "uniqueness_constraints #{uniqueness_constraints.size}"
+      columns = file.getColumns
+      uniqueness_constraints.each do |k, v|
+        column_name = v.column
+        if columns[column_name]
+          ci_columns << columns[column_name]
+        end
+      end
+    end
+    return ci_columns
 	end
 	def annotate_model_class
 		not_active_files =[]
@@ -201,5 +218,7 @@ class Version_class
 		self.annotate_model_class
 		self.extract_constraints
 		self.print_columns
+    puts "@active_files : #{@activerecord_files.size}"
+
 	end
 end

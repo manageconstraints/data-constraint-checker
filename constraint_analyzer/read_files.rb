@@ -52,7 +52,9 @@ def read_ruby_files(application_dir=nil,version='')
 			$cur_class.ast = ast
 			parse_model_constraint_file(ast)		
 			model_classes[$cur_class.class_name] = $cur_class.dup
-		rescue
+			puts "add new class #{$cur_class.class_name} #{$cur_class.upper_class_name}"
+    rescue
+      puts "filename: #{filename}"
 		end
 	end
 	puts "finished handle model files #{model_files.length} #{model_classes.length}"
