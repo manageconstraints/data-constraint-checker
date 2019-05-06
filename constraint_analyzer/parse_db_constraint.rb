@@ -4,17 +4,10 @@ def parse_db_constraint_file(ast)
 			parse_db_constraint_file(child)
 		end
   end
-  # need to be refactored too messy
+  # TODO: need to be refactored too messy. Done
   if ast.type.to_s == "call"
 		if ast[-1]&.type&.to_s == "do_block"
-			if ast[-1][-1]&.type&.to_s == "list"
-        puts "ast[-1][-1]&.type&.to_s #{ast[-1][-1][0].type}"
-        ast[-1][-1].children.each do |child|
-          if child.type.to_s == "command"
-            parse_db_constraint_file(child)
-          end
-        end
-			end
+      parse_db_constraint_file(ast[-1][-1])
 		end
 	end
 
