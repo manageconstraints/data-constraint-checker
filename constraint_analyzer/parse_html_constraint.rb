@@ -1,5 +1,5 @@
 def parse_html_constraint_file(ast)
-	puts "ast.type.to_s #{ast.type.to_s}"
+	#puts "ast.type.to_s #{ast.type.to_s}"
 	table = ""
 	if ast.type.to_s == 'list'
 		ast.children.each do |child|

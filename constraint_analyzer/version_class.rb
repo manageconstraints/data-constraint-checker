@@ -8,7 +8,7 @@ class Version_class
 	end
 	def extract_files
 		if @app_dir and @commit 
-			@files = read_ruby_files(@app_dir, @commit)
+			@files = read_constraint_files(@app_dir, @commit)
 		end
 	end
 	def extract_constraints
@@ -28,7 +28,7 @@ class Version_class
 		end
 	end
   def extract_case_insensitive_columns
-    ci_columns = []
+    ci_columns = {}
     @activerecord_files.each do |key, file|
       constraints = file.getConstraints
       validation_constraints = constraints.select{|k,v| k.include?Constraint::MODEL}
@@ -40,7 +40,8 @@ class Version_class
       uniqueness_constraints.each do |k, v|
         column_name = v.column
         if columns[column_name]
-          ci_columns << columns[column_name]
+          key = "#{file.class_name}-#{column_name}"
+          ci_columns[key] = columns[column_name]
         end
       end
     end

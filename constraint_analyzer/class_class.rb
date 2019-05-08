@@ -1,4 +1,4 @@
-class Class_class
+class File_class
 	attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord, :is_deleted, :indices
 	def initialize(filename)
 		@filename = filename
@@ -18,7 +18,7 @@ class Class_class
 			@constraints[key] = constraint
 			constraint.table = self.class_name
 		end
-		puts"@constraints.size #{@constraints.length}"
+		puts"@constraints.size #{@constraints.length}" if $debug_mode
 	end
 	def getConstraints
 		return @constraints
@@ -33,6 +33,7 @@ class Class_class
 		@indices[index.name] = index
 	end
 	def create_con_from_column_type
+		return unless @columns
 		@columns.each do |k, v|
 			type = 'db'
 			column_type = v.column_type 
@@ -43,7 +44,7 @@ class Class_class
 				max_value = 66536
 			end
 			column_name = v.column_name
-			puts "max_value from type: #{max_value} #{column_name} #{column_type} #{@class_name}"
+			puts "max_value from type: #{max_value} #{column_name} #{column_type} #{@class_name}" if $debug_mode
 			if max_value
 				constraint = Length_constraint.new(@class_name, column_name, type)
 				constraint.max_value = max_value
@@ -67,6 +68,7 @@ class Class_class
 		end
 	end
 	def create_con_from_index
+		return unless @indices
 		@indices.each do |k, v|
 			if v.unique
 				type = "db"
@@ -79,6 +81,7 @@ class Class_class
 		end
 	end
 	def create_con_from_format
+		return unless @constraints
 		cons = []
     @constraints.each do |k, v|
 			if v.is_a?Format_constraint and format = v.with_format
@@ -107,7 +110,7 @@ class Column
 		@table_class = table_class
 	end
 	def parse(dic)
-		puts "dic #{dic['default']&.type}"
+		puts "dic #{dic['default']&.type}" if $debug_mode
 		ast = dic["default"]
 		value = dic["default"]&.source if dic["default"]&.type.to_s == "var_ref"
 		@default_value = value || handle_symbol_literal_node(ast) || handle_string_literal_node(ast)
