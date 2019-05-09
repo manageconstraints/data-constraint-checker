@@ -81,7 +81,7 @@ def parse_html_constraint_function(table, funcname, ast)
 
   if ["registrations", "sessions", "accounts"].include?table
     table = "users"
-    if $app_dir and $app_dir.include?"onebody"
+    if $app_dir2 and $app_dir2.include?"onebody"
       table = "people"
     end
   end
