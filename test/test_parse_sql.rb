@@ -1,6 +1,5 @@
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_sql.rb')
-require "test/unit"
-require 'yard'
+require File.join(File.expand_path(File.dirname(__FILE__)), 'required_file.rb')
+
 
 class TestParseSql < Test::Unit::TestCase
   def test_parse_sql

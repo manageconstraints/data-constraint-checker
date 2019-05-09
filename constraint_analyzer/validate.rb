@@ -342,3 +342,7 @@ class Acceptance_constraint < Constraint
 		return (super and is_child_same(old_constraint))
 	end
 end
+
+class Function_constraint < Constraint
+	attr_accessor :funcname
+end

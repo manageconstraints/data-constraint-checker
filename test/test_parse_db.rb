@@ -1,18 +1,5 @@
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_sql.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/validate.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_model_constraint.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_db_constraint.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/read_files.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/class_class.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/helper.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/version_class.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/extract_statistics.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/ast_handler.rb')
-require "test/unit"
-require 'yard'
-require 'active_support'
-require 'active_support/inflector'
-require 'active_support/core_ext/string'
+require File.join(File.expand_path(File.dirname(__FILE__)), 'required_file.rb')
+
 class TestParseDBConstriant < Test::Unit::TestCase
   def test_create_table
     contents = "class ChangeProductsPrice < ActiveRecord::Migration[5.0]
@@ -23,13 +10,13 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end
               end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "Product"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
@@ -44,13 +31,13 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end
               end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "Product"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
@@ -68,13 +55,13 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end
               end" 
   	ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "Product"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
@@ -87,13 +74,13 @@ class TestParseDBConstriant < Test::Unit::TestCase
                   end
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "Product"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
@@ -112,13 +99,13 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
     puts "ast: #{ast.source}"
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "Product"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
@@ -138,13 +125,13 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
     
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "Product"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
@@ -162,7 +149,7 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end" 
     ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
 
-    $cur_class = Class_class.new("test2.rb")
+    $cur_class = File_class.new("test2.rb")
     $cur_class.ast = ast1
     parse_db_constraint_file(ast1)  
     assert_equal 1, model_class.getColumns.length
@@ -181,14 +168,14 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
     
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "StaffActionLog"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $dangling_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 0, model_class.getColumns.length
@@ -206,7 +193,7 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end" 
     ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
 
-    $cur_class = Class_class.new("test2.rb")
+    $cur_class = File_class.new("test2.rb")
     $cur_class.ast = ast1
     parse_db_constraint_file(ast1)  
     assert_equal 1, model_class.getColumns.length
@@ -226,14 +213,14 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
     
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "AdminLog"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $dangling_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal true, model_class.is_deleted
@@ -246,14 +233,14 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
     
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "AdminLog"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $dangling_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
   
@@ -264,7 +251,7 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end" 
     ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
 
-    $cur_class = Class_class.new("test2.rb")
+    $cur_class = File_class.new("test2.rb")
     $cur_class.ast = ast1
     parse_db_constraint_file(ast1)  
     assert_equal 1, model_class.getColumns.length
@@ -280,14 +267,14 @@ class TestParseDBConstriant < Test::Unit::TestCase
                   end
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-    model_class = Class_class.new("")
+    model_class = File_class.new("")
     model_class.class_name = "AdminLog"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $dangling_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     columns = model_class.getColumns
@@ -305,14 +292,14 @@ class TestParseDBConstriant < Test::Unit::TestCase
                   end
                 end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-    model_class = Class_class.new("")
+    model_class = File_class.new("")
     model_class.class_name = "AdminLog"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $dangling_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     columns = model_class.getColumns
@@ -333,13 +320,13 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end
               end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "Product"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
@@ -350,7 +337,7 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end
               end"
     ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
-    $cur_class = Class_class.new("add_index.rb")
+    $cur_class = File_class.new("add_index.rb")
     $cur_class.ast = ast1
     parse_db_constraint_file(ast1) 
     assert_equal 1, model_class.indices.size
@@ -363,13 +350,13 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end
               end" 
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-    model_class = Class_class.new("products.rb")
+    model_class = File_class.new("products.rb")
     model_class.class_name = "Product"
     model_class.upper_class_name == "ActiveRecord::Base"
     model_class.is_activerecord = true
     $model_classes = {}
     $model_classes[model_class.class_name] = model_class
-    $cur_class = Class_class.new("test.rb")
+    $cur_class = File_class.new("test.rb")
     $cur_class.ast = ast
     parse_db_constraint_file(ast)  
     assert_equal 1, model_class.getColumns.length
@@ -380,7 +367,7 @@ class TestParseDBConstriant < Test::Unit::TestCase
                 end
               end"
     ast1 = YARD::Parser::Ruby::RubyParser.parse(contents1).root
-    $cur_class = Class_class.new("add_index.rb")
+    $cur_class = File_class.new("add_index.rb")
     $cur_class.ast = ast1
     parse_db_constraint_file(ast1) 
     assert_equal 1, model_class.indices.size

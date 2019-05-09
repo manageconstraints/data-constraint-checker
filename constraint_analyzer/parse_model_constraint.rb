@@ -48,6 +48,22 @@ def parse_validate_constraint_function(table, funcname, ast)
 	constraints = []
 	if funcname == "validates" or funcname == "validates!"
 		constraints += parse_validates(table, funcname, ast)
+  elsif funcname == "validate"
+    puts "funcname is : validate #{ast.type.to_s}"
+    if ast.type.to_s === "list"
+      ast.children.each do |c|
+        if c.type.to_s == "symbol_literal"
+          funcname = handle_symbol_literal_node(c)
+          con = Function_constraint.new(table, nil, type)
+          con.funcname = funcname
+          constraints << con
+        end
+      end
+    end
+  elsif funcname == "validates_with" #https://guides.rubyonrails.org/active_record_validations.html#validates-with
+
+  elsif funcname == "validates_each" #https://guides.rubyonrails.org/active_record_validations.html#validates-each
+
 	elsif funcname.include?"_"
 		columns = []
 		dic = {}

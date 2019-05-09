@@ -1,30 +1,16 @@
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_sql.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/validate.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_model_constraint.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_html_constraint.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_db_constraint.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/read_files.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/class_class.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/helper.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/version_class.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/extract_statistics.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/ast_handler.rb')
-require "test/unit"
-require 'yard'
-require 'active_support'
-require 'active_support/inflector'
-require 'active_support/core_ext/string'
+require File.join(File.expand_path(File.dirname(__FILE__)), 'required_file.rb')
+
 class TestHTMLConstraint < Test::Unit::TestCase
   def test_read_erb_files
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'erb_file')
-    read_ruby_files(application_dir)
+    read_constraint_files(application_dir)
     test_filename = application_dir + "/app/views/recurring_todos/_edit_form.html.erb"
     assert_equal $cur_class.filename, test_filename
   end
   def test_read_haml_files
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'haml_file')
     test_filename = application_dir + "/app/views/people/_form_basics.haml"
-    read_ruby_files(application_dir)
+    read_constraint_files(application_dir)
     assert_equal $cur_class.filename, test_filename
   end
   def test_parse_html_erb_file
@@ -32,7 +18,7 @@ class TestHTMLConstraint < Test::Unit::TestCase
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'erb_file')
     test_filename = application_dir+"/app/views/recurring_todos/_edit_form.html.erb"
     load_html_constraint_api
-    table_class = Class_class.new("app/views/recurring_todo.rb")
+    table_class = File_class.new("app/views/recurring_todo.rb")
     table_class.class_name = "RecurringTodo"
     column = Column.new(table_class, 'description', 'string', nil, {})
     table_class.addColumn(column)
@@ -48,7 +34,7 @@ class TestHTMLConstraint < Test::Unit::TestCase
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'erb_file2')
     test_filename = application_dir+"/app/views/todos/_edit_form.rhtml"
     load_html_constraint_api
-    table_class = Class_class.new("app/views/todos/_edit_form.rhtml")
+    table_class = File_class.new("app/views/todos/_edit_form.rhtml")
     table_class.class_name = "Todo"
     column = Column.new(table_class, 'description', 'string', nil, {})
     table_class.addColumn(column)
@@ -65,7 +51,7 @@ class TestHTMLConstraint < Test::Unit::TestCase
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'haml_file')
     test_filename = application_dir + "/app/views/people/_form_basics.haml"
     load_html_constraint_api
-    table_class = Class_class.new("app/views/people/_form_basics.haml")
+    table_class = File_class.new("app/views/people/_form_basics.haml")
     table_class.class_name = "Person"
     column = Column.new(table_class, 'description', 'string', nil, {})
     table_class.addColumn(column)
@@ -79,7 +65,7 @@ class TestHTMLConstraint < Test::Unit::TestCase
     application_dir = File.join(File.expand_path(File.dirname(__FILE__)), 'haml_file2')
     test_filename = application_dir + "/app/views/registrations/_form.haml"
     load_html_constraint_api
-    table_class = Class_class.new("app/views/registrations/_form.haml")
+    table_class = File_class.new("app/views/registrations/_form.haml")
     table_class.class_name = "User"
     column = Column.new(table_class, 'username', 'string', nil, {})
     table_class.addColumn(column)
