@@ -34,7 +34,7 @@ def parse_model_constraint_file(ast)
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
 		if $validate_apis and $validate_apis.include?funcname
-			# puts"funcname #{funcname} #{ast.source}"
+			puts"funcname #{funcname} #{ast.source}"
 			constraints = parse_validate_constraint_function($cur_class.class_name, funcname, ast[1])
 			$cur_class.addConstraints(constraints) if constraints.length > 0
 		end
@@ -49,13 +49,14 @@ def parse_validate_constraint_function(table, funcname, ast)
 	if funcname == "validates" or funcname == "validates!"
 		constraints += parse_validates(table, funcname, ast)
   elsif funcname == "validate"
-    puts "funcname is : validate #{ast.type.to_s}"
     cons = handle_validate(table, type, ast)
     constraints += cons
   elsif funcname == "validates_with" #https://guides.rubyonrails.org/active_record_validations.html#validates-with
+
     cons = parse_validates_with(table, type, ast)
     constraints += cons
   elsif funcname == "validates_each" #https://guides.rubyonrails.org/active_record_validations.html#validates-each
+    puts "funcname is : validates_each #{ast.type.to_s}"
     cons = parse_validates_each(table, type, ast)
     constraints += cons
 	elsif funcname.include?"_"
@@ -314,5 +315,6 @@ def parse_validates_each(table, type, ast)
       end
     end
   end
+  puts "create parse_validates_each constriants #{constraints.size} #{constraints[0].column}-#{constraints[0].class.name}-#{type}" if constraints.size > 0
   constraints
 end

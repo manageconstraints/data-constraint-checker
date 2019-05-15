@@ -149,7 +149,7 @@ class Version_class
 			html_cons_num += html_cons.length
 			db_cons.each do |k, v|
 				k2 = k.gsub("-db","-validate")
-        k3 = k2.gsub("-#{v.class.name}-", "-#{Customized_constraint.class.name}-")
+        k3 = k2.gsub("-#{v.class.name}-", "-#{Customized_constraint.to_s}-")
 				puts "k2 #{k2}"
 				begin
 					column_name = v.column

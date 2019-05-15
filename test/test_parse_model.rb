@@ -2,6 +2,7 @@
 require File.join(File.expand_path(File.dirname(__FILE__)), 'required_file.rb')
 
 class TestParseModelConstriant < Test::Unit::TestCase
+
   def test_parse_confirmation
   	contents = "validates :email, confirmation: true" 
   	ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
