@@ -53,9 +53,11 @@ def parse_validate_constraint_function(table, funcname, ast)
     cons = handle_validate(table, type, ast)
     constraints += cons
   elsif funcname == "validates_with" #https://guides.rubyonrails.org/active_record_validations.html#validates-with
-    parse_validates_with(table, type, ast)
+    cons = parse_validates_with(table, type, ast)
+    constraints += cons
   elsif funcname == "validates_each" #https://guides.rubyonrails.org/active_record_validations.html#validates-each
-    parse_validates_each(table, type, ast)
+    cons = parse_validates_each(table, type, ast)
+    constraints += cons
 	elsif funcname.include?"_"
 		columns = []
 		dic = {}
@@ -300,10 +302,13 @@ end
 
 def parse_validates_each(table, type, ast)
   constraints = []
+  puts "ast.type.to_s #{ast.type.to_s}"
   if ast.type.to_s === "list"
     ast.children.each do |c|
-      if c.type.to_s == "symbol_literal"
-        column = handle_symbol_literal_node(c)
+      puts "c: #{c.type.to_s}|#{c.source}"
+      column = handle_symbol_literal_node(c) || handle_string_literal_node(c)
+      puts "column: #{column} #{column==nil}"
+      if column
         con = Customized_constraint.new(table, column, type)
         constraints << con
       end
