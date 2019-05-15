@@ -94,14 +94,16 @@ class File_class
 end
 class Column
 	# belongs to model class which is active record
-	attr_accessor :column_type,  :column_name, :file_class, :prev_column, :is_deleted, :default_value, :table_class
+	attr_accessor :column_type,  :column_name, :file_class, :prev_column, :is_deleted, :default_value, :table_class, :auto_increment
 	def initialize(table_class, column_name, column_type, file_class, dic={})
 		@table_class = table_class
 		@column_name = column_name
 		@column_type = column_type
 		@file_class = file_class
 		@is_deleted = false
+    @auto_increment = false
 		self.parse(dic)
+    puts "dic: #{dic.to_s}" if $debug_mode
 	end
 	def getTableClass
 		return @table_class
@@ -112,8 +114,16 @@ class Column
 	def parse(dic)
 		puts "dic #{dic['default']&.type}" if $debug_mode
 		ast = dic["default"]
-		value = dic["default"]&.source if dic["default"]&.type.to_s == "var_ref"
-		@default_value = value || handle_symbol_literal_node(ast) || handle_string_literal_node(ast)
+    if ast
+      value = dic["default"]&.source if dic["default"]&.type.to_s == "var_ref"
+      @default_value = value || handle_symbol_literal_node(ast) || handle_string_literal_node(ast)
+    end
+    if dic["auto_increment"]
+      value = handle_symbol_literal_node(ast) || handle_string_literal_node(ast)
+      if value == "true"
+        @auto_increment = true
+      end
+    end
 	end
 end
 class Index

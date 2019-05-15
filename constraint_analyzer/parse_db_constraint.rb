@@ -125,7 +125,6 @@ def handle_create_table(ast)
 						column_type = "string"
 					end
 					column_ast = c[-1]
-					# puts"column_ast: #{column_ast.class}"
 					if column_ast.class.name == "YARD::Parser::Ruby::AstNode" and  column_ast.type.to_s == "list"
 						column_name = handle_symbol_literal_node(column_ast[0]) || handle_string_literal_node(column_ast[0])
 						table_class = $model_classes[class_name]
@@ -140,6 +139,7 @@ def handle_create_table(ast)
 						table_class.addColumn(column)
 						dic = {}
 						dic = extract_hash_from_list(column_ast.children[-1])
+            column.parse(dic)
 						constraints = create_constraints(class_name, column_name, column_type, Constraint::DB, dic)
 						table_class.addConstraints(constraints)
 					end

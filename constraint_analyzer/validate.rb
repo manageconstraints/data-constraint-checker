@@ -346,3 +346,7 @@ end
 class Function_constraint < Constraint
 	attr_accessor :funcname
 end
+
+class Customized_constraint < Constraint
+
+end

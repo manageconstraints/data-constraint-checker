@@ -149,6 +149,7 @@ class Version_class
 			html_cons_num += html_cons.length
 			db_cons.each do |k, v|
 				k2 = k.gsub("-db","-validate")
+        k3 = k2.gsub("-#{v.class.name}-", "-#{Customized_constraint.class.name}-")
 				puts "k2 #{k2}"
 				begin
 					column_name = v.column
@@ -157,7 +158,25 @@ class Version_class
 				rescue
 					column_name = "nocolumn"
 					db_filename = "nofile" 
-				end
+        end
+        next unless column # if the column doesn't exist
+        next if column.is_deleted # if the column is deleted
+        # if column is auto increment, then uniquness constraint and presence constraint are not needed in models
+        if v.instance_of?Uniqueness_constraint or v.instance_of?Presence_constraint
+          if column.auto_increment
+            next
+          end
+        end
+        # if column has default value, then the presence constraint is not needed.
+        if v.instance_of?Presence_constraint
+          if column.default_value
+            next
+          end
+        end
+        if model_cons[k3]
+          puts "customized constraints"
+          next
+        end
 				unless model_cons[k2]
 					absent_cons[k] = v
 					v.self_print
