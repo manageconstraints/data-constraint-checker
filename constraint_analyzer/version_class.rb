@@ -1,10 +1,15 @@
 class Version_class
-	attr_accessor  :app_dir, :commit
+	attr_accessor  :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num
 	def initialize(app_dir, commit)
 		@app_dir = app_dir
 		@commit = commit
 		@files = {}
 		@activerecord_files = {}
+		@total_constraints_num = 0
+		@db_constraints_num = 0
+		@model_constraints_num = 0
+		@html_constraints_num = 0
+
 	end
 	def extract_files
 		if @app_dir and @commit 
@@ -14,8 +19,6 @@ class Version_class
 	def extract_constraints
 		# extract the constraints from the active record file
 		@activerecord_files = @files.select{|key, x| x.is_activerecord}
-		# puts"@files.length: #{@files.length}"
-		# puts"@activerecord_files.length: #{@activerecord_files.length}"
 
 		@activerecord_files.each do |key, file|
 			# puts"#{key} #{file.getConstraints.length}"
@@ -23,9 +26,18 @@ class Version_class
 			file.create_con_from_index
 			file.create_con_from_format
 			file.getConstraints.each do |k, constraint|
-				# puts"\t#{constraint.column}"
+				if constraint.type == Constraint::DB
+					@db_constraints_num += 1
+				end
+				if constraint.type == Constraint::MODEL
+					@model_constraints_num += 1
+				end
+				if constraint.type == Constraint::HTML
+					@html_constraints_num += 1
+				end
 			end
 		end
+		@total_constraints_num = @db_constraints_num + @model_constraints_num + @html_constraints_num
 	end
   def extract_case_insensitive_columns
     ci_columns = {}

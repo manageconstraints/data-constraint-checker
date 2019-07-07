@@ -39,6 +39,15 @@ OptionParser.new do |opts|
   opts.on("-m", "--all_mismatch", "please specify whether you want to find all versions' mismatch") do |v|
   	options[:mismatch] = true
   end
+  opts.on("-l", "--latest-version", "please specify that you want to get the current versions breakdown") do |v|
+    options[:latest] = true
+  end
+  opts.on("--first-last-num", "please specify that you want to compare the first and last verison constraint num") do |v|
+    options[:fln] = true
+  end
+  opts.on("--commit-unit", "please specify whether using commit as unit") do |v|
+    options[:commit_unit] = true
+  end
 end.parse!
 
 if options[:app]
@@ -50,8 +59,12 @@ if options[:interval]
 	interval = options[:interval].to_i
 end
 if options[:tva] and options[:app] and interval
-  puts "travese_all_versions start"
-	traverse_all_versions(application_dir, interval)
+  puts "travese_all_versions start options[:commit_unit] #{options[:commit_unit]}"
+  if options[:commit_unit]
+	  traverse_all_versions(application_dir, interval, false)
+  else
+    traverse_all_versions(application_dir, interval, true)
+  end
 end
 if options[:single] and options[:app]
 	find_mismatch_oneversion(options[:app])
@@ -59,4 +72,10 @@ end
 if options[:mismatch] and options[:app]
 	puts "interval parse: #{interval.class.name}"
 	find_all_mismatch(options[:app], interval)
-end 
+end
+if options[:latest] and application_dir
+  current_version_constraints_num(application_dir)
+end
+if options[:fln] and application_dir
+  first_last_version_comparison_on_num(application_dir)
+end

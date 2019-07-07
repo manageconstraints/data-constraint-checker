@@ -1,10 +1,10 @@
 
-def extract_commits(directory, interval=5)
+def extract_commits(directory, interval=5, tag_unit=true)
 	# reset to the most up to date commit
 	puts "cd #{directory}; git checkout master"
 	`cd #{directory}; git checkout master`
 	tags = `cd #{directory}; git tag`
-	if tags
+	if tag_unit
 		commits = tags.lines.reverse.map{|x| x.strip}
 	else
 		commits = `python commits.py #{directory}`
@@ -24,8 +24,38 @@ def extract_commits(directory, interval=5)
 	return versions
 end
 
-def traverse_all_versions(application_dir, interval)
-	versions = extract_commits(application_dir, interval)
+def current_version_constraints_num(application_dir, commit="master")
+	`cd #{application_dir}; git checkout #{commit}`
+	version = Version_class.new(application_dir, commit)
+	version.build
+	puts "Latest Version Constraint Breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}"
+end
+
+def first_last_version_comparison_on_num(application_dir)
+	`cd #{application_dir}; git stash; git checkout master`
+	versions = extract_commits(application_dir, 1, false)
+	if versions.length <= 0
+		puts "No versions"
+		return
+	end
+	version0 = versions[0]
+	version1 = versions[-1]
+	version0.build
+	version1.build
+	puts "Latest Version Constraint Breakdown: #{version0.total_constraints_num} #{version0.db_constraints_num} #{version0.model_constraints_num} #{version0.html_constraints_num}"
+	puts "First Version Constraint Breakdown: #{version1.total_constraints_num} #{version1.db_constraints_num} #{version1.model_constraints_num} #{version1.html_constraints_num}"
+end
+
+
+def total_number_comparison(application_dir, commit="master")
+	`cd #{application_dir}; git checkout #{commit}`
+	version = Version_class.new(application_dir, commit)
+	version.build
+	puts "Latest Version Constraint Breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}"
+end
+
+def traverse_all_versions(application_dir, interval, tag_unit=true)
+	versions = extract_commits(application_dir, interval, tag_unit)
 	puts "versions.length: #{versions.length}"
 	return if versions.length <= 0
 	app_name = application_dir.split("/")[-1]
@@ -49,6 +79,7 @@ def traverse_all_versions(application_dir, interval)
   sumh2 = 0
   sumh3 = 0
   sumh4 = 0
+	count1 = count2 = count3 = count4 = count5 = count6 = count7 = count8 = counth1 = counth2 = counth3 = counth4 = 0
   start = Time.now
 	for i in 1...versions.length
 		#puts "=============#{i}============="
@@ -85,18 +116,31 @@ def traverse_all_versions(application_dir, interval)
 		c7 = model_nccs.length
 		c8 = db_nccs.length
     ch4 = html_nccs.length
-		sum1 += c1
-		sum2 += c2
-		sum3 += c3
-		sum4 += c4
-		sum5 += c5
-		sum6 += c6
-		sum7 += c7
-		sum8 += c8
-    sumh1 += ch1
-    sumh2 += ch2
-    sumh3 += ch3
-    sumh4 += ch4
+		sum1 += c1 # model ncs
+		sum2 += c2 # db ncs
+		sum3 += c3 # model ccs
+		sum4 += c4 # db ccs
+		sum5 += c5 # model eccs
+		sum6 += c6 # db eccs
+		sum7 += c7 # model nccs
+		sum8 += c8 # db nccs
+    sumh1 += ch1 # html ncs
+    sumh2 += ch2 # html ccs
+    sumh3 += ch3 # html eccs
+    sumh4 += ch4 # html nccs
+		count1 += 1 if c1 > 0
+		count2 += 1 if c2 > 0
+		count3 += 1 if c3 > 0
+		count4 += 1 if c4 > 0
+		count5 += 1 if c5 > 0
+		count6 += 1 if c6 > 0
+		count7 += 1 if c7 > 0
+		count8 += 1 if c8 > 0
+		counth1 += 1 if ch1 > 0
+		counth2 += 1 if ch2 > 0
+		counth3 += 1 if ch3 > 0
+		counth4 += 1 if ch4 > 0
+
 		versions[i-1] = nil
     output_html_constraints.write("======#{new_version.commit} vs #{version.commit}=====\n")
     nmhcs.each do |c|
@@ -108,6 +152,7 @@ def traverse_all_versions(application_dir, interval)
     start = Time.now
 	end
 	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8} #{sumh1} #{sumh2} #{sumh3} #{sumh4}\n")
+	output.write("VERSION number #{count1} #{count2} #{count3} #{count4} #{count5} #{count6} #{count7} #{count8} #{counth1} #{counth2} #{counth3} #{counth4}\n")
 	output.close
   output_html_constraints.close
 end
