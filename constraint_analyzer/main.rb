@@ -48,6 +48,9 @@ OptionParser.new do |opts|
   opts.on("--commit-unit", "please specify whether using commit as unit") do |v|
     options[:commit_unit] = true
   end
+  opts.on("--api-breakdown", "please specify whether to get the API breakdown") do |v|
+    options[:api_breakdown] = true
+  end
 end.parse!
 
 if options[:app]
@@ -78,4 +81,7 @@ if options[:latest] and application_dir
 end
 if options[:fln] and application_dir
   first_last_version_comparison_on_num(application_dir)
+end
+if options[:api_breakdown] and application_dir
+  api_breakdown(application_dir)
 end
