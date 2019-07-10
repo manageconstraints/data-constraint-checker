@@ -9,10 +9,21 @@ class Version_class
 		@db_constraints_num = 0
 		@model_constraints_num = 0
 		@html_constraints_num = 0
-
+		@db_constraints = []
+		@model_constraints = []
+		@html_constraints = []
+	end
+	def getDbConstraints
+		return @db_constraints
+	end
+	def getModelConstraints
+		return @model_constraints
+	end
+	def getHtmlConstraints
+		return @html_constraints
 	end
 	def extract_files
-		if @app_dir and @commit 
+		if @app_dir and @commit
 			@files = read_constraint_files(@app_dir, @commit)
 		end
 	end
@@ -28,12 +39,15 @@ class Version_class
 			file.getConstraints.each do |k, constraint|
 				if constraint.type == Constraint::DB
 					@db_constraints_num += 1
+					@db_constraints << constraint
 				end
 				if constraint.type == Constraint::MODEL
 					@model_constraints_num += 1
+					@model_constraints << constraint
 				end
 				if constraint.type == Constraint::HTML
 					@html_constraints_num += 1
+					@html_constraints << constraint
 				end
 			end
 		end
@@ -169,7 +183,7 @@ class Version_class
 					db_filename = column.file_class.filename
 				rescue
 					column_name = "nocolumn"
-					db_filename = "nofile" 
+					db_filename = "nofile"
         end
         next unless column # if the column doesn't exist
         next if column.is_deleted # if the column is deleted
@@ -195,9 +209,9 @@ class Version_class
 					puts "absent: #{column_name} #{v.table} #{db_filename} #{v.class.name} #{@commit}"
 				else
 					v2 = model_cons[k2]
-					if v.is_a?Length_constraint				
-						if (v2.max_value and v.max_value  and v2.max_value != v.max_value) 
-							puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{db_filename} #{@commit}" 
+					if v.is_a?Length_constraint
+						if (v2.max_value and v.max_value  and v2.max_value != v.max_value)
+							puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{db_filename} #{@commit}"
 						end
 						if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
 							puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{db_filename} #{@commit}"

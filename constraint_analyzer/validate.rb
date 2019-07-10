@@ -3,13 +3,13 @@ class Constraint
 	MODEL = "validate"
 	HTML = "html"
 	attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column
-	#type: model from validate function / db migration file 
+	#type: model from validate function / db migration file
 	def initialize(table, column, type, allow_nil=false, allow_blank=false)
 		@column = column
 		@table = table
 		@type = type
 		@if_cond = nil
-		@unless_cond = nil 
+		@unless_cond = nil
 		@allow_blank = allow_blank
 		@allow_nil = allow_nil
 		@is_new_column = false
@@ -18,7 +18,7 @@ class Constraint
 		if @type == old_constraint.type and is_same_notype(old_constraint)
 			return true
 		end
-		return false 
+		return false
 	end
 	def is_same_notype(old_constraint)
 		if old_constraint.class == self.class
@@ -31,12 +31,20 @@ class Constraint
 			return true
 		end
 		return false
-	end	
+	end
 	def self_print
 		puts to_string
 	end
 	def to_string
 		return "#{self.class.name} #{table} #{column} #{type}"
+	end
+	def self.inherited(subclass)
+		@descendants = [] if not @descendants
+		@descendants << subclass
+	end
+
+	def self.descendants
+		return @descendants
 	end
 end
 
@@ -74,7 +82,7 @@ class Length_constraint < Constraint
 			@min_value = @min_value.to_i
 		else
 			@min_value = nil
-		end	 
+		end
 	end
 	def is_child_same(old_constraint)
 		if self.max_value == old_constraint.max_value and \
@@ -101,7 +109,7 @@ class Length_constraint < Constraint
 		puts to_string
 	end
 	def to_string
-		return "#{super} #{max_value} #{min_value} #{range} #{is_constraint}" 
+		return "#{super} #{max_value} #{min_value} #{range} #{is_constraint}"
 	end
 end
 
@@ -115,7 +123,7 @@ class Format_constraint < Constraint
 	end
 	def is_child_same(old_constraint)
 		if self.with_format == old_constraint.with_format and \
-			self.on_condition == old_constraint.on_condition 
+			self.on_condition == old_constraint.on_condition
 			return true
 		end
 	end
@@ -226,7 +234,7 @@ class Uniqueness_constraint < Constraint
 	def to_string
 		return "#{super} #{scope}"
 	end
-	def is_child_same(old_constraint)	
+	def is_child_same(old_constraint)
 		return @scope == old_constraint.scope
 	end
 	def is_same(old_constraint)
@@ -237,7 +245,7 @@ class Uniqueness_constraint < Constraint
 	end
 end
 
-class Numericality_constraint < Constraint 
+class Numericality_constraint < Constraint
 	attr_accessor :only_integer, :greater_than, :greater_than_or_equal_to, :equal_to, :less_than, :less_than_or_equal_to, :is_odd, :is_even
 	def parse(dic)
 		if dic["only_integer"]&.source == "true"
@@ -252,7 +260,7 @@ class Numericality_constraint < Constraint
 		@is_even = dic["even"]&.source
 	end
 	def is_child_same(old_constraint)
-		attributes = self.instance_variables.map{|x| x[2..-1]}	
+		attributes = self.instance_variables.map{|x| x[2..-1]}
 		if @only_integer == old_constraint.only_integer and \
 		@greater_than == old_constraint.greater_than and \
 		@greater_than_or_equal_to	== old_constraint.greater_than_or_equal_to and \
