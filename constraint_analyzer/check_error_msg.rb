@@ -36,42 +36,7 @@ def os_walk(dir)
   [root, files, dirs]
 end
 
-def check_app_for_missing_errors(application_dir=nil, app_name)
-  unless application_dir
-    puts "application dir not defined"
-    return
-  end
 
-  $cur_app = app_name
-
-  $error_results[app_name] = {}
-  $error_results[app_name][:missing] = {}
-  $error_results[app_name][:found] = {}
-
-  root, files, dirs = os_walk(application_dir)
-  model_files = []
-  for filename in files
-    filename = filename.to_s
-    if filename.include?("app/models/")
-      model_files << filename
-    end
-  end
-
-  #model_files = ["/Users/utsavsethi/workspace/apps/falling-fruit/app/models/observation.rb"]
-  model_files.each do |filename|
-    file = open(filename)
-    contents = file.read
-    file.close
-    begin
-      $cur_file = filename
-      ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-      search_ast_for_missing_errors(ast)
-    rescue StandardError => e
-      #puts "failed filename: #{filename}"
-      #puts e.message
-    end
-  end
-end
 
 def get_validation_function_names(ast)
   if ast.type.to_s == 'list'
@@ -109,14 +74,18 @@ def get_validation_function_names(ast)
 end
 
 def found_missing(app_name, file, source)
-  $error_results[app_name][:missing][file] =  source
+  if $error_results[app_name][:missing][file]
+    $error_results[app_name][:missing][file] << source
+  else
+    $error_results[app_name][:missing][file] =  [source]
+  end
 end
 
-def did_not_find(app_name, file)
-  if $error_results[app_name][:found][file].nil?
-    $error_results[app_name][:found][file] = 1
+def did_not_find(app_name, file, source)
+  if $error_results[app_name][:found][file]
+    $error_results[app_name][:found][file] << source
   else
-    $error_results[app_name][:found][file] = $error_results[app_name][:found][file] + 1
+    $error_results[app_name][:found][file] = [source]
   end
 end
 
@@ -151,7 +120,7 @@ def check_for_error(ast, funcnames)
           # puts "Missing error!"
           # puts ast.source
         else
-          did_not_find($cur_app, $cur_file)
+          did_not_find($cur_app, $cur_file, ast.source)
           # puts $cur_file
           # puts "Error check - OK"
         end
@@ -168,7 +137,7 @@ def check_for_error(ast, funcnames)
           # puts "Missing error!"
           # puts ast.source
         else
-          did_not_find($cur_app, $cur_file)
+          did_not_find($cur_app, $cur_file, ast.source)
           # puts $cur_file
           # puts "Error check - OK"
         end
@@ -182,10 +151,19 @@ def check_for_error(ast, funcnames)
       # puts "Missing error!"
       # puts ast.source
     else
-      did_not_find($cur_app, $cur_file)
+      did_not_find($cur_app, $cur_file, ast.source)
       # puts $cur_file
       # puts "Error check - OK"
     end
+  end
+end
+
+def summarize_results()
+  $error_results.each do |appname, results|
+    num_found = results[:found].reduce(0) {|sum, (key, value)| sum += value.size}
+    num_missing = results[:missing].reduce(0) {|sum, (key, value)| sum += value.size}
+
+    puts appname + "\tnum_found: " + num_found.to_s + "\tnum_missing: " + num_missing.to_s
   end
 end
 
@@ -197,5 +175,10 @@ def search_ast_for_missing_errors(ast)
 
 end
 
+
+# grep -ril "EachValidator" * | xargs -I % grep -iL "errors\.add\|errors\[" %
+
+
 check_all_apps "/Users/utsavsethi/workspace/apps/"
 pp $error_results
+summarize_results
