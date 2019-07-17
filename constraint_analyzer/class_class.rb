@@ -14,7 +14,7 @@ class File_class
 	def addConstraints(constraints)
 		constraints.each do |constraint|
 			# puts"constraint #{constraint.class}"
-			key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+			key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
 			@constraints[key] = constraint
 			constraint.table = self.class_name
 		end
@@ -36,8 +36,8 @@ class File_class
 		return unless @columns
 		@columns.each do |k, v|
 			type = 'db'
-			column_type = v.column_type 
-			if column_type == "string" 
+			column_type = v.column_type
+			if column_type == "string"
 				max_value = 255
 			end
 			if column_type == "text"
@@ -48,7 +48,7 @@ class File_class
 			if max_value
 				constraint = Length_constraint.new(@class_name, column_name, type)
 				constraint.max_value = max_value
-				key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+				key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
 				exist_con = @constraints[key]
 				if exist_con and (not exist_con.max_value || exist_con.max_value == "nil")
 					exist_con.max_value = max_value
@@ -62,7 +62,7 @@ class File_class
 				if column_type == "integer"
 					constraint.only_integer = true
 				end
-				key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+				key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
 				@constraints[key] = constraint
 			end
 		end
@@ -74,9 +74,9 @@ class File_class
 				type = "db"
 				v.columns.each do |column|
 					constraint = Uniqueness_constraint.new(@class_name, column, type)
-					key = "#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+					key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
 					@constraints[key] = constraint
-				end	
+				end
 			end
 		end
 	end
