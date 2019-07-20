@@ -64,6 +64,14 @@ def handle_string_literal_node(ast)
 	end
 end
 
+def handle_numeric_literal_node(ast)
+	return unless ast
+	if ast&.type.to_s == "int" || ast&.type.to_s == "float"
+		column = ast.source
+		return column
+	end
+end
+
 def extract_hash_from_list(ast)
 	return {} unless ast
 	return {} unless ast.type.to_s == "list"

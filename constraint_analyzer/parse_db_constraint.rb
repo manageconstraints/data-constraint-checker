@@ -93,12 +93,25 @@ def handle_change_column(ast, is_deleted=false)
 		table_class = File_class.new("")
 		$dangling_classes[class_name] = table_class
 	end
+	if is_deleted
+		table_class.getColumns[column_name].is_deleted = true
+		constraint_delete_keys = table_class.getConstraints.select do |k,v|
+			k.start_with?"#{class_name}-#{column_name}"
+		end
+		table_class.getConstraints.delete_if {|k,v| constraint_delete_keys.include? k}
+	end
+
 	if table and column_name and column_type  
 		column = Column.new(table_class, column_name, column_type, $cur_class, dic)
 		column.is_deleted = is_deleted
 		columns = table_class.getColumns
 		column.prev_column =  columns[column_name]
 		table_class.addColumn(column)
+		constraint_delete_keys = table_class.getConstraints.select do |k,v|
+				k.include? "#{class_name}-#{column_name}-#{Presence_constraint.to_s}-#{Constraint::DB}" or
+						k.include? "#{class_name}-#{column_name}-#{Length_constraint.to_s}-#{Constraint::DB}"
+		end
+		table_class.getConstraints.delete_if {|k,v| constraint_delete_keys.include? k}
 		constraints = create_constraints(class_name, column_name, column_type, Constraint::DB, dic)
 		table_class.addConstraints(constraints)
 	end
@@ -224,9 +237,11 @@ def handle_reversible(ast)
 		end
 	end
 end
+
 def create_constraints(class_name, column_name, column_type, type, dic)
 	return [] unless dic
 	return [] unless dic.length > 0
+	return [] if %w(timestamps spatial).include? column_type
 	constraints = []
 	if  dic["null"]
 		null = dic["null"].source
@@ -381,7 +396,7 @@ def handle_rename_column(ast)
 		constraints = table_class.getConstraints
 		new_constraints = []
 		constraints.each do |k, v|
-			prefix = "#{old_column_name}-"
+			prefix = "#{class_name}-#{old_column_name}-"
 			if k.start_with?prefix
 				v.column = new_column_name
 				new_constraints << v
