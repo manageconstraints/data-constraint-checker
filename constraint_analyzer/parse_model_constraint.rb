@@ -37,7 +37,14 @@ def parse_model_constraint_file(ast)
 			puts"funcname #{funcname} #{ast.source}"
 			constraints = parse_validate_constraint_function($cur_class.class_name, funcname, ast[1])
 			$cur_class.addConstraints(constraints) if constraints.length > 0
-		end
+    end
+    if funcname == "belongs_to"
+      if ast[1][0].type.to_s == "symbol_literal"
+        key_field = handle_symbol_literal_node(ast[1][0]) + "_id"
+        puts "foreign key: #{key_field}"
+        $cur_class.addForeignKey(key_field)
+      end
+    end
   end
 end
 

@@ -10,6 +10,7 @@ class File_class
 		@columns = {}
 		@is_deleted = false
 		@indices = {}
+		@foreign_keys = []
 	end
 	def addConstraints(constraints)
 		constraints.each do |constraint|
@@ -26,6 +27,12 @@ class File_class
 	def getColumns
 		return @columns
 	end
+	def addForeignKey(key_name)
+		@foreign_keys << key_name
+	end
+	def getForeignKeys
+		return @foreign_keys
+	end
 	def addColumn(column)
 		@columns[column.column_name] = column
 	end
@@ -35,6 +42,7 @@ class File_class
 	def create_con_from_column_type
 		return unless @columns
 		@columns.each do |k, v|
+			next if v.is_deleted
 			type = 'db'
 			column_type = v.column_type
 			if column_type == "string"
@@ -116,7 +124,7 @@ class Column
 		ast = dic["default"]
     if ast
       value = dic["default"]&.source if dic["default"]&.type.to_s == "var_ref"
-      @default_value = value || handle_symbol_literal_node(ast) || handle_string_literal_node(ast)
+      @default_value = value || handle_symbol_literal_node(ast) || handle_string_literal_node(ast) || handle_numeric_literal_node(ast)
     end
     if dic["auto_increment"]
       value = handle_symbol_literal_node(ast) || handle_string_literal_node(ast)
