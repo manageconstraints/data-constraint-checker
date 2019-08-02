@@ -56,7 +56,7 @@ class Length_constraint < Constraint
 			self.range = range
 		end
 		if dic["within"]
-			range = dic["in"].source
+			range = dic["within"].source
 			self.range = range
 		end
 		if dic["maximum"]
