@@ -39,8 +39,8 @@ def parse_model_constraint_file(ast)
 			$cur_class.addConstraints(constraints) if constraints.length > 0
     end
     if funcname == "belongs_to"
-      if ast[1][0].type.to_s == "symbol_literal"
-        key_field = handle_symbol_literal_node(ast[1][0]) + "_id"
+      key_field = parse_foreign_key(ast[1])
+      if key_field
         puts "foreign key: #{key_field}"
         $cur_class.addForeignKey(key_field)
       end
@@ -48,6 +48,27 @@ def parse_model_constraint_file(ast)
   end
 end
 
+def parse_foreign_key(ast)
+  dic = {}
+  key_field = ""
+  if ast[0].type.to_s == "symbol_literal"
+    key_field = handle_symbol_literal_node(ast[0]) + "_id"
+    if ast[1] and ast[1].type.to_s == "list"
+      ast[1].each do |child|
+        if child.type.to_s == 'assoc'
+          key, value = handle_assoc_node(child)
+          if key and value
+            dic[key] = value
+          end
+        end
+      end
+    end
+  end
+  if !dic.empty? and dic.has_key? "foreign_key" and dic["foreign_key"].type.to_s == "string_literal"
+    key_field = handle_string_literal_node(dic["foreign_key"])
+  end
+  return key_field
+end
 
 
 def parse_validate_constraint_function(table, funcname, ast)
