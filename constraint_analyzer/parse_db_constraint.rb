@@ -172,7 +172,7 @@ def handle_change_column_null(ast)
 		if ast[1][0].type.to_s == "symbol_literal"
 			table_name = handle_symbol_literal_node(ast[1][0]) || handle_string_literal_node(ast[1][0])
 			class_name = convert_tablename(table_name)
-			table_class = $model_classes[class_name]
+      table_class = $model_classes[class_name]
 		end
 		table_class = $dangling_classes[class_name] if !table_class
 		if !table_class 

@@ -54,9 +54,11 @@ def read_constraint_files(application_dir=nil,version='')
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = File_class.new(filename)
 			$cur_class.ast = ast
+      $module_name = ""
       $classes = []
       parse_model_constraint_file(ast)
 			model_classes[$cur_class.class_name] = $cur_class.dup
+			puts "$cur_class.class_name #{$cur_class.class_name}"
       $classes.each do |c|
         model_classes[c.class_name] = c
         puts "add new class #{c.class_name} #{c.upper_class_name}"

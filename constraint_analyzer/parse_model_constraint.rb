@@ -5,6 +5,8 @@ def parse_model_constraint_file(ast)
 		end
 	end
 	if ast.type.to_s == 'module'
+    moduleName = ast[0]&.source
+    $module_name += moduleName
 		if ast[1] and ast[1].type.to_s == "list"
 			ast[1].each do |child|
 				parse_model_constraint_file(child)
@@ -19,7 +21,7 @@ def parse_model_constraint_file(ast)
       if $cur_class.class_name
         $classes << $cur_class.dup
       end
-			$cur_class.class_name = c1.source
+			$cur_class.class_name = $module_name + c1.source
 		end
 		if c2 and (c2.type.to_s == 'var_ref' or c2.type.to_s == 'const_path_ref')
 			$cur_class.upper_class_name = c2.source
