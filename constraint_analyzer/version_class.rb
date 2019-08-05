@@ -2,7 +2,7 @@ class Version_class
 	attr_accessor  :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num
 	def initialize(app_dir, commit)
 		@app_dir = app_dir
-		@commit = commit
+		@commit = commit.strip
 		@files = {}
 		@activerecord_files = {}
 		@total_constraints_num = 0
