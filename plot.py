@@ -5,7 +5,8 @@ from matplotlib import colors as mcolors
 
 app_names = open("app_names.txt").read().split("\n")
 colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
-
+fig = plt.figure()
+index = 1
 for app in app_names:
     filename = "log/codechange_{}.log".format(app)
     if os.path.exists(filename):
@@ -18,9 +19,15 @@ for app in app_names:
 
         x = array[:, 1] + array[:, 2]
         y = array[:,3] + array[:,4] + array[:,5] + array[:, 6] + array[:,11] + array[:, 12]
-        plt.xlabel('line of code change')
-        plt.ylabel('added/changed constraints')
-        plt.title(app)
-        plt.scatter(x, y, s=area, c=color, alpha=0.5)
-        plt.savefig(output, dpi = 300)
-        plt.close()
+        # plt.xlabel('line of code change')
+        # plt.ylabel('added/changed constraints')
+        axes = fig.add_subplot(2,3,index)
+        index += 1
+        #axes.title(app)
+        axes.scatter(x, y, s=area, c=color, alpha=0.5)
+        axes.title.set_text(app)
+        # plt.scatter(x, y, s=area, c=color, alpha=0.5)
+        # plt.savefig(output, dpi = 300, bbox_inches='tight')
+        # plt.close()
+plt.subplots_adjust(hspace = 0.4, wspace = 0.4)
+plt.savefig("output/total.png", dpi = 300, bbox_inches='tight')
