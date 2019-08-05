@@ -12,12 +12,12 @@ def os_walk(dir)
   [root, files, dirs]
 end
 def read_constraint_files(application_dir=nil,version='')
-	
+
 	if application_dir and version
 		$app_dir2 = application_dir
 	else
 		puts "application dir not defined or version number is not defined"
-		return 
+		return
 	end
 	# checkout to specified version
 	if version != ''
@@ -50,7 +50,7 @@ def read_constraint_files(application_dir=nil,version='')
     contents = file.read
     file.close
     puts "reach here true #{filename}" if filename.include?"app/models/wiki_page.rb"
-		begin 
+		begin
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = File_class.new(filename)
 			$cur_class.ast = ast
@@ -117,23 +117,27 @@ def read_html_file_ast(view_files)
       `rm #{formalized_filename}`
 		end
 		target = File.join(File.expand_path(File.dirname(__FILE__)), "../tmp/#{base}.rb")
-		`ruby #{extract_erb} #{erb_filename} #{target}`
-		file = open(target)
-		contents = file.read
-    if not (contents.include?"required" or contents.include?"maxlength" or contents.include?"minlength" or contents.include?"pattern")
-      next
-    end
-		file.close
-		if erb_filename.include?"haml"
-    	`rm #{erb_filename}` 
-    end
-    `rm #{target}`
 		begin
-			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-			$cur_class = File_class.new(filename)
-      puts "$cur_class #{$cur_class.filename}"
-			parse_html_constraint_file(ast)
-		rescue
-		end
+      `ruby #{extract_erb} #{erb_filename} #{target}`
+    	file = open(target)
+  		contents = file.read
+      if not (contents.include?"required" or contents.include?"maxlength" or contents.include?"minlength" or contents.include?"pattern")
+        next
+      end
+  		file.close
+  		if erb_filename.include?"haml"
+      	`rm #{erb_filename}`
+      end
+      `rm #{target}`
+  		begin
+  			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+  			$cur_class = File_class.new(filename)
+        puts "$cur_class #{$cur_class.filename}"
+  			parse_html_constraint_file(ast)
+  		rescue
+  		end
+    rescue
+      puts "file doesn't exist"
+    end
 	end
 end
