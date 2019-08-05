@@ -106,6 +106,7 @@ def traverse_all_versions(application_dir, interval, tag_unit=true)
 	app_name = application_dir.split("/")[-1]
 	versions[0].build
 	output = open("../log/output_#{app_name}.log", 'w')
+  output_diff_codechange = open("../log/codechange_#{app_name}.log", "w")
   log_dir = "../log/#{app_name}_log/"
   if not File.exist?log_dir
     `mkdir #{log_dir}`
@@ -136,7 +137,7 @@ def traverse_all_versions(application_dir, interval, tag_unit=true)
 		if ncs.length > 0 or ccs.length > 0
 			cnt += 1
 		end
-
+		file, insertion, deletion = code_change(application_dir, new_version.commit, version.commit)
 		model_ncs = ncs.select{|x| x.type == Constraint::MODEL}
 		db_ncs = ncs.select{|x| x.type == Constraint::DB}
     html_ncs = ncs.select{|x| x.type == Constraint::HTML}
@@ -185,7 +186,7 @@ def traverse_all_versions(application_dir, interval, tag_unit=true)
 		counth2 += 1 if ch2 > 0
 		counth3 += 1 if ch3 > 0
 		counth4 += 1 if ch4 > 0
-
+    output_diff_codechange.write("#{file} #{insertion} #{deletion} #{c1} #{c2} #{c3} #{c4} #{c5} #{c6} #{c7} #{c8} #{ch1} #{ch2} #{ch3} #{ch4}\n")
 		versions[i-1] = nil
     output_html_constraints.write("======#{new_version.commit} vs #{version.commit}=====\n")
     nmhcs.each do |c|
@@ -199,6 +200,7 @@ def traverse_all_versions(application_dir, interval, tag_unit=true)
 	output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8} #{sumh1} #{sumh2} #{sumh3} #{sumh4}\n")
 	output.write("VERSION number #{count1} #{count2} #{count3} #{count4} #{count5} #{count6} #{count7} #{count8} #{counth1} #{counth2} #{counth3} #{counth4}\n")
 	output.close
+  output_diff_codechange.close
   output_html_constraints.close
 end
 def find_all_mismatch(application_dir, interval)
