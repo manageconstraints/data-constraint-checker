@@ -19,15 +19,16 @@ for app in app_names:
 
         x = array[:, 1] + array[:, 2]
         y = array[:,3] + array[:,4] + array[:,5] + array[:, 6] + array[:,11] + array[:, 12]
-        # plt.xlabel('line of code change')
-        # plt.ylabel('added/changed constraints')
-        axes = fig.add_subplot(2,3,index)
+        axes = fig.add_subplot(3, 2,index)
         index += 1
         #axes.title(app)
         axes.scatter(x, y, s=area, c=color, alpha=0.5)
         axes.title.set_text(app)
+        axes.title.set_size(8)
+        for label in (axes.get_xticklabels() + axes.get_yticklabels()):
+            label.set_fontsize(8)
         # plt.scatter(x, y, s=area, c=color, alpha=0.5)
         # plt.savefig(output, dpi = 300, bbox_inches='tight')
         # plt.close()
-plt.subplots_adjust(hspace = 0.4, wspace = 0.4)
+plt.subplots_adjust(hspace = 0.4, wspace = 0.15)
 plt.savefig("output/total.png", dpi = 300, bbox_inches='tight')
