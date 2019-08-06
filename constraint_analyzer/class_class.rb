@@ -49,7 +49,7 @@ class File_class
 				max_value = 255
 			end
 			if column_type == "text"
-				max_value = 66536
+				max_value = 65535
 			end
 			column_name = v.column_name
 			puts "max_value from type: #{max_value} #{column_name} #{column_type} #{@class_name}" if $debug_mode

@@ -1,3 +1,5 @@
+require 'pp'
+
 class Version_class
 	attr_accessor  :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num
 	def initialize(app_dir, commit)
@@ -165,6 +167,13 @@ class Version_class
 		mm_cons_num = 0
     absent_cons2 = {}
     mm_cons_num2 = 0
+
+		# Categorize absent constraints
+		absent_timestamp_cons = {}
+		absent_foreign_key_cons = {}
+		absent_text_field_cons = {}
+		absent_string_field_cons = {}
+		absent_other_cons = {}
 		@activerecord_files.each do |key, file|
 			constraints = file.getConstraints
 			model_cons = constraints.select{|k,v| k.include?"-#{Constraint::MODEL}"}
@@ -207,6 +216,17 @@ class Version_class
 					absent_cons[k] = v
 					v.self_print
 					puts "absent: #{column_name} #{v.table} #{db_filename} #{v.class.name} #{@commit}"
+					if v.column == "updated_at" or v.column == "created_at"
+						absent_timestamp_cons[k] = v
+					elsif file.getForeignKeys.include? v.column
+						absent_foreign_key_cons[k] = v
+					elsif v.is_a? Length_constraint and v.max_value >= 65535
+						absent_text_field_cons[k] = v
+					elsif v.is_a? Length_constraint and v.max_value == 255
+						absent_string_field_cons[k] = v
+					else
+						absent_other_cons[k] = v
+					end
 				else
 					v2 = model_cons[k2]
 					if v.is_a?Length_constraint
@@ -258,7 +278,21 @@ class Version_class
 				end
 			end
 		end
+
+
+
+
+
 		puts "total absent: #{absent_cons.size} total_constraints: #{total_constraints} model_cons_num: #{model_cons_num} db_cons_num: #{db_cons_num} mm_cons_num: #{mm_cons_num}"
+		puts "ABSENT: " + @app_dir.to_s
+		puts "ABSENT TIMESTAMP CONSTRAINTS: #{absent_timestamp_cons.size}"
+		puts "ABSENT FOREIGN KEY CONSTRAINTS: #{absent_foreign_key_cons.size}"
+		puts "ABSENT TEXT FIELD CONSTRAINTS: #{absent_text_field_cons.size}"
+		puts "ABSENT STRING FIELD CONSTRAINTS: #{absent_string_field_cons.size}"
+		puts "ABSENT OTHER CONSTRAINTS: #{absent_other_cons.size}"
+		puts "ABSENT OTHER CONSTRAINTS DETAIL:"
+		pp absent_other_cons.keys
+
     puts "total absent2: #{absent_cons2.size} total_constraints: #{total_constraints} html_cons_num: #{html_cons_num} model_cons_num: #{model_cons_num}  mm_cons_num2: #{mm_cons_num2}"
 
   end
