@@ -5,3 +5,4 @@ output
 ../log/output_diaspora.log
 apps/*
 log/*
+.idea
