@@ -222,6 +222,19 @@ class Version_class
 						puts "mismatch constraint #{db_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
 						mm_cons_num += 1
 					end
+
+					# temp analysis
+					if not v.is_same_notype(v2)
+						mismatch_category = "DB-Model"
+						constraint_key = k2.gsub("-validate", "")
+						db_min = (v.is_a?Length_constraint and v.min_value) ? v.min_value : ""
+						db_max = (v.is_a?Length_constraint and v.max_value) ? v.max_value : ""
+						model_min = (v2.is_a?Length_constraint and v2.min_value) ? v2.min_value : ""
+						model_max = (v2.is_a?Length_constraint and v2.max_value) ? v2.max_value : ""
+						mismatch_fields = v.get_mismatch_fields(v2)
+
+						puts "MC2\t#{@app_dir}\t#{v.class.name}\t#{mismatch_category}\t#{constraint_key}\t#{db_min}\t#{db_max}\t#{model_min}\t#{model_max}\t#{mismatch_fields}"
+					end
 				end
       end
 

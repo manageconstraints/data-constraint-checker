@@ -33,6 +33,24 @@ class Constraint
 		end
 		return false
 	end
+	def get_mismatch_fields(old_constraint)
+		mismatch_fields = []
+		if @if_cond != old_constraint.if_cond
+			mismatch_fields << "if_cond"
+		end
+		if @unless_cond != old_constraint.unless_cond
+			mismatch_fields << "unless_cond"
+		end
+		if @allow_blank != old_constraint.allow_blank
+			mismatch_fields << "allow_blank-#{@allow_blank}-#{old_constraint.allow_blank}"
+		end
+		if @allow_nil != old_constraint.allow_nil
+			mismatch_fields << "allow_nil-#{@allow_nil}-#{old_constraint.allow_nil}"
+		end
+
+		return mismatch_fields
+	end
+
 	def self_print
 		puts to_string
 	end
@@ -113,6 +131,25 @@ class Length_constraint < Constraint
 		end
 		return false
 	end
+
+	def get_mismatch_fields(old_constraint)
+		mismatch_fields = []
+		if self.max_value != old_constraint.max_value
+			mismatch_fields << "max_value"
+		end
+		if self.min_value != old_constraint.min_value
+			mismatch_fields << "min_value"
+		end
+		if self.range != old_constraint.range
+			mismatch_fields << "range"
+		end
+		if self.is_constraint != old_constraint.is_constraint
+			mismatch_fields << "is_constraint"
+		end
+
+		return super + mismatch_fields
+	end
+
 	def self_print
 		puts to_string
 	end
@@ -225,12 +262,12 @@ class Uniqueness_constraint < Constraint
 	end
 	def parse(dic)
 		super
-		@scope = []
+		#@scope = []
 		if dic["scope"]
 			scope_ast = dic["scope"]
 			if scope_ast.type.to_s == "symbol_literal"
 				column = handle_symbol_literal_node(scope_ast)
-				@scope << column
+				@scope = [column]
 			end
 			if scope_ast.type.to_s == "array"
 				@scope = handle_array_node(scope_ast)
@@ -254,6 +291,14 @@ class Uniqueness_constraint < Constraint
 	end
 	def is_same_notype(old_constraint)
 		return (super and is_child_same(old_constraint))
+	end
+	def get_mismatch_fields(old_constraint)
+		mismatch_fields = []
+		if @scope != old_constraint.scope
+			mismatch_fields << "scope-#{@scope}-#{old_constraint.scope}"
+		end
+
+		return super + mismatch_fields
 	end
 end
 
@@ -291,6 +336,35 @@ class Numericality_constraint < Constraint
 	end
 	def is_same_notype(old_constraint)
 		return (super and is_child_same(old_constraint))
+	end
+	def get_mismatch_fields(old_constraint)
+		mismatch_fields = []
+		if @only_integer != old_constraint.only_integer
+			mismatch_fields << "only_integer"
+		end
+		if @greater_than != old_constraint.greater_than
+			mismatch_fields << "greater_than-#{@greater_than}-#{old_constraint.greater_than}"
+		end
+		if @greater_than_or_equal_to != old_constraint.greater_than_or_equal_to
+			mismatch_fields << "greater_than_or_equal_to-#{@greater_than_or_equal_to}-#{old_constraint.greater_than_or_equal_to}"
+		end
+		if @equal_to != old_constraint.equal_to
+			mismatch_fields << "equal_to-#{@equal_to}-#{old_constraint.equal_to}"
+		end
+		if @less_than != old_constraint.less_than
+			mismatch_fields << "less_than-#{@less_than}-#{old_constraint.less_than}"
+		end
+		if @less_than_or_equal_to != old_constraint.less_than_or_equal_to
+			mismatch_fields << "less_than_or_equal_to-#{@less_than_or_equal_to}-#{old_constraint.less_than_or_equal_to}"
+		end
+		if @is_odd != old_constraint.is_odd
+			mismatch_fields << "is_odd-#{@is_odd}-#{old_constraint.is_odd}"
+		end
+		if @is_even != old_constraint.is_even
+			mismatch_fields << "is_even-#{@is_even}-#{old_constraint.is_even}"
+		end
+
+		return super + mismatch_fields
 	end
 	def self_print
 		puts to_string
