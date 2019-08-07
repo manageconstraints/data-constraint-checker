@@ -74,6 +74,20 @@ def api_breakdown(application_dir)
 	output.close
 end
 
+def custom_error_msg_info(application_dir)
+	commit = "master"
+	`cd #{application_dir}; git checkout -f #{commit}`
+	version = Version_class.new(application_dir, commit)
+	version.build
+	model_cons = version.getModelConstraints
+	custom_error_msg_cons = model_cons.select{|c| c and c.custom_error_msg == true}
+	built_in_cons = model_cons.select{|c| c and !(c.is_a? Customized_constraint or c.is_a? Function_constraint)}
+	puts "============ CUSTOM ERROR MSG"
+	puts "custom error msg count: #{custom_error_msg_cons.length}"
+	puts "total model built-in count: #{built_in_cons.length}"
+	puts "total model constraint count: #{model_cons.length}"
+end
+
 def api_type_breakdown(constraints)
 	num_dic = {}
 	constraint_classes = Constraint.descendants
