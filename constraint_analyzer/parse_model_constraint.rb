@@ -135,6 +135,7 @@ def parse_validate_constraint_function(table, funcname, ast)
 			if funcname == "validates_presence_of"
 				columns.each do |column|
 					constraint = Presence_constraint.new(table, column, type, allow_nil, allow_blank)
+					constraint.parse(dic)
 					constraints << constraint
 				end
 			end
@@ -205,6 +206,7 @@ def parse_validates(table, funcname, ast)
             if cur_value == "true"
               columns.each do |c|
                 constraint = Presence_constraint.new(table, c, type)
+                constraint.parse(dic)
                 constraints << constraint
               end
             end
@@ -223,6 +225,7 @@ def parse_validates(table, funcname, ast)
             columns.each do |c|
               constraint = Inclusion_constraint.new(table, c, type)
               constraint.range = cur_value
+              constraint.parse(dic)
               constraints << constraint
             end
           end
@@ -231,6 +234,7 @@ def parse_validates(table, funcname, ast)
             columns.each do |c|
               constraint = Exclusion_constraint.new(table, c, type)
               constraint.range = cur_value
+              constraint.parse(dic)
               constraints << constraint
             end
           end

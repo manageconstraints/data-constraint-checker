@@ -51,6 +51,9 @@ OptionParser.new do |opts|
   opts.on("--api-breakdown", "please specify whether to get the API breakdown") do |v|
     options[:api_breakdown] = true
   end
+  opts.on("--custom-error-msg", "please specify whether to get custom error messages") do |v|
+    options[:custom_error_msg] = true
+  end
 end.parse!
 
 if options[:app]
@@ -84,4 +87,7 @@ if options[:fln] and application_dir
 end
 if options[:api_breakdown] and application_dir
   api_breakdown(application_dir)
+end
+if options[:custom_error_msg] and application_dir
+  custom_error_msg_info(application_dir)
 end

@@ -2,7 +2,7 @@ class Constraint
 	DB = "db"
 	MODEL = "validate"
 	HTML = "html"
-	attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column
+	attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column, :custom_error_msg
 	#type: model from validate function / db migration file
 	def initialize(table, column, type, allow_nil=false, allow_blank=false)
 		@column = column
@@ -13,6 +13,7 @@ class Constraint
 		@allow_blank = allow_blank
 		@allow_nil = allow_nil
 		@is_new_column = false
+		@custom_error_msg = false
 	end
 	def is_same(old_constraint)
 		if @type == old_constraint.type and is_same_notype(old_constraint)
@@ -46,11 +47,18 @@ class Constraint
 	def self.descendants
 		return @descendants
 	end
+
+	def parse(dic)
+		if dic and dic.include? "message"
+			@custom_error_msg = true
+		end
+	end
 end
 
 class Length_constraint < Constraint
 	attr_accessor :min_value, :max_value, :is_constraint, :range
 	def parse(dic)
+		super
 		if dic["in"]
 			range = dic["in"].source
 			self.range = range
@@ -116,6 +124,7 @@ end
 class Format_constraint < Constraint
 	attr_accessor :with_format, :on_condition
 	def parse(dic)
+		super
 		if dic["with"]
 			with_format = dic["with"].source
 			self.with_format = with_format
@@ -145,6 +154,7 @@ end
 class Inclusion_constraint < Constraint
 	attr_accessor :range
 	def parse(dic)
+		super
 		if dic["in"]
 			range = dic["in"].source
 			self.range = range
@@ -173,6 +183,7 @@ end
 class Exclusion_constraint < Constraint
 	attr_accessor :range
 	def parse(dic)
+		super
 		if dic["in"]
 			range = dic["in"].source
 			self.range = range
@@ -213,6 +224,7 @@ class Uniqueness_constraint < Constraint
 		@case_sensitive = true
 	end
 	def parse(dic)
+		super
 		@scope = []
 		if dic["scope"]
 			scope_ast = dic["scope"]
@@ -248,6 +260,7 @@ end
 class Numericality_constraint < Constraint
 	attr_accessor :only_integer, :greater_than, :greater_than_or_equal_to, :equal_to, :less_than, :less_than_or_equal_to, :is_odd, :is_even
 	def parse(dic)
+		super
 		if dic["only_integer"]&.source == "true"
 			@only_integer = true
 		end
@@ -305,6 +318,7 @@ class Confirmation_constraint < Constraint
 		return (super and is_child_same(old_constraint))
 	end
 	def parse(dic)
+		super
 		if  dic["case_sensitive"]&.source == "false"
 			self.case_sensitive = false
 		else
@@ -323,6 +337,7 @@ class Acceptance_constraint < Constraint
 	attr_accessor :accept_condition
 	def parse(dic)
 		return unless dic
+		super
 		@accept_condition = []
 		if dic["accept"]
 			accept_condition_ast = dic["accept"]
