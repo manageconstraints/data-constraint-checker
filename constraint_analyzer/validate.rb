@@ -162,9 +162,9 @@ class Format_constraint < Constraint
 	attr_accessor :with_format, :on_condition
 	def parse(dic)
 		super
-		if dic["with"]
-			with_format = dic["with"].source
-			self.with_format = with_format
+		if dic["with"] and dic["with"].type.to_s == "regexp_literal"
+				with_format = dic["with"].source
+				self.with_format = with_format
 		end
 	end
 	def is_child_same(old_constraint)

@@ -94,7 +94,7 @@ class File_class
     @constraints.each do |k, v|
 			if v.is_a?Format_constraint and format = v.with_format
 				constraint = derive_length_constraint_from_format(v)
-        cons << constraint
+				cons << constraint unless constraint.nil?
 			end
     end
     self.addConstraints(cons)

@@ -14,6 +14,7 @@ require 'yard'
 require 'active_support'
 require 'active_support/inflector'
 require 'active_support/core_ext/string'
+require 'regexp-examples'
 application_dir = "/Users/jwy/Research/lobsters-ori/"
 load_validate_api # load the model api
 load_html_constraint_api #load the html api
