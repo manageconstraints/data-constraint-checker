@@ -84,22 +84,24 @@ end
 
 def code_change(folder, commit1, commit2)
   diffs = `cd #{folder}; git diff --stat #{commit1} #{commit2}`.lines
+	file = 0
+	insertion = 0
+	deletion = 0
   return 0, 0, 0 unless diffs
   diff = diffs[-1]
-  datas = diff.split(",")
-  if datas.length >= 3
-    file = 0
-    insertion = 0
-    deletion = 0
-    if datas[0].include?"files changed"
-      file = datas[0].to_i
-    end
-    if datas[1].include?"insertions(+)"
-      insertion = datas[1].to_i
-    end
-    if datas[2].include?"deletions(-)"
-      deletion = datas[2].to_i
-    end
-  end
+	if diff
+		datas = diff.split(",")
+		if datas.length >= 3
+			if datas[0].include?"files changed"
+				file = datas[0].to_i
+			end
+			if datas[1].include?"insertions(+)"
+				insertion = datas[1].to_i
+			end
+			if datas[2].include?"deletions(-)"
+				deletion = datas[2].to_i
+			end
+		end
+	end
   return file, insertion, deletion
 end

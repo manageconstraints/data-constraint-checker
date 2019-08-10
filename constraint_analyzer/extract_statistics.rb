@@ -28,7 +28,8 @@ def current_version_constraints_num(application_dir, commit="master")
 	`cd #{application_dir}; git checkout #{commit}`
 	version = Version_class.new(application_dir, commit)
 	version.build
-	puts "Latest Version Constraint Breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}"
+	version.column_stats
+	puts "Latest Version Constraint Breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num} columnstats: #{version.column_stats}"
 end
 
 def first_last_version_comparison_on_num(application_dir)
@@ -111,6 +112,25 @@ def total_number_comparison(application_dir, commit="master")
 	version = Version_class.new(application_dir, commit)
 	version.build
 	puts "Latest Version Constraint Breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}"
+end
+
+def traverse_constraints_code_curve(application_dir, interval, tag_unit=true)
+  versions = extract_commits(application_dir, interval, tag_unit)
+  puts "versions.length: #{versions.length}"
+  return if versions.length <= 0
+  app_name = application_dir.split("/")[-1]
+  versions[0].build
+  output = open("../log/output_loc_constraints_#{app_name}.log", 'w')
+  if not File.exist?log_dir
+    `mkdir #{log_dir}`
+  end
+  for i in 0...versions.length
+    version = versions[i]
+    version.build
+    content "#{loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n"
+    output.write(content)
+  end
+
 end
 
 def traverse_all_versions(application_dir, interval, tag_unit=true)

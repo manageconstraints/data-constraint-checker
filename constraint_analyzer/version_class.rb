@@ -1,5 +1,5 @@
 class Version_class
-	attr_accessor  :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num
+	attr_accessor  :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num, :loc
 	def initialize(app_dir, commit)
 		@app_dir = app_dir
 		@commit = commit.strip
@@ -12,6 +12,7 @@ class Version_class
 		@db_constraints = []
 		@model_constraints = []
 		@html_constraints = []
+    @loc = 0
 	end
 	def getDbConstraints
 		return @db_constraints
@@ -290,13 +291,27 @@ class Version_class
 		puts "total absent: #{absent_cons.size} total_constraints: #{total_constraints} model_cons_num: #{model_cons_num} db_cons_num: #{db_cons_num} mm_cons_num: #{mm_cons_num}"
     puts "total absent2: #{absent_cons2.size} total_constraints: #{total_constraints} html_cons_num: #{html_cons_num} model_cons_num: #{model_cons_num}  mm_cons_num2: #{mm_cons_num2}"
 
-  end
+	end
+	def column_stats
+    num_column = 0
+    num_column_has_constraints = 0
+    @activerecord_files.each do |k,v|
+      n, nh = v.num_columns_has_constraints
+      num_column += n
+      num_column_has_constraints += nh
+    end
+    return num_column, num_column_has_constraints
+	end
 	def build
 		self.extract_files
 		self.annotate_model_class
 		self.extract_constraints
 		self.print_columns
+    self.calculate_loc
     puts "@active_files : #{@activerecord_files.size}"
+  end
 
-	end
+  def calculate_loc
+    @loc = 0
+  end
 end

@@ -18,13 +18,17 @@ class File_class
 			key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
 			@constraints[key] = constraint
 			constraint.table = self.class_name
-      column = self.getColumns[constraint.column]
+		end
+		puts"@constraints.size #{@constraints.length}" if $debug_mode
+  end
+  def check_whether_column_has_constraints
+    @constraints.each do |k, v|
+      column = self.getColumns[v.column]
       if column
         column.has_constraints = true
       end
-		end
-		puts"@constraints.size #{@constraints.length}" if $debug_mode
-	end
+    end
+  end
 	def getConstraints
 		return @constraints
 	end
@@ -44,6 +48,7 @@ class File_class
 		@indices[index.name] = index
   end
   def num_columns_has_constraints
+    check_whether_column_has_constraints
     num = @columns.select{|k,v| v.has_constraints}.length
     return @columns.length, num
   end
