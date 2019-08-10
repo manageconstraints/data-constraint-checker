@@ -165,6 +165,7 @@ class Version_class
 		mm_cons_num = 0
     absent_cons2 = {}
     mm_cons_num2 = 0
+		puts "mismatch_db_model\tAppDir\tConstraintType\tCategory\tKey\tMin1\tMax1\tMin2\tMax2\tMismatchFields"
 		@activerecord_files.each do |key, file|
 			constraints = file.getConstraints
 			model_cons = constraints.select{|k,v| k.include?"-#{Constraint::MODEL}"}
@@ -174,7 +175,7 @@ class Version_class
 			db_cons_num += db_cons.length
 			html_cons_num += html_cons.length
 			db_cons.each do |k, v|
-				k2 = k.gsub("-db","-validate")
+				k2 = k.gsub("-#{Constraint::DB}","-#{Constraint::MODEL}")
         k3 = k2.gsub("-#{v.class.name}-", "-#{Customized_constraint.to_s}-")
 				puts "k2 #{k2}"
 				begin
@@ -209,21 +210,20 @@ class Version_class
 					puts "absent: #{column_name} #{v.table} #{db_filename} #{v.class.name} #{@commit}"
 				else
 					v2 = model_cons[k2]
-					if v.is_a?Length_constraint
-						if (v2.max_value and v.max_value  and v2.max_value != v.max_value)
-							puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{db_filename} #{@commit}"
-						end
-						if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
-							puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{db_filename} #{@commit}"
-						end
-						v.self_print
-					end
-					if not v.is_same_notype(v2)
-						puts "mismatch constraint #{db_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
-						mm_cons_num += 1
-					end
+					# if v.is_a?Length_constraint
+					# 	if (v2.max_value and v.max_value  and v2.max_value != v.max_value)
+					# 		puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{db_filename} #{@commit}"
+					# 	end
+					# 	if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
+					# 		puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{db_filename} #{@commit}"
+					# 	end
+					# 	v.self_print
+					# end
+					# if not v.is_same_notype(v2)
+					# 	puts "mismatch constraint #{db_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
+					# 	mm_cons_num += 1
+					# end
 
-					# temp analysis
 					if not v.is_same_notype(v2)
 						mismatch_category = "DB-Model"
 						constraint_key = k2.gsub("-validate", "")
@@ -231,9 +231,11 @@ class Version_class
 						db_max = (v.is_a?Length_constraint and v.max_value) ? v.max_value : ""
 						model_min = (v2.is_a?Length_constraint and v2.min_value) ? v2.min_value : ""
 						model_max = (v2.is_a?Length_constraint and v2.max_value) ? v2.max_value : ""
-						mismatch_fields = v.get_mismatch_fields(v2)
+						mismatch_fields = compare_instance_variables(v, v2).reject {|a| a == "@type-db-validate"}
 
-						puts "MC2\t#{@app_dir}\t#{v.class.name}\t#{mismatch_category}\t#{constraint_key}\t#{db_min}\t#{db_max}\t#{model_min}\t#{model_max}\t#{mismatch_fields}"
+						mm_cons_num += 1
+
+						puts "mismatch_constraint\t#{@app_dir}\t#{v.class.name}\t#{mismatch_category}\t#{constraint_key}\t#{db_min}\t#{db_max}\t#{model_min}\t#{model_max}\t#{mismatch_fields}"
 					end
 				end
       end
@@ -255,18 +257,32 @@ class Version_class
 					puts "absent2: #{column_name} #{v.table} #{model_filename} #{v.class.name} #{@commit}"
 				else
 					v2 = html_cons[k2]
-					if v.is_a?Length_constraint
-						if (v2.max_value and v.max_value  and v2.max_value != v.max_value)
-							puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{model_filename} #{@commit}"
-						end
-						if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
-							puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{model_filename} #{@commit}"
-						end
-						v.self_print
-					end
+					# if v.is_a?Length_constraint
+					# 	if (v2.max_value and v.max_value  and v2.max_value != v.max_value)
+					# 		puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{model_filename} #{@commit}"
+					# 	end
+					# 	if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
+					# 		puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{model_filename} #{@commit}"
+					# 	end
+					# 	v.self_print
+					# end
+					# if not v.is_same_notype(v2)
+					# 	puts "mismatch constraint #{model_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
+          #   mm_cons_num2 += 1
+					# end
+
 					if not v.is_same_notype(v2)
-						puts "mismatch constraint #{model_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
-            mm_cons_num2 += 1
+						mismatch_category = "Model-HTML"
+						constraint_key = k2.gsub("-#{Constraint::HTML}", "")
+						model_min = (v.is_a?Length_constraint and v.min_value) ? v.min_value : ""
+						model_max = (v.is_a?Length_constraint and v.max_value) ? v.max_value : ""
+						html_min = (v2.is_a?Length_constraint and v2.min_value) ? v2.min_value : ""
+						html_max = (v2.is_a?Length_constraint and v2.max_value) ? v2.max_value : ""
+						mismatch_fields = compare_instance_variables(v, v2).reject {|a| a == "@type-validate-html"}
+
+						mm_cons_num2 += 1
+
+						puts "mismatch_constraint\t#{@app_dir}\t#{v.class.name}\t#{mismatch_category}\t#{constraint_key}\t#{model_min}\t#{model_max}\t#{html_min}\t#{html_max}\t#{mismatch_fields}"
 					end
 				end
 			end

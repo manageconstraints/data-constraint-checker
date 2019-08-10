@@ -34,6 +34,7 @@ def convert_tablename(name)
 	temp_name = _word_list.join
 	return temp_name
 end
+
 def derive_length_constraint_from_format(constraint)
 	return nil unless constraint.is_a?Format_constraint
 
@@ -55,7 +56,7 @@ def derive_length_from_format(format)
 	max_value = -1
 
 	begin
-		examples = Regexp.new(format.gsub(/(\\A|\^|\\G|\$|\\Z|\\z|^\/|\/$)/, '')).examples(max_repeater_variance: 40)
+		examples = Regexp.new(format.gsub(/(\\A|\^|\\G|\$|\\Z|\\z|^\/|\/$|%r\{|\}$)/, '')).examples(max_repeater_variance: 40)
 		min_value = examples.map(&:length).min
 		if format =~ /(\\A|\^|\\G).*(\$|\\Z|\\z)/ and format !~ /([^\\]\*|[^\\]\+|\{\d,\})/
 			max_value = examples.map(&:length).max
@@ -67,7 +68,19 @@ def derive_length_from_format(format)
   return min_value, max_value
 end
 
+def compare_instance_variables(obj1, obj2)
+	results = []
 
+	obj1.instance_variables.map do |v|
+		val1 = obj1.send(:instance_variable_get, v)
+		val2 = obj2.send(:instance_variable_get, v)
+		if val1 != val2
+			results << v.to_s + "-" + val1.to_s + "-" + val2.to_s
+		end
+	end
+
+	return results
+end
 
 def code_change(folder, commit1, commit2)
   diffs = `cd #{folder}; git diff --stat #{commit1} #{commit2}`.lines

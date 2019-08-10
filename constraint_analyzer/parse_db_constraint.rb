@@ -358,17 +358,25 @@ end
 def handle_add_index(ast)
 	puts "handle_add_index" if $debug_mode
 	children = ast.children
-	table_name = handle_symbol_literal_node(children[0]) ||  handle_symbol_literal_node(children[0])
-	column = handle_symbol_literal_node(children[1]) || handle_string_literal_node(children[1])
+	table_name = handle_symbol_literal_node(children[0])
+
+	columns = []
+
+	if children[1].type.to_s == "symbol_literal"
+		columns = [handle_symbol_literal_node(children[1])]
+	elsif children[1].type.to_s == "string_literal"
+		columns = [handle_string_literal_node(children[1])]
+	elsif children[1].type.to_s == "array"
+		columns = handle_array_node(children[1])
+	end
+
 	class_name = convert_tablename(table_name)
 	table_class = $model_classes[class_name] || $dangling_classes[class_name]
 	if !table_class
 		table_class = File_class.new("")
 		$dangling_classes[class_name] = table_class
 	end
-	columns = []
-	columns << column if column
-	columns = handle_array_node(children[1]) unless column
+
 	dic = extract_hash_from_list(children[2])
 	index_name = dic["name"]&.source || handle_symbol_literal_node(dic["name"]) || handle_string_literal_node(dic["name"])
 	index_name = index_name || "#{table_name}_#{columns.join("_")}"
