@@ -119,18 +119,14 @@ def traverse_constraints_code_curve(application_dir, interval, tag_unit=true)
   puts "versions.length: #{versions.length}"
   return if versions.length <= 0
   app_name = application_dir.split("/")[-1]
-  versions[0].build
   output = open("../log/output_loc_constraints_#{app_name}.log", 'w')
-  if not File.exist?log_dir
-    `mkdir #{log_dir}`
-  end
   for i in 0...versions.length
     version = versions[i]
     version.build
     content "#{loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n"
     output.write(content)
   end
-
+  output.close
 end
 
 def traverse_all_versions(application_dir, interval, tag_unit=true)

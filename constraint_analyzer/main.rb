@@ -55,6 +55,9 @@ OptionParser.new do |opts|
   opts.on("--custom-error-msg", "please specify whether to get custom error messages") do |v|
     options[:custom_error_msg] = true
   end
+  opts.on("--curve", "please specify whether you want the curve of # constraints # loc") do |v|
+    options[:curve] = true
+  end
 end.parse!
 
 if options[:app]
@@ -91,4 +94,9 @@ if options[:api_breakdown] and application_dir
 end
 if options[:custom_error_msg] and application_dir
   custom_error_msg_info(application_dir)
+end
+
+if options[:curve] and application_dir
+  interval = 100 unless interval
+  traverse_constraints_code_curve(application_dir, interval, false)
 end
