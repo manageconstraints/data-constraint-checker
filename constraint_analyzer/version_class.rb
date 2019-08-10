@@ -165,7 +165,7 @@ class Version_class
 		mm_cons_num = 0
     absent_cons2 = {}
     mm_cons_num2 = 0
-		puts "mismatch_db_model\tAppDir\tConstraintType\tCategory\tKey\tMin1\tMax1\tMin2\tMax2\tMismatchFields"
+		puts "mismatch_constraint\tAppDir\tConstraintType\tCategory\tKey\tMin1\tMax1\tMin2\tMax2\tMismatchFields"
 		@activerecord_files.each do |key, file|
 			constraints = file.getConstraints
 			model_cons = constraints.select{|k,v| k.include?"-#{Constraint::MODEL}"}
