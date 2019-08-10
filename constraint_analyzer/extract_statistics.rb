@@ -123,7 +123,7 @@ def traverse_constraints_code_curve(application_dir, interval, tag_unit=true)
   for i in 0...versions.length
     version = versions[i]
     version.build
-    content "#{loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n"
+    content = "#{version.loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n"
     output.write(content)
   end
   output.close

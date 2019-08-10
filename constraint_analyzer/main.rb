@@ -97,6 +97,7 @@ if options[:custom_error_msg] and application_dir
 end
 
 if options[:curve] and application_dir
-  interval = 100 unless interval
+  interval = 100 
+  puts "interval #{interval}"
   traverse_constraints_code_curve(application_dir, interval, false)
 end
