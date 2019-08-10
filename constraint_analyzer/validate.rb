@@ -33,6 +33,7 @@ class Constraint
 		end
 		return false
 	end
+
 	def self_print
 		puts to_string
 	end
@@ -113,6 +114,7 @@ class Length_constraint < Constraint
 		end
 		return false
 	end
+
 	def self_print
 		puts to_string
 	end
@@ -125,9 +127,9 @@ class Format_constraint < Constraint
 	attr_accessor :with_format, :on_condition
 	def parse(dic)
 		super
-		if dic["with"]
-			with_format = dic["with"].source
-			self.with_format = with_format
+		if dic["with"] and dic["with"].type.to_s == "regexp_literal"
+				with_format = dic["with"].source
+				self.with_format = with_format
 		end
 	end
 	def is_child_same(old_constraint)
@@ -219,23 +221,44 @@ end
 
 class Uniqueness_constraint < Constraint
 	attr_accessor :scope, :case_sensitive
-	def initialize(table, column, type, allow_nil=false, allow_blank=false)
+	def initialize(table, column_s_, type, allow_nil=false, allow_blank=false)
+
+		if column_s_.kind_of?(Array)
+			column = column_s_.min
+			@scope = column_s_.reject {|a| a == column}
+		else
+			column = column_s_
+			@scope = []
+		end
+
 		super(table, column, type, allow_nil=false, allow_blank=false)
 		@case_sensitive = true
+
 	end
+
 	def parse(dic)
 		super
-		@scope = []
+
 		if dic["scope"]
 			scope_ast = dic["scope"]
 			if scope_ast.type.to_s == "symbol_literal"
 				column = handle_symbol_literal_node(scope_ast)
-				@scope << column
+				@scope = [column]
 			end
 			if scope_ast.type.to_s == "array"
 				@scope = handle_array_node(scope_ast)
 			end
 		end
+
+		# Ensure "column" is that which is first alphabetically
+		# Needed to keep multi-column unique constraints identical
+		lowest = @scope.min
+		if lowest and @column > lowest
+			@scope << @column
+			@column = lowest
+			@scope.delete(lowest)
+		end
+
 		if dic["case_sensitive"]&.source == "false"
 			@case_sensitive = false
 		end
@@ -247,7 +270,7 @@ class Uniqueness_constraint < Constraint
 		return "#{super} #{scope}"
 	end
 	def is_child_same(old_constraint)
-		return @scope == old_constraint.scope
+		return @scope.sort == old_constraint.scope.sort
 	end
 	def is_same(old_constraint)
 		return (super and is_child_same(old_constraint))

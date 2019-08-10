@@ -8,7 +8,7 @@ workbook = WriteXLSX.new("output/#{output}.xlsx")
 
 # Add a worksheet
 worksheet = workbook.add_worksheet
-grep_param = ARGV[0] || "mismatch constraint"
+grep_param = ARGV[0] || "mismatch_constraint"
 lines = `grep "#{grep_param}" log/output.log`
 lines = lines.lines
 lines = lines.map{|x| x.strip}

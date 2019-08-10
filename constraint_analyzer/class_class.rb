@@ -49,7 +49,7 @@ class File_class
 				max_value = 255
 			end
 			if column_type == "text"
-				max_value = 66536
+				max_value = 65535
 			end
 			column_name = v.column_name
 			puts "max_value from type: #{max_value} #{column_name} #{column_type} #{@class_name}" if $debug_mode
@@ -80,11 +80,9 @@ class File_class
 		@indices.each do |k, v|
 			if v.unique
 				type = "db"
-				v.columns.each do |column|
-					constraint = Uniqueness_constraint.new(@class_name, column, type)
-					key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
-					@constraints[key] = constraint
-				end
+				constraint = Uniqueness_constraint.new(@class_name, v.columns, type)
+				key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+				@constraints[key] = constraint
 			end
 		end
 	end
@@ -92,12 +90,21 @@ class File_class
 		return unless @constraints
 		cons = []
     @constraints.each do |k, v|
-			if v.is_a?Format_constraint and format = v.with_format
+			if v.is_a?Format_constraint and v.with_format
 				constraint = derive_length_constraint_from_format(v)
-        cons << constraint
+				next if constraint.nil?
+
+				key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
+				if (existing_constraint = @constraints[key])
+					existing_constraint.min_value = [constraint.min_value, existing_constraint.min_value].compact.max
+					existing_constraint.max_value = [constraint.max_value, existing_constraint.max_value].compact.min
+				else
+					cons << constraint
+				end
 			end
-    end
-    self.addConstraints(cons)
+		end
+
+		self.addConstraints(cons)
 	end
 end
 class Column

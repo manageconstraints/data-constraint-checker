@@ -34,104 +34,52 @@ def convert_tablename(name)
 	temp_name = _word_list.join
 	return temp_name
 end
+
 def derive_length_constraint_from_format(constraint)
 	return nil unless constraint.is_a?Format_constraint
+
 	format = constraint.with_format
   min_value, max_value = derive_length_from_format(format)
-	len_constraint = Length_constraint.new(constraint.table, constraint.column, constraint.type)
-  len_constraint.min_value = min_value
-  len_constraint.max_value = max_value if max_value > 0
-	return len_constraint
+
+	if min_value != 0 or max_value != -1
+		len_constraint = Length_constraint.new(constraint.table, constraint.column, constraint.type)
+		len_constraint.min_value = min_value
+		len_constraint.max_value = max_value if max_value > 0
+		return len_constraint
+	else
+		return nil
+	end
 end
 
 def derive_length_from_format(format)
-  return nil unless format
-  length = format.length
-  index = 0
   min_value = 0
-  max_value = 0
-  prev = false
-  while(true)
-    if index >= length
-      if prev
-        min_value += 1
-        max_value += 1 if max_value != -1
+	max_value = -1
 
-        #puts "add in last character #{min_value}"
-      end
-      break
-    end
-    c = format[index]
-    if (not ["[", "{","+","*"].include?c)
-      if prev
-        min_value += 1
-        max_value += 1 if max_value != -1
-        #puts "add in normal character 1 #{min_value} c: #{c}"
-      end
-      prev = true
-      index += 1
-      next
-    end
-    if prev
-      if c == "*"
-        index += 1
-        max_value = -1
-        prev = false
-        next
-      elsif c == "+"
-        index += 1
-        min_value += 1
-        max_value = -1
-        prev = false
-        next
-      elsif c == "{"
-        prev = false
-        length_tmp = ""
-        index += 1
-        while(index < length and format[index] != "}")
-          length_tmp += format[index]
-          index += 1
-          next
-        end
-        if length_tmp.include?(",")
-          len_arr = length_tmp.split(",")
-          min_value += len_arr[0].to_i
-          if len_arr.length > 1 and len_arr[1].to_i != 0
-            max_value += len_arr[1].to_i if max_value != -1
-          else
-            max_value = -1
-          end
-        else
-          min_value += length_tmp.to_i
-          max_value += length_tmp.to_i if max_value != -1
-        end
-        index += 1
-        next
-      elsif c != "["
-        #puts "add in normal character #{min_value}"
-        min_value += 1
-        max_value += 1 if max_value != -1
-        index += 1
-        next
-      end
-    end
-    if c == "["
-      if prev
-        min_value += 1
-        max_value += 1 if max_value != -1
-        #puts "add in [ #{min_value}"
-      end
-      index += 1
-      while(index < length and format[index] != "]")
-        index += 1
-        next
-      end
-      prev = true
-      index += 1
-      next
-    end
-  end
+	begin
+		examples = Regexp.new(format.gsub(/(\\A|\^|\\G|\$|\\Z|\\z|^\/|\/$|%r\{|\}$)/, '')).examples(max_repeater_variance: 40)
+		min_value = examples.map(&:length).min
+		if format =~ /(\\A|\^|\\G).*(\$|\\Z|\\z)/ and format !~ /([^\\]\*|[^\\]\+|\{\d,\})/
+			max_value = examples.map(&:length).max
+		end
+	rescue
+		puts "cannot parse regex: #{format}"
+	end
+
   return min_value, max_value
+end
+
+def compare_instance_variables(obj1, obj2)
+	results = []
+
+	obj1.instance_variables.map do |v|
+		val1 = obj1.send(:instance_variable_get, v)
+		val2 = obj2.send(:instance_variable_get, v)
+		if val1 != val2
+			results << v.to_s + "-" + val1.to_s + "-" + val2.to_s
+		end
+	end
+
+	return results
 end
 
 def code_change(folder, commit1, commit2)
