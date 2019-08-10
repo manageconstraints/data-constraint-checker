@@ -18,6 +18,10 @@ class File_class
 			key = "#{@class_name}-#{constraint.column}-#{constraint.class.name}-#{constraint.type}"
 			@constraints[key] = constraint
 			constraint.table = self.class_name
+      column = self.getColumns[constraint.column]
+      if column
+        column.has_constraints = true
+      end
 		end
 		puts"@constraints.size #{@constraints.length}" if $debug_mode
 	end
@@ -38,7 +42,11 @@ class File_class
 	end
 	def addIndex(index)
 		@indices[index.name] = index
-	end
+  end
+  def num_columns_has_constraints
+    num = @columns.select{|k,v| v.has_constraints}.length
+    return @columns.length, num
+  end
 	def create_con_from_column_type
 		return unless @columns
 		@columns.each do |k, v|
@@ -109,7 +117,7 @@ class File_class
 end
 class Column
 	# belongs to model class which is active record
-	attr_accessor :column_type,  :column_name, :file_class, :prev_column, :is_deleted, :default_value, :table_class, :auto_increment
+	attr_accessor :column_type,  :column_name, :file_class, :prev_column, :is_deleted, :default_value, :table_class, :auto_increment, :has_constraints
 	def initialize(table_class, column_name, column_type, file_class, dic={})
 		@table_class = table_class
 		@column_name = column_name
@@ -117,6 +125,7 @@ class Column
 		@file_class = file_class
 		@is_deleted = false
     @auto_increment = false
+		@has_constraints = false
 		self.parse(dic)
     puts "dic: #{dic.to_s}" if $debug_mode
 	end
