@@ -22,7 +22,7 @@ format.set_align('left')
 col = row = 0
 for row in 0...lines.length
 	line = lines[row]
-	contents = line.split(" ")
+	contents = line.split("\t")
 	for col in 0..contents.length
 		worksheet.write(row, col, contents[col], format)
 	end
