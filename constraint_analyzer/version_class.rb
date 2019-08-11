@@ -312,6 +312,17 @@ class Version_class
   end
 
   def calculate_loc
-    @loc = 0
+		app_subdir = File.join(@app_dir, "app")
+		db_subdir = File.join(@app_dir, "db")
+    output = `cloc --json #{app_subdir} #{db_subdir}`
+
+		json_output = JSON.parse(output)
+
+		ruby_loc = json_output.fetch("Ruby", {}).fetch("code", 0)
+		erb_loc = json_output.fetch("ERB", {}).fetch("code", 0)
+		haml_loc = json_output.fetch("Haml", {}).fetch("code", 0)
+		html_loc = json_output.fetch("HTML", {}).fetch("code", 0)
+
+		@loc = ruby_loc + erb_loc + haml_loc + html_loc
   end
 end
