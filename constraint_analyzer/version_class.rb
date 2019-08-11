@@ -314,6 +314,10 @@ class Version_class
   def calculate_loc
 		app_subdir = File.join(@app_dir, "app")
 		db_subdir = File.join(@app_dir, "db")
+    if app_dir.include?'spree'
+      app_subdir = File.join(@app_dir, "*/app")
+      db_subdir = File.join(@app_dir, "*/db")
+    end
     output = `cloc --json #{app_subdir} #{db_subdir}`
 
 		json_output = JSON.parse(output)
