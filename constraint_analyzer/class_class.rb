@@ -11,6 +11,7 @@ class File_class
 		@is_deleted = false
 		@indices = {}
 		@foreign_keys = []
+		@instance_var_refs = Set.new
 	end
 	def addConstraints(constraints)
 		constraints.each do |constraint|
@@ -118,6 +119,14 @@ class File_class
 		end
 
 		self.addConstraints(cons)
+	end
+
+	def extract_instance_var_refs
+		refs = []
+		parse_model_var_refs(@ast, refs)
+		@instance_var_refs = refs.uniq
+		puts @filename
+		puts "REFS: #{@instance_var_refs}"
 	end
 end
 class Column
