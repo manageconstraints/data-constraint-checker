@@ -54,6 +54,7 @@ def read_constraint_files(application_dir=nil,version='')
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = File_class.new(filename)
 			$cur_class.ast = ast
+			$cur_class.contents = contents
       $module_name = ""
       $classes = []
       parse_model_constraint_file(ast)
