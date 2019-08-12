@@ -29,14 +29,12 @@ class Version_class
 		end
 	end
 	def extract_constraints
-		# extract the constraints from the active record file
-		@activerecord_files = @files.select{|key, x| x.is_activerecord}
-
 		@activerecord_files.each do |key, file|
 			# puts"#{key} #{file.getConstraints.length}"
 			file.create_con_from_column_type
 			file.create_con_from_index
 			file.create_con_from_format
+			file.extract_instance_var_refs
 			file.getConstraints.each do |k, constraint|
 				if constraint.type == Constraint::DB
 					@db_constraints_num += 1
@@ -54,6 +52,7 @@ class Version_class
 		end
 		@total_constraints_num = @db_constraints_num + @model_constraints_num + @html_constraints_num
 	end
+
   def extract_case_insensitive_columns
     ci_columns = {}
     @activerecord_files.each do |key, file|
@@ -96,7 +95,11 @@ class Version_class
 				break
 			end
 		end
+
+		# extract the constraints from the active record file
+		@activerecord_files = @files.select{|key, x| x.is_activerecord}
 	end
+
 	def get_activerecord_files
 		return @activerecord_files
 	end
@@ -156,6 +159,7 @@ class Version_class
 		end
 		return false
 	end
+
 	def compare_self
 		absent_cons = {}
 		puts "@activerecord_files: #{@activerecord_files.length}"
@@ -211,19 +215,6 @@ class Version_class
 					puts "absent: #{column_name} #{v.table} #{db_filename} #{v.class.name} #{@commit}"
 				else
 					v2 = model_cons[k2]
-					# if v.is_a?Length_constraint
-					# 	if (v2.max_value and v.max_value  and v2.max_value != v.max_value)
-					# 		puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{db_filename} #{@commit}"
-					# 	end
-					# 	if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
-					# 		puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{db_filename} #{@commit}"
-					# 	end
-					# 	v.self_print
-					# end
-					# if not v.is_same_notype(v2)
-					# 	puts "mismatch constraint #{db_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
-					# 	mm_cons_num += 1
-					# end
 
 					if not v.is_same_notype(v2)
 						mismatch_category = "DB-Model"
@@ -258,19 +249,6 @@ class Version_class
 					puts "absent2: #{column_name} #{v.table} #{model_filename} #{v.class.name} #{@commit}"
 				else
 					v2 = html_cons[k2]
-					# if v.is_a?Length_constraint
-					# 	if (v2.max_value and v.max_value  and v2.max_value != v.max_value)
-					# 		puts "mismatch constraint max #{v.table}  #{v.max_value} #{v2.max_value} #{column_name} #{model_filename} #{@commit}"
-					# 	end
-					# 	if (v2.min_value and v.min_value  and v2.min_value != v.min_value)
-					# 		puts "mismatch constraint min #{v.table}  #{v.min_value} #{v2.min_value} #{column_name} #{model_filename} #{@commit}"
-					# 	end
-					# 	v.self_print
-					# end
-					# if not v.is_same_notype(v2)
-					# 	puts "mismatch constraint #{model_filename} #{@commit} #{v.class.name} #{v.table} #{v.to_string} #{v2.to_string}"
-          #   mm_cons_num2 += 1
-					# end
 
 					if not v.is_same_notype(v2)
 						mismatch_category = "Model-HTML"
