@@ -160,15 +160,99 @@ class Version_class
 		return false
 	end
 
+	def compare_absent_constraints
+		db_present_model_absent = []
+		model_present_db_absent = []
+		all_db_cons = []
+		@activerecord_files.each do |key, file|
+			db_cons = file.getConstraints.select{|k,v| k.include?"-#{Constraint::DB}"}
+			model_cons = file.getConstraints.select{|k,v| k.include?"-#{Constraint::MODEL}"}
+			html_cons = file.getConstraints.select{|k,v| k.include?"-#{Constraint::HTML}"}
+
+			all_db_cons += db_cons.keys
+
+			db_cons.each do |k,v|
+				k2 = k.gsub("-#{Constraint::DB}","-#{Constraint::MODEL}")
+				column = file.getColumns[v.column]
+
+				next if !column or column.is_deleted or model_cons[k2]
+
+				if (v.instance_of?Uniqueness_constraint or v.instance_of?Presence_constraint) and column.auto_increment
+					db_present_model_absent << {:name => k, :category => :self_satisfied}
+				elsif v.instance_of?Presence_constraint and column.default_value
+					db_present_model_absent << {:name => k, :category => :self_satisfied}
+				elsif model_cons[k.gsub("-#{v.class.name}-", "-#{Customized_constraint.to_s}-")]
+					db_present_model_absent << {:name => k, :category => :other}
+				elsif v.column == "updated_at" or v.column == "created_at"
+					db_present_model_absent << {:name => k, :category => :timestamp}
+				elsif file.getForeignKeys.include? v.column
+					db_present_model_absent << {:name => k, :category => :fk}
+				elsif v.is_a? Length_constraint and (v.max_value == 255 or v.max_value >= 65535)
+					db_present_model_absent << {:name => k, :category => :str_unlimited}
+				elsif !file.contents.include? v.column
+					db_present_model_absent << {:name => k, :category => :not_accessed}
+				else
+					db_present_model_absent << {:name => k, :category => :other}
+				end
+			end
+
+			model_cons.each do |k,v|
+				k2 = k.gsub("-#{Constraint::MODEL}","-#{Constraint::DB}")
+				column = file.getColumns[v.column]
+				next if !column or db_cons[k2]
+
+				if v.instance_of?Presence_constraint and !column.default_value
+					model_present_db_absent << {:name => k, :category => :presence_no_default}
+				elsif v.instance_of?Presence_constraint and column.default_value
+					model_present_db_absent << {:name => k, :category => :presence_has_default}
+				elsif v.instance_of?Format_constraint
+					model_present_db_absent << {:name => k, :category => :format}
+				elsif v.instance_of?Inclusion_constraint or v.instance_of?Exclusion_constraint
+					model_present_db_absent << {:name => k, :category => :inclusion_exclusion}
+				elsif v.instance_of?Uniqueness_constraint
+					model_present_db_absent << {:name => k, :category => :unique}
+				elsif v.instance_of?Customized_constraint or v.instance_of?Function_constraint
+					model_present_db_absent << {:name => k, :category => :custom}
+				else
+					model_present_db_absent << {:name => k, :category => :other}
+				end
+			end
+		end
+
+		puts "absent_constraint\t#{@app_dir}\tdb_present_model_absent\tself_satisfied\t#{db_present_model_absent.select{|v| v[:category] == :self_satisfied}.count}"
+		puts "absent_constraint\t#{@app_dir}\tdb_present_model_absent\tfk\t#{db_present_model_absent.select{|v| v[:category] == :fk}.count}"
+		puts "absent_constraint\t#{@app_dir}\tdb_present_model_absent\tstr_unlimited\t#{db_present_model_absent.select{|v| v[:category] == :str_unlimited}.count}"
+		puts "absent_constraint\t#{@app_dir}\tdb_present_model_absent\tnot_accessed\t#{db_present_model_absent.select{|v| v[:category] == :not_accessed}.count}"
+		puts "absent_constraint\t#{@app_dir}\tdb_present_model_absent\tother\t#{db_present_model_absent.select{|v| v[:category] == :other}.count}"
+
+		puts ""
+
+		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tpresence_no_default\t#{model_present_db_absent.select{|v| v[:category] == :presence_no_default}.count}"
+		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tpresence_default\t#{model_present_db_absent.select{|v| v[:category] == :presence_has_default}.count}"
+		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tformat\t#{model_present_db_absent.select{|v| v[:category] == :format}.count}"
+		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tinclusion_exclusion\t#{model_present_db_absent.select{|v| v[:category] == :inclusion_exclusion}.count}"
+		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tunique\t#{model_present_db_absent.select{|v| v[:category] == :unique}.count}"
+		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tcustom\t#{model_present_db_absent.select{|v| v[:category] == :custom}.count}"
+		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tother\t#{model_present_db_absent.select{|v| v[:category] == :other}.count}"
+
+		require 'pp'
+		puts "OTHER MODEL PRESENT DB ABSENT"
+		pp model_present_db_absent.select{|v| v[:category] == :other}.map{|v| v[:name]}
+
+		puts "UNIQUE MODEL PRESENT DB ABSENT"
+		pp model_present_db_absent.select{|v| v[:category] == :unique}.map{|v| v[:name]}
+
+	end
+
 	def compare_self
-		absent_cons = {}
 		puts "@activerecord_files: #{@activerecord_files.length}"
 		total_constraints = @activerecord_files.map{|k,v| v.getConstraints.length}.reduce(:+)
 		db_cons_num = 0
 		model_cons_num = 0
 		html_cons_num = 0
 		mm_cons_num = 0
-    absent_cons2 = {}
+		absent_cons = {}
+		absent_cons2 = {}
     mm_cons_num2 = 0
 		puts "mismatch_constraint\tAppDir\tConstraintType\tCategory\tKey\tMin1\tMax1\tMin2\tMax2\tMismatchFields"
 		@activerecord_files.each do |key, file|
@@ -266,6 +350,7 @@ class Version_class
 				end
 			end
 		end
+		compare_absent_constraints
 		puts "total absent: #{absent_cons.size} total_constraints: #{total_constraints} model_cons_num: #{model_cons_num} db_cons_num: #{db_cons_num} mm_cons_num: #{mm_cons_num}"
     puts "total absent2: #{absent_cons2.size} total_constraints: #{total_constraints} html_cons_num: #{html_cons_num} model_cons_num: #{model_cons_num}  mm_cons_num2: #{mm_cons_num2}"
 

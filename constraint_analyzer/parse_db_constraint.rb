@@ -137,30 +137,54 @@ def handle_create_table(ast)
 					if column_type == "references"
 						column_type = "string"
 					end
+					if column_type == "column"
+						column_type = handle_symbol_literal_node(c[3][1])
+					end
 					column_ast = c[-1]
 					if column_ast.class.name == "YARD::Parser::Ruby::AstNode" and  column_ast.type.to_s == "list"
-						column_name = handle_symbol_literal_node(column_ast[0]) || handle_string_literal_node(column_ast[0])
 						table_class = $model_classes[class_name]
 						table_class = $dangling_classes[class_name] if !table_class
 						if !table_class 
 							table_class = File_class.new("")
 							$dangling_classes[class_name] = table_class
 						end
-						column = Column.new(table_class, column_name, column_type, $cur_class)
-						columns = table_class.getColumns
-						column.prev_column =  columns[column_name]
-						table_class.addColumn(column)
-						dic = {}
 						dic = extract_hash_from_list(column_ast.children[-1])
-            column.parse(dic)
-						constraints = create_constraints(class_name, column_name, column_type, Constraint::DB, dic)
-						table_class.addConstraints(constraints)
+						if column_type == "index"
+							columns = []
+							if column_ast[0].type.to_s == "symbol_literal"
+								columns = [handle_symbol_literal_node(column_ast[0])]
+							elsif column_ast[0].type.to_s == "string_literal"
+								columns = [handle_string_literal_node(column_ast[0])]
+							elsif column_ast[0].type.to_s == "array"
+								columns = handle_array_node(column_ast[0])
+							end
+							index_name = dic["name"]&.source || handle_symbol_literal_node(dic["name"]) || handle_string_literal_node(dic["name"])
+							index_name = index_name || "#{table_name}_#{columns.join("_")}"
+							new_index = Index.new(index_name, table_name, columns)
+							if dic["unique"]&.source == "true"
+								new_index.unique = true
+							end
+							table_class.addIndex(new_index)
+							#puts "ADD INDEX: #{new_index.table_name} #{new_index.name} #{new_index.columns} #{new_index.unique}"
+						else
+							column_name = handle_symbol_literal_node(column_ast[0]) || handle_string_literal_node(column_ast[0])
+							column = Column.new(table_class, column_name, column_type, $cur_class)
+							columns = table_class.getColumns
+							column.prev_column =  columns[column_name]
+							table_class.addColumn(column)
+							column.parse(dic)
+							constraints = create_constraints(class_name, column_name, column_type, Constraint::DB, dic)
+							table_class.addConstraints(constraints)
+						end
 					end
 				end
 			end
 		end
 	end
 end
+
+
+
 def handle_change_column_null(ast)
 	puts "++++++++++handle_change_column_null++++++++++" if $debug_mode
 	if ast[1].type.to_s == "list"

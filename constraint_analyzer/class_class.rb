@@ -1,5 +1,5 @@
 class File_class
-	attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord, :is_deleted, :indices
+	attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord, :is_deleted, :indices, :contents
 	def initialize(filename)
 		@filename = filename
 		@is_activerecord = false
@@ -11,7 +11,8 @@ class File_class
 		@is_deleted = false
 		@indices = {}
 		@foreign_keys = []
-		@instance_var_refs = Set.new
+		@instance_var_refs = []
+		@contents = ""
 	end
 	def addConstraints(constraints)
 		constraints.each do |constraint|
@@ -47,7 +48,10 @@ class File_class
 	end
 	def addIndex(index)
 		@indices[index.name] = index
-  end
+	end
+	def getInstanceVarRefs
+		return @instance_var_refs
+	end
   def num_columns_has_constraints
     check_whether_column_has_constraints
     num = @columns.select{|k,v| v.has_constraints}.length
@@ -125,8 +129,6 @@ class File_class
 		refs = []
 		parse_model_var_refs(@ast, refs)
 		@instance_var_refs = refs.uniq
-		puts @filename
-		puts "REFS: #{@instance_var_refs}"
 	end
 end
 class Column
