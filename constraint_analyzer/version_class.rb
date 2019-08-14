@@ -371,7 +371,7 @@ class Version_class
       db_subdir = File.join(@app_dir, "*/db")
     end
     output = `cloc --json #{app_subdir} #{db_subdir}`
-
+    begin
 		json_output = JSON.parse(output)
 
 		ruby_loc = json_output.fetch("Ruby", {}).fetch("code", 0)
@@ -380,5 +380,8 @@ class Version_class
 		html_loc = json_output.fetch("HTML", {}).fetch("code", 0)
 
 		@loc = ruby_loc + erb_loc + haml_loc + html_loc
+    rescue
+      @loc = 0
+    end
   end
 end

@@ -6,9 +6,13 @@ def extract_commits(directory, interval=5, tag_unit=true)
 	tags = `cd #{directory}; git tag`
 	if tag_unit
 		commits = tags.lines.reverse.map{|x| x.strip}
-	else
+	end
+	if !commits || commits.length < 10
 		commits = `python commits.py #{directory}`
 		commits = commits.lines
+		interval = 100
+	else
+		interval = 1
 	end
 	puts "commits.length: #{commits.length}"
 	versions = []
@@ -21,6 +25,7 @@ def extract_commits(directory, interval=5, tag_unit=true)
 		end
 		i += 1
 	end
+	puts "versions.length: #{versions.length}"
 	return versions
 end
 
