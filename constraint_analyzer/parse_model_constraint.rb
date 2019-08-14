@@ -185,6 +185,7 @@ def parse_validates(table, funcname, ast)
 	constraints = []
 	columns = []
 	cur_constrs = []
+	dic = {}
 	puts "ast: #{ast&.children&.length}"
 	ast.children.each do |child|
   		if child.type.to_s == 'symbol_literal'
