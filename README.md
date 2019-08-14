@@ -8,3 +8,5 @@ Install required gems:
 `gem install yard`
 
 `gem install regexp-examples -v 1.4.4`
+
+`gem install pg_query`
