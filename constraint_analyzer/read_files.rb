@@ -47,7 +47,7 @@ def read_constraint_files(application_dir=nil,version='')
 	end
 	model_files.each do |filename|
     file = open(filename)
-    contents = file.read
+    contents = file.readlines.reject{|l| /^\s*#/.match l}.join
     file.close
     puts "reach here true #{filename}" if filename.include?"app/models/wiki_page.rb"
 		begin
