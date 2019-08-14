@@ -143,6 +143,9 @@ def traverse_all_versions(application_dir, interval, tag_unit=true)
 	output = open("../log/output_#{app_name}.log", 'w')
   output_diff_codechange = open("../log/codechange_#{app_name}.log", "w")
   log_dir = "../log/#{app_name}_log/"
+        version = versions[0]
+        content = "#{version.loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n"
+        output_diff_codechange.write(content)
   if not File.exist?log_dir
     `mkdir #{log_dir}`
   end
@@ -221,7 +224,8 @@ def traverse_all_versions(application_dir, interval, tag_unit=true)
 		counth2 += 1 if ch2 > 0
 		counth3 += 1 if ch3 > 0
 		counth4 += 1 if ch4 > 0
-    output_diff_codechange.write("#{file} #{insertion} #{deletion} #{c1} #{c2} #{c3} #{c4} #{c5} #{c6} #{c7} #{c8} #{ch1} #{ch2} #{ch3} #{ch4}\n")
+    content = "#{version.loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n"
+    output_diff_codechange.write(content)
 		versions[i-1] = nil
     output_html_constraints.write("======#{new_version.commit} vs #{version.commit}=====\n")
     nmhcs.each do |c|
