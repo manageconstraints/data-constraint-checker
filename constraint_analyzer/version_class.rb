@@ -34,7 +34,7 @@ class Version_class
 			file.create_con_from_column_type
 			file.create_con_from_index
 			file.create_con_from_format
-			file.extract_instance_var_refs
+			#file.extract_instance_var_refs
 			file.getConstraints.each do |k, constraint|
 				if constraint.type == Constraint::DB
 					@db_constraints_num += 1
@@ -163,13 +163,10 @@ class Version_class
 	def compare_absent_constraints
 		db_present_model_absent = []
 		model_present_db_absent = []
-		all_db_cons = []
 		@activerecord_files.each do |key, file|
 			db_cons = file.getConstraints.select{|k,v| k.include?"-#{Constraint::DB}"}
 			model_cons = file.getConstraints.select{|k,v| k.include?"-#{Constraint::MODEL}"}
 			html_cons = file.getConstraints.select{|k,v| k.include?"-#{Constraint::HTML}"}
-
-			all_db_cons += db_cons.keys
 
 			db_cons.each do |k,v|
 				k2 = k.gsub("-#{Constraint::DB}","-#{Constraint::MODEL}")
@@ -234,14 +231,6 @@ class Version_class
 		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tunique\t#{model_present_db_absent.select{|v| v[:category] == :unique}.count}"
 		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tcustom\t#{model_present_db_absent.select{|v| v[:category] == :custom}.count}"
 		puts "absent_constraint\t#{@app_dir}\tmodel_present_db_absent\tother\t#{model_present_db_absent.select{|v| v[:category] == :other}.count}"
-
-		require 'pp'
-		puts "OTHER MODEL PRESENT DB ABSENT"
-		pp model_present_db_absent.select{|v| v[:category] == :other}.map{|v| v[:name]}
-
-		puts "UNIQUE MODEL PRESENT DB ABSENT"
-		pp model_present_db_absent.select{|v| v[:category] == :unique}.map{|v| v[:name]}
-
 	end
 
 	def compare_self
