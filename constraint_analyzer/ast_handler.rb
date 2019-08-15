@@ -45,9 +45,15 @@ def handle_array_node(ast)
 				if child.type.to_s == "symbol_literal"
 					column = handle_symbol_literal_node(child)
 					scope << column
-				end
-				if child.type.to_s == "string_literal"
+				elsif child.type.to_s == "string_literal"
 					column = handle_string_literal_node(child)
+					scope << column
+				end
+			end
+		elsif ast[0].type.to_s == "qsymbols_literal" || ast[0].type.to_s == "qwords_literal"
+			ast[0].children.each do |child|
+				if child.type.to_s == "tstring_content"
+					column = handle_tstring_content_node(child)
 					scope << column
 				end
 			end
@@ -56,6 +62,15 @@ def handle_array_node(ast)
 	end
 	return nil
 end
+
+def handle_tstring_content_node(ast)
+	return unless ast
+	if ast&.type.to_s == "tstring_content"
+		return ast.source
+	end
+end
+
+
 def handle_string_literal_node(ast)
 	return unless ast
 	if ast&.type.to_s == "string_literal"
