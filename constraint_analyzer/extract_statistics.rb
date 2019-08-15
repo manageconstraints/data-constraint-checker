@@ -4,11 +4,7 @@ def extract_commits(directory, interval=5, tag_unit=true)
 	puts "cd #{directory}; git checkout master"
 	`cd #{directory}; git checkout master`
 	puts "directory #{directory}"
-	if directory.include?'gitlab'
-		tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
-	else
-		tags = `cd #{directory}; git tag`
-	end
+	tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
 	if tag_unit
 		commits = tags.lines.reverse.map{|x| x.strip}
 	end
