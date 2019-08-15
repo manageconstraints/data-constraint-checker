@@ -166,7 +166,7 @@ def traverse_all_versions(application_dir, interval, tag_unit=true)
 	count1 = count2 = count3 = count4 = count5 = count6 = count7 = count8 = counth1 = counth2 = counth3 = counth4 = 0
   start = Time.now
 	for i in 1...versions.length
-		#puts "=============#{i}============="
+		puts "=============#{i} out of #{versions.length}============="
 		new_version = versions[i-1]
 		version = versions[i]
 		version.build

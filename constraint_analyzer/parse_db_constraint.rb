@@ -34,12 +34,12 @@ def parse_db_constraint_file(ast)
 	end
 	if ast.type.to_s == "fcall"
 		funcname = ast[0].source
-		puts ("fcall #{funcname}")
+		# puts ("fcall #{funcname}")
 		parse_db_constraint_function(nil, funcname, ast)
 	end
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
-		puts "callname: #{funcname}"
+		# puts "callname: #{funcname}"
 		parse_db_constraint_function(nil, funcname, ast)
 	end
 end
@@ -74,9 +74,9 @@ def handle_add_column(ast)
 end
 
 def handle_change_column(ast, is_deleted=false)
-	puts "handle_change_column"
+	# puts "handle_change_column"
 	children = ast.children
-	puts "is_deleted: #{is_deleted}"
+	# puts "is_deleted: #{is_deleted}"
 	# puts"ast.source #{ast.source}"
 	table = nil
 	column_name = nil
@@ -186,7 +186,7 @@ end
 
 
 def handle_change_column_null(ast)
-	puts "++++++++++handle_change_column_null++++++++++" if $debug_mode
+	# puts "++++++++++handle_change_column_null++++++++++" if $debug_mode
 	if ast[1].type.to_s == "list"
 		table_name = nil
 		column_name = nil
@@ -227,7 +227,7 @@ def handle_reversible(ast)
 	return unless list_ast&.type.to_s == "list"
 	list_ast.children.each do |child|
 		next unless child.type.to_s == "command"
-		puts "#{child[1].type.to_s} child1 #{child[1][0].type.to_s}"
+		# puts "#{child[1].type.to_s} child1 #{child[1][0].type.to_s}"
 		next if !(child[1].type.to_s == "list" and child[1][0].type.to_s == "symbol_literal") if $debug_mode
 		table_name = handle_symbol_literal_node(child[1][0]) || handle_string_literal_node(child[1][0])
 		class_name = convert_tablename(table_name)
@@ -237,7 +237,7 @@ def handle_reversible(ast)
 			table_class = File_class.new("")
 			$dangling_classes[class_name] = table_class
 		end
-		puts "table_name : #{table_name}" if $debug_mode
+		# puts "table_name : #{table_name}" if $debug_mode
 		next unless child[-1].type.to_s == "do_block"
 		if child[-1][-1].type.to_s == "list"
 			child[-1][-1].children.each do |cc|
@@ -320,7 +320,7 @@ end
 
 
 def handle_change_column_default(ast)
-	puts "handle_change_column_default" if $debug_mode
+	# puts "handle_change_column_default" if $debug_mode
 	children = ast.children
 	puts"ast.source #{ast.source} \n#{ast[0].type}"
 	table = nil
@@ -355,7 +355,7 @@ def handle_rename_table(ast)
 	new_table_name = handle_symbol_literal_node(children[1]) || handle_string_literal_node(children[1])
 	old_class_name = convert_tablename(old_table_name)
 	new_class_name = convert_tablename(new_table_name)
-	puts "n: #{new_class_name} o: #{old_class_name}" if $debug_mode
+	# puts "n: #{new_class_name} o: #{old_class_name}" if $debug_mode
 	old_class = $model_classes[old_table_name]
 	old_class = $dangling_classes[old_class_name] if !old_class
 	new_class= $model_classes[new_class_name]
@@ -380,7 +380,7 @@ def handle_drop_table(ast)
 end
 
 def handle_add_index(ast)
-	puts "handle_add_index" if $debug_mode
+	# puts "handle_add_index" if $debug_mode
 	children = ast.children
 	table_name = handle_symbol_literal_node(children[0])
 

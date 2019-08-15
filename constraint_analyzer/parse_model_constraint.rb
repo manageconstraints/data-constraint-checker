@@ -17,7 +17,7 @@ def parse_model_constraint_file(ast)
 		c1 =  ast.children[0]
 		c2 = ast.children[1] 
 		if c1 and c1.type.to_s == 'const_ref'
-      puts "c1.source #{c1.source} class_name #{$cur_class.class_name}"
+      # puts "c1.source #{c1.source} class_name #{$cur_class.class_name}"
       if $cur_class.class_name
         $classes << $cur_class.dup
       end
@@ -36,14 +36,14 @@ def parse_model_constraint_file(ast)
 	if ast.type.to_s == "command"
 		funcname = ast[0].source 
 		if $validate_apis and $validate_apis.include?funcname
-			puts"funcname #{funcname} #{ast.source}"
+			# puts"funcname #{funcname} #{ast.source}"
 			constraints = parse_validate_constraint_function($cur_class.class_name, funcname, ast[1])
 			$cur_class.addConstraints(constraints) if constraints.length > 0
     end
     if funcname == "belongs_to"
       key_field = parse_foreign_key(ast[1])
       if key_field
-        puts "foreign key: #{key_field}"
+        # puts "foreign key: #{key_field}"
         $cur_class.addForeignKey(key_field)
       end
     end
@@ -86,7 +86,7 @@ def parse_validate_constraint_function(table, funcname, ast)
     cons = parse_validates_with(table, type, ast)
     constraints += cons
   elsif funcname == "validates_each" #https://guides.rubyonrails.org/active_record_validations.html#validates-each
-    puts "funcname is : validates_each #{ast.type.to_s}"
+    # puts "funcname is : validates_each #{ast.type.to_s}"
     cons = parse_validates_each(table, type, ast)
     constraints += cons
 	elsif funcname.include?"_"
@@ -186,7 +186,7 @@ def parse_validates(table, funcname, ast)
 	columns = []
 	cur_constrs = []
 	dic = {}
-	puts "ast: #{ast&.children&.length}"
+	# puts "ast: #{ast&.children&.length}"
 	ast.children.each do |child|
   		if child.type.to_s == 'symbol_literal'
   			column = handle_symbol_literal_node(child)
@@ -197,7 +197,7 @@ def parse_validates(table, funcname, ast)
           node = c
           if node.type.to_s == "assoc"
             cur_constr, cur_value_ast = handle_assoc_node(node)
-            puts "cur_constr #{cur_constr}"
+            # puts "cur_constr #{cur_constr}"
             next unless cur_constr
           if cur_value_ast.type.to_s == "hash"
             dic = handle_hash_node(cur_value_ast)
@@ -338,18 +338,18 @@ end
 
 def parse_validates_each(table, type, ast)
   constraints = []
-  puts "ast.type.to_s #{ast.type.to_s}"
+  # puts "ast.type.to_s #{ast.type.to_s}"
   if ast.type.to_s === "list"
     ast.children.each do |c|
-      puts "c: #{c.type.to_s}|#{c.source}"
+      # puts "c: #{c.type.to_s}|#{c.source}"
       column = handle_symbol_literal_node(c) || handle_string_literal_node(c)
-      puts "column: #{column} #{column==nil}"
+      # puts "column: #{column} #{column==nil}"
       if column
         con = Customized_constraint.new(table, column, type)
         constraints << con
       end
     end
   end
-  puts "create parse_validates_each constriants #{constraints.size} #{constraints[0].column}-#{constraints[0].class.name}-#{type}" if constraints.size > 0
+  # puts "create parse_validates_each constriants #{constraints.size} #{constraints[0].column}-#{constraints[0].class.name}-#{type}" if constraints.size > 0
   constraints
 end

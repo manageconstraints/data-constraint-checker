@@ -59,10 +59,10 @@ class Version_class
       constraints = file.getConstraints
       validation_constraints = constraints.select{|k,v| k.include?Constraint::MODEL}
       uniqueness_constraints = validation_constraints.select{|k,v| v.instance_of?Uniqueness_constraint and v.case_sensitive == false}
-      puts "uniqueness_constraints #{uniqueness_constraints.size}"
+      # puts "uniqueness_constraints #{uniqueness_constraints.size}"
 
       columns = file.getColumns
-      puts "Columns #{file.class_name} #{columns.map{|k,v| v.column_name}.join(" ,")}" if columns.size > 0
+      # puts "Columns #{file.class_name} #{columns.map{|k,v| v.column_name}.join(" ,")}" if columns.size > 0
       uniqueness_constraints.each do |k, v|
         column_name = v.column
         if columns[column_name]
@@ -234,7 +234,7 @@ class Version_class
 	end
 
 	def compare_self
-		puts "@activerecord_files: #{@activerecord_files.length}"
+		# puts "@activerecord_files: #{@activerecord_files.length}"
 		total_constraints = @activerecord_files.map{|k,v| v.getConstraints.length}.reduce(:+)
 		db_cons_num = 0
 		model_cons_num = 0

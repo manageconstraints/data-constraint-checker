@@ -1,7 +1,7 @@
 require 'pathname'
 def os_walk(dir)
   root = Pathname(dir)
-  puts root
+  # puts root
   files, dirs = [], []
   Pathname(root).find do |path|
     unless path == root
@@ -16,7 +16,7 @@ def read_constraint_files(application_dir=nil,version='')
 	if application_dir and version
 		$app_dir2 = application_dir
 	else
-		puts "application dir not defined or version number is not defined"
+		# puts "application dir not defined or version number is not defined"
 		return
 	end
 	# checkout to specified version
@@ -24,7 +24,7 @@ def read_constraint_files(application_dir=nil,version='')
 		`cd #{$app_dir2};git stash; git checkout #{version}`
 	end
 
-  puts "$application_dir #{$app_dir2}"
+  # puts "$application_dir #{$app_dir2}"
 	root, files, dirs = os_walk($app_dir2)
 	model_classes = {}
 	model_files = []
@@ -49,7 +49,7 @@ def read_constraint_files(application_dir=nil,version='')
     file = open(filename)
     contents = file.readlines.reject{|l| /^\s*#/.match l}.join
     file.close
-    puts "reach here true #{filename}" if filename.include?"app/models/wiki_page.rb"
+    # puts "reach here true #{filename}" if filename.include?"app/models/wiki_page.rb"
 		begin
 			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
 			$cur_class = File_class.new(filename)
@@ -59,21 +59,21 @@ def read_constraint_files(application_dir=nil,version='')
       $classes = []
       parse_model_constraint_file(ast)
 			model_classes[$cur_class.class_name] = $cur_class.dup
-			puts "$cur_class.class_name #{$cur_class.class_name}"
+			#puts "$cur_class.class_name #{$cur_class.class_name}"
       $classes.each do |c|
         model_classes[c.class_name] = c
-        puts "add new class #{c.class_name} #{c.upper_class_name}"
+        # puts "add new class #{c.class_name} #{c.upper_class_name}"
       end
-			puts "add new class #{$cur_class.class_name} #{$cur_class.upper_class_name}"
+			# puts "add new class #{$cur_class.class_name} #{$cur_class.upper_class_name}"
     rescue
-			puts "failed filename: #{filename}"
+			# puts "failed filename: #{filename}"
 		end
 	end
-	puts "finished handle model files #{model_files.length} #{model_classes.length}"
+	# puts "finished handle model files #{model_files.length} #{model_classes.length}"
 	$model_classes = model_classes
 	$dangling_classes = {}
-	puts "********migration_files:********"
-	puts migration_files
+	# puts "********migration_files:********"
+	# puts migration_files
 	cnt = 0
 	migration_files.each do |filename|
     file = open(filename)
@@ -88,10 +88,12 @@ def read_constraint_files(application_dir=nil,version='')
 		rescue
 		end
 	end
-	puts "finished handle migration files #{migration_files.length} #{cnt}"
+	# puts "finished handle migration files #{migration_files.length} #{cnt}"
 
-	read_html_file_ast(view_files)
-
+	begin
+	  read_html_file_ast(view_files)
+	rescue
+	end
 	return model_classes
 end
 
@@ -133,12 +135,12 @@ def read_html_file_ast(view_files)
   		begin
   			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
   			$cur_class = File_class.new(filename)
-        puts "$cur_class #{$cur_class.filename}"
+        # puts "$cur_class #{$cur_class.filename}"
   			parse_html_constraint_file(ast)
   		rescue
   		end
     rescue
-      puts "file doesn't exist"
+      # puts "file doesn't exist"
     end
 	end
 end

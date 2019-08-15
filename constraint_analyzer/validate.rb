@@ -80,7 +80,7 @@ class Length_constraint < Constraint
 			@range = eval(@range)
 			@min_value = @range.min
 			@max_value = @range.max
-			puts "RANGE: #{@range} #{min_value} #{max_value}"
+			# puts "RANGE: #{@range} #{min_value} #{max_value}"
 		end
 		if @max_value and @max_value != "nil" and @max_value.to_i
 			@max_value = @max_value.to_i
@@ -347,7 +347,7 @@ class Confirmation_constraint < Constraint
 		else
 			self.case_sensitive = true
 		end
-		puts "self case case_sensitive #{self.case_sensitive}"
+		# puts "self case case_sensitive #{self.case_sensitive}"
 	end
 	def self_print
 		puts to_string
@@ -364,7 +364,7 @@ class Acceptance_constraint < Constraint
 		@accept_condition = []
 		if dic["accept"]
 			accept_condition_ast = dic["accept"]
-			puts "accept_condition_ast #{accept_condition_ast.type}"
+			# puts "accept_condition_ast #{accept_condition_ast.type}"
 			if accept_condition_ast.type.to_s == "symbol_literal"
 				value = handle_symbol_literal_node(accept_condition_ast)
 				@accept_condition << value
