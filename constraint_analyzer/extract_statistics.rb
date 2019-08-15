@@ -3,14 +3,16 @@ def extract_commits(directory, interval=5, tag_unit=true)
 	# reset to the most up to date commit
 	puts "cd #{directory}; git checkout master"
 	`cd #{directory}; git checkout master`
+	puts "directory #{directory}"
 	if directory.include?'gitlab'
-		tags = `git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
+		tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
 	else
 		tags = `cd #{directory}; git tag`
 	end
 	if tag_unit
 		commits = tags.lines.reverse.map{|x| x.strip}
 	end
+	puts "commits.length: #{commits.length}"
 	if !commits || commits.length < 10
 		commits = `python commits.py #{directory}`
 		commits = commits.lines
