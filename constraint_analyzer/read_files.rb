@@ -30,6 +30,7 @@ def read_constraint_files(application_dir=nil,version='')
 	model_files = []
 	migration_files = []
 	view_files = []
+	controller_files = []
 	for filename in files
 		filename = filename.to_s
 		if filename.include?("app/models/")
@@ -37,14 +38,38 @@ def read_constraint_files(application_dir=nil,version='')
 		end
 		if filename.include?("db/migrate/")
 			migration_files  << filename
-    end
-    if filename.include?("db/schema.rb")
-      migration_files = [filename]
-    end
+   	 	end
+	    if filename.include?("db/schema.rb")
+	      migration_files = [filename]
+	    end
 		if filename.include?("app/views/")
 			view_files << filename
 		end
+		if filename.include?("app/controllers/")
+			controller_files << filename
+		end
 	end
+
+	puts "controller_files #{controller_files.length}"
+	$write_action_num = 0
+	$no_resuce_num = 0
+	controller_files.each do |filename|
+		file = open(filename)
+	    contents = file.readlines.reject{|l| /^\s*#/.match l}.join
+	    file.close
+    	begin
+			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+			$code = ''
+			parse_controller_file(ast) 
+			if $code
+				# puts "#{filename} #{$write_action_num} #{$no_resuce_num}"
+				# puts $code
+			end
+		rescue
+		end
+	end
+	puts "#{$write_action_num} #{$no_resuce_num}"
+	
 	model_files.each do |filename|
     file = open(filename)
     contents = file.readlines.reject{|l| /^\s*#/.match l}.join
@@ -55,17 +80,17 @@ def read_constraint_files(application_dir=nil,version='')
 			$cur_class = File_class.new(filename)
 			$cur_class.ast = ast
 			$cur_class.contents = contents
-      $module_name = ""
-      $classes = []
-      parse_model_constraint_file(ast)
+			$module_name = ""
+			$classes = []
+			parse_model_constraint_file(ast)
 			model_classes[$cur_class.class_name] = $cur_class.dup
 			#puts "$cur_class.class_name #{$cur_class.class_name}"
-      $classes.each do |c|
-        model_classes[c.class_name] = c
-        # puts "add new class #{c.class_name} #{c.upper_class_name}"
-      end
+			$classes.each do |c|
+        	model_classes[c.class_name] = c
+        	# puts "add new class #{c.class_name} #{c.upper_class_name}"
+      		end
 			# puts "add new class #{$cur_class.class_name} #{$cur_class.upper_class_name}"
-    rescue
+    	rescue
 			# puts "failed filename: #{filename}"
 		end
 	end
@@ -96,7 +121,6 @@ def read_constraint_files(application_dir=nil,version='')
 	end
 	return model_classes
 end
-
 def read_html_file_ast(view_files)
 	view_files.each do |filename|
     #puts "filenmae: #{filename}"
