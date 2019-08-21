@@ -57,19 +57,21 @@ def read_constraint_files(application_dir=nil,version='')
 		file = open(filename)
 	    contents = file.readlines.reject{|l| /^\s*#/.match l}.join
 	    file.close
-    	begin
-			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-			$code = ''
-			parse_controller_file(ast) 
-			if $code
-				# puts "#{filename} #{$write_action_num} #{$no_resuce_num}"
-				# puts $code
-			end
-		rescue
+	    $global_rescue = false
+	    $global_rescue = true if contents.include?'rescue_from.*ActiveRecord::StatementInvalid'
+    	    begin
+		ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+		$code = ''
+		parse_controller_file(ast) 
+		if $code
+			puts "#{filename} #{$write_action_num} #{$no_resuce_num}"
+			puts $code
 		end
+	     rescue
+	  end
 	end
 	puts "#{$write_action_num} #{$no_resuce_num}"
-	
+ 	exit if ENV['rescue']	
 	model_files.each do |filename|
     file = open(filename)
     contents = file.readlines.reject{|l| /^\s*#/.match l}.join
