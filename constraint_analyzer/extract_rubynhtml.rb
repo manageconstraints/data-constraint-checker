@@ -14,7 +14,7 @@ output_file = ARGV[1]
 $id = 0
 line_file = output_file + ".line"
 tag_file = output_file + ".tag"
-if File.exist?output_file
+#if File.exist?output_file
 	$fout = File.open(output_file, 'w+')
 	string_buffer = ""
 	tags = []
@@ -195,4 +195,4 @@ if File.exist?output_file
 	   end
 	end
 	$fout.close
-end
+#end

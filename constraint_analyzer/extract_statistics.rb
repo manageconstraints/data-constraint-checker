@@ -58,8 +58,15 @@ def api_breakdown(application_dir)
 	commit = "master"
 	app_name = application_dir.split("/")[-1]
 	output = open("../log/api_breakdown_#{app_name}.log", 'w')
-	`cd #{application_dir}; git checkout -f #{commit}`
-	version = Version_class.new(application_dir, commit)
+	# `cd #{application_dir}; git checkout -f #{commit}`
+	# version = Version_class.new(application_dir, commit)
+	`cd #{application_dir}; git stash; git checkout master`
+	versions = extract_commits(application_dir, 1, false)
+	if versions.length <= 0
+		puts "No versions"
+		return
+	end
+	version0 = versions[0]
 	version.build
 	db_constraints = version.getDbConstraints
 	model_constraints = version.getModelConstraints
