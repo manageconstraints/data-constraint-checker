@@ -66,7 +66,7 @@ def api_breakdown(application_dir)
 		puts "No versions"
 		return
 	end
-	version0 = versions[0]
+	version = versions[0]
 	version.build
 	db_constraints = version.getDbConstraints
 	model_constraints = version.getModelConstraints
