@@ -60,7 +60,7 @@ def api_breakdown(application_dir)
 	output = open("../log/api_breakdown_#{app_name}.log", 'w')
 	# `cd #{application_dir}; git checkout -f #{commit}`
 	# version = Version_class.new(application_dir, commit)
-	`cd #{application_dir}; git stash; git checkout master`
+	`cd #{application_dir}; git stash; git pull; git checkout master`
 	versions = extract_commits(application_dir, 1, false)
 	if versions.length <= 0
 		puts "No versions"
