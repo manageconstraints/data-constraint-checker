@@ -29,28 +29,34 @@ class Version_class
 		end
 	end
 	def extract_constraints
+		num = 0
 		@activerecord_files.each do |key, file|
 			# puts"#{key} #{file.getConstraints.length}"
 			file.create_con_from_column_type
 			file.create_con_from_index
 			file.create_con_from_format
+		end
+		@activerecord_files.each do |key, file|
 			#file.extract_instance_var_refs
+			num += file.getConstraints.length
 			file.getConstraints.each do |k, constraint|
 				if constraint.type == Constraint::DB
 					@db_constraints_num += 1
 					@db_constraints << constraint
-				end
-				if constraint.type == Constraint::MODEL
+				elsif constraint.type == Constraint::MODEL
 					@model_constraints_num += 1
 					@model_constraints << constraint
-				end
-				if constraint.type == Constraint::HTML
+				elsif constraint.type == Constraint::HTML
 					@html_constraints_num += 1
 					@html_constraints << constraint
+				else
+					puts "k: #{k}"
 				end
 			end
 		end
 		@total_constraints_num = @db_constraints_num + @model_constraints_num + @html_constraints_num
+		total_constraints = @activerecord_files.map{|k,v| v.getConstraints.length}.reduce(:+)
+		puts "total_constraints #{total_constraints} #{@total_constraints_num} #{num}"
 	end
 
   def extract_case_insensitive_columns
