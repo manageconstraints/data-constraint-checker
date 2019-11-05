@@ -1,22 +1,22 @@
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_sql.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/validate.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_model_constraint.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_model_metadata.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_controller_file.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_html_constraint.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/parse_db_constraint.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/read_files.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/class_class.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/helper.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/version_class.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/extract_statistics.rb')
-require File.join(File.expand_path(File.dirname(__FILE__)), '../constraint_analyzer/ast_handler.rb')
-require 'optparse'
-require 'yard'
-require 'active_support'
-require 'active_support/inflector'
-require 'active_support/core_ext/string'
-require 'regexp-examples'
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_sql.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/validate.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_model_constraint.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_model_metadata.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_controller_file.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_html_constraint.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_db_constraint.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/read_files.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/class_class.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/helper.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/version_class.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/extract_statistics.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/ast_handler.rb")
+require "optparse"
+require "yard"
+require "active_support"
+require "active_support/inflector"
+require "active_support/core_ext/string"
+require "regexp-examples"
 application_dir = "/Users/jwy/Research/lobsters-ori/"
 load_validate_api # load the model api
 load_html_constraint_api #load the html api
@@ -40,7 +40,7 @@ OptionParser.new do |opts|
     options[:single] = true
   end
   opts.on("-m", "--all_mismatch", "please specify whether you want to find all versions' mismatch") do |v|
-  	options[:mismatch] = true
+    options[:mismatch] = true
   end
   opts.on("-l", "--latest-version", "please specify that you want to get the current versions breakdown") do |v|
     options[:latest] = true
@@ -63,27 +63,27 @@ OptionParser.new do |opts|
 end.parse!
 
 if options[:app]
-	application_dir = options[:app]
-	puts "application_dir #{application_dir}"
+  application_dir = options[:app]
+  puts "application_dir #{application_dir}"
 end
 interval = 1
 if options[:interval]
-	interval = options[:interval].to_i
+  interval = options[:interval].to_i
 end
 if options[:tva] and options[:app] and interval
   puts "travese_all_versions start options[:commit_unit] #{options[:commit_unit]}"
   if options[:commit_unit]
-	  traverse_all_versions(application_dir, interval, false)
+    traverse_all_versions(application_dir, interval, false)
   else
     traverse_all_versions(application_dir, interval, true)
   end
 end
 if options[:single] and options[:app]
-	find_mismatch_oneversion(options[:app])
+  find_mismatch_oneversion(options[:app])
 end
 if options[:mismatch] and options[:app]
-	puts "interval parse: #{interval.class.name}"
-	find_all_mismatch(options[:app], interval)
+  puts "interval parse: #{interval.class.name}"
+  find_all_mismatch(options[:app], interval)
 end
 if options[:latest] and application_dir
   current_version_constraints_num(application_dir)

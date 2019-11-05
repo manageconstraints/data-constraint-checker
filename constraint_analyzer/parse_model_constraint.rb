@@ -1,44 +1,44 @@
 def parse_model_constraint_file(ast)
-  if ast.type.to_s == 'list'
-		ast.children.each do |child|
-			parse_model_constraint_file(child)
-		end
-	end
-	if ast.type.to_s == 'module'
+  if ast.type.to_s == "list"
+    ast.children.each do |child|
+      parse_model_constraint_file(child)
+    end
+  end
+  if ast.type.to_s == "module"
     moduleName = ast[0]&.source
     $module_name += moduleName
-		if ast[1] and ast[1].type.to_s == "list"
-			ast[1].each do |child|
-				parse_model_constraint_file(child)
-			end
-		end
-	end
-	if ast.type.to_s == 'class'
-		c1 =  ast.children[0]
-		c2 = ast.children[1] 
-		if c1 and c1.type.to_s == 'const_ref'
+    if ast[1] and ast[1].type.to_s == "list"
+      ast[1].each do |child|
+        parse_model_constraint_file(child)
+      end
+    end
+  end
+  if ast.type.to_s == "class"
+    c1 = ast.children[0]
+    c2 = ast.children[1]
+    if c1 and c1.type.to_s == "const_ref"
       # puts "c1.source #{c1.source} class_name #{$cur_class.class_name}"
       if $cur_class.class_name
         $classes << $cur_class.dup
       end
-			$cur_class.class_name = $module_name + c1.source
-		end
-		if c2 and (c2.type.to_s == 'var_ref' or c2.type.to_s == 'const_path_ref')
-			$cur_class.upper_class_name = c2.source
-		end
-		# puts"filename: #{$cur_class.filename} "
-		# puts"classname: #{$cur_class.class_name} upper_class_name: #{$cur_class.upper_class_name}"
-		c3 = ast.children[2]
-		if c3
-			parse_model_constraint_file(c3)
-		end
-	end
-	if ast.type.to_s == "command"
-		funcname = ast[0].source 
-		if $validate_apis and $validate_apis.include?funcname
-			# puts"funcname #{funcname} #{ast.source}"
-			constraints = parse_validate_constraint_function($cur_class.class_name, funcname, ast[1])
-			$cur_class.addConstraints(constraints) if constraints.length > 0
+      $cur_class.class_name = $module_name + c1.source
+    end
+    if c2 and (c2.type.to_s == "var_ref" or c2.type.to_s == "const_path_ref")
+      $cur_class.upper_class_name = c2.source
+    end
+    # puts"filename: #{$cur_class.filename} "
+    # puts"classname: #{$cur_class.class_name} upper_class_name: #{$cur_class.upper_class_name}"
+    c3 = ast.children[2]
+    if c3
+      parse_model_constraint_file(c3)
+    end
+  end
+  if ast.type.to_s == "command"
+    funcname = ast[0].source
+    if $validate_apis and $validate_apis.include? funcname
+      # puts"funcname #{funcname} #{ast.source}"
+      constraints = parse_validate_constraint_function($cur_class.class_name, funcname, ast[1])
+      $cur_class.addConstraints(constraints) if constraints.length > 0
     end
     if funcname == "belongs_to"
       key_field = parse_foreign_key(ast[1])
@@ -57,7 +57,7 @@ def parse_foreign_key(ast)
     key_field = handle_symbol_literal_node(ast[0]) + "_id"
     if ast[1] and ast[1].type.to_s == "list"
       ast[1].each do |child|
-        if child.type.to_s == 'assoc'
+        if child.type.to_s == "assoc"
           key, value = handle_assoc_node(child)
           if key and value
             dic[key] = value
@@ -72,137 +72,134 @@ def parse_foreign_key(ast)
   return key_field
 end
 
-
 def parse_validate_constraint_function(table, funcname, ast)
-	type = Constraint::MODEL
-	constraints = []
-	if funcname == "validates" or funcname == "validates!"
-		constraints += parse_validates(table, funcname, ast)
+  type = Constraint::MODEL
+  constraints = []
+  if funcname == "validates" or funcname == "validates!"
+    constraints += parse_validates(table, funcname, ast)
   elsif funcname == "validate"
     cons = handle_validate(table, type, ast)
     constraints += cons
   elsif funcname == "validates_with" #https://guides.rubyonrails.org/active_record_validations.html#validates-with
-
     cons = parse_validates_with(table, type, ast)
     constraints += cons
   elsif funcname == "validates_each" #https://guides.rubyonrails.org/active_record_validations.html#validates-each
     # puts "funcname is : validates_each #{ast.type.to_s}"
     cons = parse_validates_each(table, type, ast)
     constraints += cons
-	elsif funcname.include?"_"
-		columns = []
-		dic = {}
-		ast.children.each do |child|
-			if child.type.to_s == 'symbol_literal'
-				column = handle_symbol_literal_node(child)
-				columns << column
-			end
-			# puts"child.type.to_s #{child.type.to_s} #{child.source}"
-			if child.type.to_s == "list"
-				child.each do |c|
-					if c.type.to_s == 'assoc'
-						key, value = handle_assoc_node(c)
-						if key and value
-							dic[key] = value 
-						end
-					end
-				end
-			end
-		end
-		allow_blank = false
-		allow_nil = false
-		if dic["allow_blank"] and dic["allow_blank"].source == "true"
-			allow_blank = true
-		end
-		if dic["allow_nil"] and dic["allow_nil"].source == "true"
-			allow_nil = true
-		end
-		if columns.length > 0
-			if funcname == "validates_exclusion_of"
-				columns.each do |column|
-					constraint = Exclusion_constraint.new(table, column, type, allow_nil, allow_blank)
-					constraint.parse(dic)
-					constraints << constraint
-				end
-			end
-			if funcname == "validates_inclusion_of"
-				columns.each do |column|
-					constraint = Inclusion_constraint.new(table, column, type, allow_nil, allow_blank)
-					constraint.parse(dic)
-					constraints << constraint
-				end
-			end
-			if funcname == "validates_presence_of"
-				columns.each do |column|
-					constraint = Presence_constraint.new(table, column, type, allow_nil, allow_blank)
-					constraint.parse(dic)
-					constraints << constraint
-				end
-			end
-			if funcname == "validates_length_of" or funcname == "validates_size_of"
-				columns.each do |column|
-					constraint = Length_constraint.new(table, column, type, allow_nil, allow_blank)
-					constraint.parse(dic)
-					constraints << constraint
-				end
-			end
-			if funcname == "validates_format_of"
-				columns.each do |column|
-					constraint = Format_constraint.new(table, column, type, allow_nil, allow_blank)
-					constraint.parse(dic)
-					constraints << constraint
-				end
-			end
-			if funcname == "validates_uniqueness_of"
-				columns.each do |column|
-					constraint = Uniqueness_constraint.new(table, column, type, allow_nil, allow_blank)
-					constraint.parse(dic)
-					constraints << constraint
-				end
-			end
-			if funcname == "validates_numericality_of"
-				columns.each do |column|
-					constraint = Numericality_constraint.new(table, column, type, allow_nil, allow_blank)
-					constraint.parse(dic)
-					constraints << constraint
-				end
-			end
-			if funcname == "validates_acceptance_of"
-				columns.each do |column|
-					constraint = Acceptance_constraint.new(table, column, type)
-					constraint.parse(dic)
-					constraints << constraint
-				end
-			end
-		end
-	end
-	return constraints
+  elsif funcname.include? "_"
+    columns = []
+    dic = {}
+    ast.children.each do |child|
+      if child.type.to_s == "symbol_literal"
+        column = handle_symbol_literal_node(child)
+        columns << column
+      end
+      # puts"child.type.to_s #{child.type.to_s} #{child.source}"
+      if child.type.to_s == "list"
+        child.each do |c|
+          if c.type.to_s == "assoc"
+            key, value = handle_assoc_node(c)
+            if key and value
+              dic[key] = value
+            end
+          end
+        end
+      end
+    end
+    allow_blank = false
+    allow_nil = false
+    if dic["allow_blank"] and dic["allow_blank"].source == "true"
+      allow_blank = true
+    end
+    if dic["allow_nil"] and dic["allow_nil"].source == "true"
+      allow_nil = true
+    end
+    if columns.length > 0
+      if funcname == "validates_exclusion_of"
+        columns.each do |column|
+          constraint = Exclusion_constraint.new(table, column, type, allow_nil, allow_blank)
+          constraint.parse(dic)
+          constraints << constraint
+        end
+      end
+      if funcname == "validates_inclusion_of"
+        columns.each do |column|
+          constraint = Inclusion_constraint.new(table, column, type, allow_nil, allow_blank)
+          constraint.parse(dic)
+          constraints << constraint
+        end
+      end
+      if funcname == "validates_presence_of"
+        columns.each do |column|
+          constraint = Presence_constraint.new(table, column, type, allow_nil, allow_blank)
+          constraint.parse(dic)
+          constraints << constraint
+        end
+      end
+      if funcname == "validates_length_of" or funcname == "validates_size_of"
+        columns.each do |column|
+          constraint = Length_constraint.new(table, column, type, allow_nil, allow_blank)
+          constraint.parse(dic)
+          constraints << constraint
+        end
+      end
+      if funcname == "validates_format_of"
+        columns.each do |column|
+          constraint = Format_constraint.new(table, column, type, allow_nil, allow_blank)
+          constraint.parse(dic)
+          constraints << constraint
+        end
+      end
+      if funcname == "validates_uniqueness_of"
+        columns.each do |column|
+          constraint = Uniqueness_constraint.new(table, column, type, allow_nil, allow_blank)
+          constraint.parse(dic)
+          constraints << constraint
+        end
+      end
+      if funcname == "validates_numericality_of"
+        columns.each do |column|
+          constraint = Numericality_constraint.new(table, column, type, allow_nil, allow_blank)
+          constraint.parse(dic)
+          constraints << constraint
+        end
+      end
+      if funcname == "validates_acceptance_of"
+        columns.each do |column|
+          constraint = Acceptance_constraint.new(table, column, type)
+          constraint.parse(dic)
+          constraints << constraint
+        end
+      end
+    end
+  end
+  return constraints
 end
 
-
 def parse_validates(table, funcname, ast)
-	type = "validate"
-	constraints = []
-	columns = []
-	cur_constrs = []
-	dic = {}
-	# puts "ast: #{ast&.children&.length}"
-	ast.children.each do |child|
-  		if child.type.to_s == 'symbol_literal'
-  			column = handle_symbol_literal_node(child)
-  			columns << column
-  		end
-  		if child.type.to_s == 'list'
-				child.each do |c|
-          node = c
-          if node.type.to_s == "assoc"
-            cur_constr, cur_value_ast = handle_assoc_node(node)
-            # puts "cur_constr #{cur_constr}"
-            next unless cur_constr
+  type = "validate"
+  constraints = []
+  columns = []
+  cur_constrs = []
+  dic = {}
+  # puts "ast: #{ast&.children&.length}"
+  ast.children.each do |child|
+    if child.type.to_s == "symbol_literal"
+      column = handle_symbol_literal_node(child)
+      columns << column
+    end
+    if child.type.to_s == "list"
+      child.each do |c|
+        node = c
+        if node.type.to_s == "assoc"
+          cur_constr, cur_value_ast = handle_assoc_node(node)
+          # puts "cur_constr #{cur_constr}"
+          next unless cur_constr
           if cur_value_ast.type.to_s == "hash"
             dic = handle_hash_node(cur_value_ast)
           end
-            if cur_constr == "presence"
+          if cur_constr == "presence"
             cur_value = cur_value_ast.source
             if cur_value == "true"
               columns.each do |c|
@@ -216,9 +213,9 @@ def parse_validates(table, funcname, ast)
             if dic
               columns.each do |c|
                 constraint = Format_constraint.new(table, c, type)
-                  constraint.parse(dic)
-                  constraints << constraint
-                end
+                constraint.parse(dic)
+                constraints << constraint
+              end
             end
           end
           if cur_constr == "inclusion"
@@ -297,15 +294,12 @@ def parse_validates(table, funcname, ast)
               end
             end
           end
-          end
         end
-
       end
-	end
-	return constraints
+    end
+  end
+  return constraints
 end
-
-
 
 def handle_validate(table, type, ast)
   constraints = []

@@ -1,58 +1,58 @@
-require 'pg_query'
-require 'yard'
+require "pg_query"
+require "yard"
+
 def parse_sql(ast)
-	if ast&.type.to_s == "list"
-		string_literal_node = ast[0]
-		if string_literal_node.type.to_s == "string_literal"
-			query_node = string_literal_node[0]
-			if query_node&.type.to_s == "string_content"
-				sql = query_node.source
-				if sql.start_with?"<-"
-					sql = handle_cross_line_string(sql)
-				end
-				return parse_sql_string(sql)
-			end
-		end
-	end
+  if ast&.type.to_s == "list"
+    string_literal_node = ast[0]
+    if string_literal_node.type.to_s == "string_literal"
+      query_node = string_literal_node[0]
+      if query_node&.type.to_s == "string_content"
+        sql = query_node.source
+        if sql.start_with? "<-"
+          sql = handle_cross_line_string(sql)
+        end
+        return parse_sql_string(sql)
+      end
+    end
+  end
 end
+
 # use pg query to handle sql query string
 def parse_sql_string(sql)
-	sql_ast = PgQuery.parse(sql)
-	tree = sql_ast.tree[0]['RawStmt']['stmt']
-	table_name = nil 
-	columns =[]
-	if tree['UpdateStmt']
-		update_query = tree['UpdateStmt']
-		begin
-			table_name = update_query['relation']['RangeVar']['relname']
-		rescue
-		end
-		update_query['targetList'].each do |v|
-			begin 
-				column = v['ResTarget']['name']
-				columns << column
-			rescue
-			end
-		end
-	end
-	alter_query = tree['AlterTableStmt']
-	if alter_query
-		
-	end
-	return table_name, columns
+  sql_ast = PgQuery.parse(sql)
+  tree = sql_ast.tree[0]["RawStmt"]["stmt"]
+  table_name = nil
+  columns = []
+  if tree["UpdateStmt"]
+    update_query = tree["UpdateStmt"]
+    begin
+      table_name = update_query["relation"]["RangeVar"]["relname"]
+    rescue
+    end
+    update_query["targetList"].each do |v|
+      begin
+        column = v["ResTarget"]["name"]
+        columns << column
+      rescue
+      end
+    end
+  end
+  alter_query = tree["AlterTableStmt"]
+  if alter_query
+  end
+  return table_name, columns
 end
 
 def handle_cross_line_string(sql)
-
-	if sql.start_with?'<-'
-		sql = sql.lines[1...-1].join
-		begin 
-			PgQuery.parse(sql)
-		rescue
-			puts "Illegal query reset to null"
-			sql = ""
-		end
-		return sql
-	end 
-	return ""
+  if sql.start_with? "<-"
+    sql = sql.lines[1...-1].join
+    begin
+      PgQuery.parse(sql)
+    rescue
+      puts "Illegal query reset to null"
+      sql = ""
+    end
+    return sql
+  end
+  return ""
 end
