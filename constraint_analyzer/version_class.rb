@@ -380,12 +380,19 @@ class Version_class
     puts "@active_files : #{@activerecord_files.size}"
   end
 
-  def print_validate_function
+  def print_validate_functions
     @activerecord_files.each do |key, file|
+      functions = file.functions
       ast = file.ast
       file.getConstraints.each do |k, constraint|
         if constraint.type == Constraint::MODEL
           if constraint.instance_of? Function_constraint
+            funcname = constraint.funcname
+            k = funcname
+            v = functions[k]
+            if v
+              file.printFunction(k, v)
+            end
           end
         end
       end

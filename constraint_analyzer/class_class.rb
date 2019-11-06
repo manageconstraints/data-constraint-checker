@@ -1,5 +1,5 @@
 class File_class
-  attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord, :is_deleted, :indices, :contents
+  attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord, :is_deleted, :indices, :contents, :functions
 
   def initialize(filename)
     @filename = filename
@@ -14,6 +14,23 @@ class File_class
     @foreign_keys = []
     @instance_var_refs = []
     @contents = ""
+    @functions = {}
+  end
+
+  def addFunction(funcname, ast)
+    @functions[funcname] = ast
+  end
+
+  def printFunctions
+    @functions.each do |k, v|
+      printFunction(k, v)
+    end
+  end
+
+  def printFunction(k, v)
+    puts "====start of function #{k}===="
+    puts "#{v.source}"
+    puts "====end of function #{k}===="
   end
 
   def addConstraints(constraints)

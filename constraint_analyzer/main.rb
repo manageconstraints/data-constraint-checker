@@ -60,6 +60,9 @@ OptionParser.new do |opts|
   opts.on("--curve", "please specify whether you want the curve of # constraints # loc") do |v|
     options[:curve] = true
   end
+  opts.on("--pvf", "please specify whether you want to print the validation functions") do |v|
+    options[:pvf] = true
+  end
 end.parse!
 
 if options[:app]
@@ -102,4 +105,9 @@ if options[:curve] and application_dir
   interval = 100
   puts "interval #{interval}"
   traverse_constraints_code_curve(application_dir, interval, false)
+end
+
+if options[:pvf] and application_dir
+  puts "print validation function"
+  print_validate_functions(application_dir)
 end

@@ -48,6 +48,10 @@ def parse_model_constraint_file(ast)
       end
     end
   end
+  if ast.type.to_s == "def"
+    funcname = ast[0].source
+    $cur_class.addFunction(funcname, ast)
+  end
 end
 
 def parse_foreign_key(ast)
