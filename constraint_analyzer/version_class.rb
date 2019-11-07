@@ -381,22 +381,33 @@ class Version_class
   end
 
   def print_validate_functions
+    all_functions = {}
     @activerecord_files.each do |key, file|
       functions = file.functions
+      functions.each do |k, v|
+        all_functions[k] = v
+      end     
+    end
+    contents = ""       
+    @activerecord_files.each do |key, file|
       ast = file.ast
       file.getConstraints.each do |k, constraint|
         if constraint.type == Constraint::MODEL
           if constraint.instance_of? Function_constraint
             funcname = constraint.funcname
             k = funcname
-            v = functions[k]
+            v = all_functions[k]
             if v
               file.printFunction(k, v)
+              contents += "====start of function #{k}====\n"
+              contents += "#{v.source}\n"
+              contents +="====end of function #{k}====\n"
             end
           end
         end
       end
     end
+    return contents
   end
 
   def calculate_loc

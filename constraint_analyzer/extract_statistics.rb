@@ -43,7 +43,12 @@ def print_validate_functions(application_dir, commit = "master")
   `cd #{application_dir}; git checkout #{commit}`
   version = Version_class.new(application_dir, commit)
   version.build
-  version.print_validate_functions
+  contents = version.print_validate_functions
+  app = application_dir.gsub("/", "_")
+  app_name = application_dir.split("/")[-1]
+  output = open("../log/validation_functions#{app_name}.log", "w")
+  output.write(contents)
+  output.close
 end
 
 def first_last_version_comparison_on_num(application_dir)
