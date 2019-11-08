@@ -78,32 +78,32 @@ def read_constraint_files(application_dir = nil, version = "")
     contents = file.readlines.reject { |l| /^\s*#/.match l }.join
     file.close
     # puts "reach here true #{filename}" if filename.include?"app/models/wiki_page.rb"
-    begin
-      ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-      $cur_class = File_class.new(filename)
-      $cur_class.ast = ast
-      $cur_class.contents = contents
-      $module_name = ""
-      $classes = []
-      parse_model_constraint_file(ast)
-      model_classes[$cur_class.class_name] = $cur_class.dup
-      #puts "$cur_class.class_name #{$cur_class.class_name}"
-      $classes.each do |c|
-        model_classes[c.class_name] = c
-        # puts "add new class #{c.class_name} #{c.upper_class_name}"
-      end
-      # puts "add new class #{$cur_class.class_name} #{$cur_class.upper_class_name}"
-    rescue
-      # puts "failed filename: #{filename}"
-    end
-  end
-  # puts "finished handle model files #{model_files.length} #{model_classes.length}"
-  $model_classes = model_classes
-  $dangling_classes = {}
-  # puts "********migration_files:********"
-  # puts migration_files
-  cnt = 0
-  migration_files.each do |filename|
+		begin
+			ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+			$cur_class = File_class.new(filename)
+			$cur_class.ast = ast
+			$cur_class.contents = contents
+			$module_name = ""
+			$classes = []
+			parse_model_constraint_file(ast)
+			model_classes[$cur_class.class_name] = $cur_class.dup
+			#puts "$cur_class.class_name #{$cur_class.class_name}"
+			$classes.each do |c|
+        	model_classes[c.class_name] = c
+        	# puts "add new class #{c.class_name} #{c.upper_class_name}"
+      		end
+			# puts "add new class #{$cur_class.class_name} #{$cur_class.upper_class_name}"
+    	rescue
+			# puts "failed filename: #{filename}"
+		end
+	end
+	# puts "finished handle model files #{model_files.length} #{model_classes.length}"
+	$model_classes = model_classes
+	$dangling_classes = {}
+	# puts "********migration_files:********"
+	# puts migration_files
+	cnt = 0
+	migration_files.each do |filename|
     file = open(filename)
     contents = file.read
     file.close
