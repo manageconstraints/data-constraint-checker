@@ -36,7 +36,7 @@ def current_version_constraints_num(application_dir, commit = "master")
   version = Version_class.new(application_dir, commit)
   version.build
   version.column_stats
-  puts "Latest Version Constraint Breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num} columnstats: #{version.column_stats}"
+  puts "Latest Version Constraint Breakdown: #{version.loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num} columnstats: #{version.column_stats}"
 end
 
 def print_validate_functions(application_dir, commit = "master")
