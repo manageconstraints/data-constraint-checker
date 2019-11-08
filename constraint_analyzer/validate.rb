@@ -342,45 +342,38 @@ class Numericality_constraint < Constraint
 end
 
 class Confirmation_constraint < Constraint
-  attr_accessor :case_sensitive
-
-  def initialize(table, column, type, allow_nil = false, allow_blank = false)
-    super(table, column, type, allow_nil = false, allow_blank = false)
-    @case_sensitive = true
-  end
-
-  def is_child_same(old_constraint)
-    if old_constraint.case_sensitive == @case_sensitive
-      return true
-    end
-    return false
-  end
-
-  def is_same(old_constraint)
-    return (super and is_child_same(old_constraint))
-  end
-
-  def is_same_notype(old_constraint)
-    return (super and is_child_same(old_constraint))
-  end
-
-  def parse(dic)
-    super
-    if dic["case_sensitive"]&.source == "false"
-      self.case_sensitive = false
-    else
-      self.case_sensitive = true
-    end
-    # puts "self case case_sensitive #{self.case_sensitive}"
-  end
-
-  def self_print
-    puts to_string
-  end
-
-  def to_string
-    puts "#{super} #{self.case_sensitive}"
-  end
+	attr_accessor :case_sensitive
+	def initialize(table, column, type, allow_nil=false, allow_blank=false)
+		super(table, column, type, allow_nil, allow_blank)
+		@case_sensitive = true
+	end
+	def is_child_same(old_constraint)
+		if old_constraint.case_sensitive == @case_sensitive
+			return true
+		end
+		return false
+	end
+	def is_same(old_constraint)
+		return (super and is_child_same(old_constraint))
+	end
+	def is_same_notype(old_constraint)
+		return (super and is_child_same(old_constraint))
+	end
+	def parse(dic)
+		super
+		if  dic["case_sensitive"]&.source == "false"
+			self.case_sensitive = false
+		else
+			self.case_sensitive = true
+		end
+		# puts "self case case_sensitive #{self.case_sensitive}"
+	end
+	def self_print
+		puts to_string
+	end
+	def to_string
+		puts "#{super} #{self.case_sensitive}"
+	end
 end
 
 class Acceptance_constraint < Constraint

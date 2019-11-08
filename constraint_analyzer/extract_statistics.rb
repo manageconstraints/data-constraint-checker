@@ -67,37 +67,39 @@ def first_last_version_comparison_on_num(application_dir)
 end
 
 def api_breakdown(application_dir)
-  commit = "master"
-  app_name = application_dir.split("/")[-1]
-  output = open("../log/api_breakdown_#{app_name}.log", "w")
-  # `cd #{application_dir}; git checkout -f #{commit}`
-  # version = Version_class.new(application_dir, commit)
-  `cd #{application_dir}; git stash; git pull; git checkout master`
-  versions = extract_commits(application_dir, 1, false)
-  if versions.length <= 0
-    puts "No versions"
-    return
-  end
-  version = versions[0]
-  version.build
-  db_constraints = version.getDbConstraints
-  model_constraints = version.getModelConstraints
-  html_constraints = version.getHtmlConstraints
-  # get all types of constraints
-  constraint_classes = Constraint.descendants
-  db_dic = api_type_breakdown(db_constraints)
-  model_dic = api_type_breakdown(model_constraints)
-  html_dic = api_type_breakdown(html_constraints)
-  # output the result to log file
-  output.write("=======START BREAKDOWN of API\n")
-  output.write("constraint_type #db #model #html\n")
-  output.write("Layer_breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n")
-  output.write("constraint_type #{version.total_constraints_num} #{db_constraints.size} #{model_constraints.size} #{html_constraints.size}\n")
-  constraint_classes.each do |constraint_class|
-    output.write("#{constraint_class} #{db_dic[constraint_class]} #{model_dic[constraint_class]} #{html_dic[constraint_class]}\n")
-  end
-  output.write("=======FINISH BREAKDOWN of API\n")
-  output.close
+	commit = "master"
+	app_name = application_dir.split("/")[-1]
+	output = open("../log/api_breakdown_#{app_name}.log", 'w')
+	# `cd #{application_dir}; git checkout -f #{commit}`
+	# version = Version_class.new(application_dir, commit)
+	`cd #{application_dir}; git stash; git pull; git checkout master`
+	versions = extract_commits(application_dir, 1, false)
+	if versions.length <= 0
+		puts "No versions"
+		return
+	end
+	version = versions[0]
+	version.build
+	db_constraints = version.getDbConstraints
+	model_constraints = version.getModelConstraints
+	html_constraints = version.getHtmlConstraints
+
+	# get all types of constraints
+	constraint_classes = Constraint.descendants
+	db_dic = api_type_breakdown(db_constraints)
+	model_dic = api_type_breakdown(model_constraints)
+	html_dic = api_type_breakdown(html_constraints)
+	# output the result to log file
+	output.write("=======START BREAKDOWN of API\n")
+	output.write("constraint_type #db #model #html\n")
+	output.write("Layer_breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n"
+)
+	output.write("constraint_type #{version.total_constraints_num} #{db_constraints.size} #{model_constraints.size} #{html_constraints.size}\n")
+	constraint_classes.each do |constraint_class|
+		output.write("#{constraint_class} #{db_dic[constraint_class]} #{model_dic[constraint_class]} #{html_dic[constraint_class]}\n")
+	end
+	output.write("=======FINISH BREAKDOWN of API\n")
+	output.close
 end
 
 def custom_error_msg_info(application_dir)
