@@ -258,8 +258,8 @@ def traverse_all_versions(application_dir, interval, tag_unit = true)
     puts "Duration: #{Time.now - start}"
     start = Time.now
   end
-  output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8} #{sumh1} #{sumh2} #{sumh3} #{sumh4}\n")
   output.write("VERSION number #{count1} #{count2} #{count3} #{count4} #{count5} #{count6} #{count7} #{count8} #{counth1} #{counth2} #{counth3} #{counth4}\n")
+  output.write("#{versions.length} #{cnt} #{sum1} #{sum2} #{sum3} #{sum4} #{sum5} #{sum6} #{sum7} #{sum8} #{sumh1} #{sumh2} #{sumh3} #{sumh4}\n")
   output.close
   output_diff_codechange.close
   output_html_constraints.close

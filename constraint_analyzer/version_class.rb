@@ -402,7 +402,10 @@ class Version_class
     self.annotate_model_class
     self.extract_constraints
     self.print_columns
-    self.calculate_loc
+    begin
+      self.calculate_loc
+    rescue
+    end
     puts "@active_files : #{@activerecord_files.size}"
   end
 

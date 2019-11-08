@@ -13,13 +13,15 @@ apps.each do |app|
 	execute = "cd #{main_folder}; ruby main.rb -a #{app_folder}/#{app} #{command}"
 	puts "#{execute}"
 	lines = `#{execute}`
-	log.write("======#{app}======\n")
-	log.write(lines)
-	log.write("\n")
-
+	#log.write("======#{app}======\n")
+	#log.write(lines)
+	#log.write("\n")
+	
 	lines = lines.lines
 	absent_total = lines[-1].strip
 	count[app] = absent_total
+	log.write(absent_total)
+	log.write("\n")
 	#puts "#{app} #{absent_total}"
 	# `cd #{main_folder}; ruby main.rb #{app_folder}/#{app}`
 	# lines = open("./log/output_#{app}.log").readlines
