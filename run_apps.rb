@@ -1,3 +1,13 @@
+def header_line(command)
+	header_line = ""
+	if command == '-l'
+		header_line = "APP loc total_constraints_num db_constraints_num model_constraints_num html_constraints_num columnstats: [total, associated_with_constraints]\n"
+	end
+	if ["--tva", '-t'].include?command
+		header_line = "APP #versions	added/changed_versions	model_newconstraints	db_newconstraints	model_changedconstraints	db_changedconstraints	model_existing_columns	db_existing_columns	model_new_columns	db_new_columns	html_newconstraints	html_changedconstraints	html_exisitng_columns	html_new_columns"
+	end
+	return header_line
+end
 apps = open('app_names.txt').readlines
 apps = apps.map{|x| x.strip}
 main_folder = 'constraint_analyzer'
@@ -6,6 +16,8 @@ command = ARGV[0] || "-s"
 return unless app_folder
 count = {}
 log = open("log/output.log",'w')
+header_line = header_line(command)
+log.write(header_line)
 apps.each do |app|
 	if app.start_with?'#'
 		next
@@ -20,6 +32,7 @@ apps.each do |app|
 	lines = lines.lines
 	absent_total = lines[-1].strip
 	count[app] = absent_total
+	log.write("#{app} ")
 	log.write(absent_total)
 	log.write("\n")
 	#puts "#{app} #{absent_total}"
