@@ -63,6 +63,9 @@ OptionParser.new do |opts|
   opts.on("--pvf", "please specify whether you want to print the validation functions") do |v|
     options[:pvf] = true
   end
+  opts.on("--commit-hash", "please specify whether you want to get the commit hash") do |v|
+    options[:commit_hash] = true
+  end
 end.parse!
 
 if options[:app]
@@ -110,4 +113,8 @@ end
 if options[:pvf] and application_dir
   puts "print validation function"
   print_validate_functions(application_dir)
+end
+
+if options[:commit_hash] and application_dir
+  puts `cd #{application_dir}; git rev-parse HEAD`
 end
