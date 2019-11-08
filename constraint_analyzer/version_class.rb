@@ -400,6 +400,7 @@ class Version_class
             if v
               file.printFunction(k, v)
               contents += "====start of function #{k}====\n"
+              contents += "in file: #{file.filename}\n"
               contents += "#{v.source}\n"
               contents +="====end of function #{k}====\n"
             end
