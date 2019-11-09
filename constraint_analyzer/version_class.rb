@@ -276,13 +276,13 @@ class Version_class
 		# end
 		# puts "absent_constraint\t#{@app_dir}\tdb_present_model_absent\tnot_accessed_total\t#{not_accessed_total}"
 
-		db_present_model_absent.each do |v|
-			puts "absent_check\t#{@app_dir}\tdb_present_model_absent\t#{v[:category]}\t#{v[:name]}"
-		end
+		#db_present_model_absent.each do |v|
+		#	puts "absent_check\t#{@app_dir}\tdb_present_model_absent\t#{v[:category]}\t#{v[:name]}"
+		#end
 
-		model_present_db_absent.each do |v|
-			puts "absent_check\t#{@app_dir}\tmodel_present_db_absent\t#{v[:category]}\t#{v[:name]}"
-		end
+		#model_present_db_absent.each do |v|
+		#	puts "absent_check\t#{@app_dir}\tmodel_present_db_absent\t#{v[:category]}\t#{v[:name]}"
+		#end
 	end
 
 	def compare_self
