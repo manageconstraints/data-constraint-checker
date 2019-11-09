@@ -65,12 +65,16 @@ class Version_class
     puts "total_constraints #{total_constraints} #{@total_constraints_num} #{num}"
   end
 
+
+
   def extract_case_insensitive_columns
     ci_columns = {}
+    email_columns = {}
     @activerecord_files.each do |key, file|
       constraints = file.getConstraints
       validation_constraints = constraints.select { |k, v| k.include? Constraint::MODEL }
       uniqueness_constraints = validation_constraints.select { |k, v| v.instance_of? Uniqueness_constraint and v.case_sensitive == false }
+      sensitive_uniq_constraints = validation_constraints.select { |k, v| v.instance_of? Uniqueness_constraint and v.case_sensitive == true }
       # puts "uniqueness_constraints #{uniqueness_constraints.size}"
 
       columns = file.getColumns
@@ -82,8 +86,14 @@ class Version_class
           ci_columns[key] = columns[column_name]
         end
       end
+      sensitive_uniq_constraints.each do |k, v|
+        column_name = v.column
+        if columns[column_name] and column_name == "email"
+          email_columns[key] = v.to_string
+        end
+      end
     end
-    return ci_columns
+    return ci_columns, email_columns
   end
 
   def annotate_model_class
