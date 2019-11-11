@@ -2,7 +2,7 @@ class Constraint
   DB = "db"
   MODEL = "validate"
   HTML = "html"
-  attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column, :custom_error_msg
+  attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column, :custom_error_msg, :has_cond
   #type: model from validate function / db migration file
   def initialize(table, column, type, allow_nil = false, allow_blank = false)
     @column = column
@@ -14,6 +14,7 @@ class Constraint
     @allow_nil = allow_nil
     @is_new_column = false
     @custom_error_msg = false
+    @has_cond = false
   end
 
   def is_same(old_constraint)
@@ -25,7 +26,7 @@ class Constraint
 
   def is_same_notype(old_constraint)
     if old_constraint.class == self.class
-      @table == old_constraint.table and @column == old_constraint.column and @if_cond == old_constraint.if_cond and @unless_cond == old_constraint.unless_cond and @allow_blank == old_constraint.allow_blank and @allow_nil == old_constraint.allow_nil
+      @table == old_constraint.table and @column == old_constraint.column and @allow_blank == old_constraint.allow_blank and @allow_nil == old_constraint.allow_nil
       return true
     end
     return false

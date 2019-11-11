@@ -230,11 +230,13 @@ class Version_class
 					next
 				elsif !column
 					next
+                elsif v.instance_of?Presence_constraint and v.has_cond
+                    next
 				end
 
-				if v.instance_of?Presence_constraint and !column.default_value
+                if v.instance_of?Presence_constraint and !column.default_value
 					model_present_db_absent << {:name => k, :category => :presence_no_default, :value => v}
-				elsif v.instance_of?Presence_constraint and column.default_value
+                elsif v.instance_of?Presence_constraint and column.default_value
 					model_present_db_absent << {:name => k, :category => :presence_has_default, :value => v}
 				elsif v.instance_of?Format_constraint
 					model_present_db_absent << {:name => k, :category => :format, :value => v}
@@ -280,9 +282,9 @@ class Version_class
 		#	puts "absent_check\t#{@app_dir}\tdb_present_model_absent\t#{v[:category]}\t#{v[:name]}"
 		#end
 
-		#model_present_db_absent.each do |v|
-		#	puts "absent_check\t#{@app_dir}\tmodel_present_db_absent\t#{v[:category]}\t#{v[:name]}"
-		#end
+		model_present_db_absent.each do |v|
+			puts "absent_check\t#{@app_dir}\tmodel_present_db_absent\t#{v[:category]}\t#{v[:name]}"
+		end
 	end
 
 	def compare_self

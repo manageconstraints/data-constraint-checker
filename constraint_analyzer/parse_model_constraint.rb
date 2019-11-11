@@ -181,6 +181,21 @@ def parse_validate_constraint_function(table, funcname, ast)
   return constraints
 end
 
+def list_contains_conditional(list_node)
+  result = false
+  list_node.each do |child|
+    if child.type.to_s == "assoc"
+      cur_key, cur_value = handle_assoc_node(child)
+      # puts "cur_constr #{cur_constr}"
+      if cur_key == "if" or cur_key == "unless"
+        result = true
+      end
+    end
+  end
+
+  return result
+end
+
 def parse_validates(table, funcname, ast)
   type = "validate"
   constraints = []
@@ -194,6 +209,8 @@ def parse_validates(table, funcname, ast)
       columns << column
     end
     if child.type.to_s == "list"
+      # first check for conditional
+      has_conditional = list_contains_conditional(child)
       child.each do |c|
         node = c
         if node.type.to_s == "assoc"
@@ -209,6 +226,7 @@ def parse_validates(table, funcname, ast)
               columns.each do |c|
                 constraint = Presence_constraint.new(table, c, type)
                 constraint.parse(dic)
+                constraint.has_cond = has_conditional
                 constraints << constraint
               end
             end
