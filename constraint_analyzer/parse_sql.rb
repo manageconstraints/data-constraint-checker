@@ -12,7 +12,8 @@ def parse_sql(ast)
           sql = handle_cross_line_string(sql)
         end
         if sql.downcase["alter table"]
-          parse_alter_query(sql) 
+          ast = parse_alter_query(sql) 
+          parse_db_constraint_file(ast)
         end
         return parse_sql_string(sql)
       end
@@ -60,6 +61,7 @@ def handle_cross_line_string(sql)
   if sql.start_with? "<"
     sql = sql.lines[1...-1].join
     begin
+      puts "sql : #{sql}"
       PgQuery.parse(sql)
     rescue
       puts "Illegal query reset to null"
