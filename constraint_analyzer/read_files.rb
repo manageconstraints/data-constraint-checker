@@ -41,6 +41,7 @@ def read_constraint_files(application_dir = nil, version = "")
       migration_files << filename
     end
     if filename.include?("db/schema.rb")
+      replaced_files = migration_files.dup
       migration_files = [filename]
     end
     if filename.include?("app/views/")

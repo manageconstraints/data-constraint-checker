@@ -5,6 +5,7 @@ require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analy
 require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_controller_file.rb")
 require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_html_constraint.rb")
 require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_db_constraint.rb")
+require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/parse_alter_query.rb")
 require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/read_files.rb")
 require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/class_class.rb")
 require File.join(File.expand_path(File.dirname(__FILE__)), "../constraint_analyzer/helper.rb")

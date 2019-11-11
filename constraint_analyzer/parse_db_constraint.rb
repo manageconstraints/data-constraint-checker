@@ -42,6 +42,9 @@ def parse_db_constraint_file(ast)
     # puts "callname: #{funcname}"
     parse_db_constraint_function(nil, funcname, ast)
   end
+  if ast.type.to_s == "if_mod"
+    parse_db_constraint_file(ast[-1])
+  end
 end
 
 def parse_db_constraint_function(table, funcname, ast)

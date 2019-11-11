@@ -11,6 +11,9 @@ def parse_sql(ast)
         if sql.start_with? "<"
           sql = handle_cross_line_string(sql)
         end
+        if sql.downcase["alter table"]
+          parse_alter_query(sql) 
+        end
         return parse_sql_string(sql)
       end
     end
@@ -19,11 +22,13 @@ end
 
 # use pg query to handle sql query string
 def parse_sql_string(sql)
+  type = ""
   sql_ast = PgQuery.parse(sql)
   tree = sql_ast.tree[0]["RawStmt"]["stmt"]
   table_name = nil
   columns = []
   if tree["UpdateStmt"]
+    type = "update"
     update_query = tree["UpdateStmt"]
     begin
       table_name = update_query["relation"]["RangeVar"]["relname"]
@@ -37,22 +42,18 @@ def parse_sql_string(sql)
       end
     end
   end
-  alter_query = tree["AlterTableStmt"]
-  if alter_query
-  end
-  insert_query = tree["InsertStmt"]
-  begin
-      table_name = insert_query["relation"]["RangeVar"]["relname"]
-  rescue
-  end
-  begin
-    insert_query['cols'].each do |col|
-      col_name = col["ResTarget"]["name"]
-      columns << col_name
+  if insert_query = tree["InsertStmt"]
+    type = "insert"
+    begin
+        table_name = insert_query["relation"]["RangeVar"]["relname"]
+        insert_query['cols'].each do |col|
+        col_name = col["ResTarget"]["name"]
+        columns << col_name
+      end
+    rescue
     end
-  rescue
   end
-  return table_name, columns
+  return table_name, columns, type
 end
 
 def handle_cross_line_string(sql)
