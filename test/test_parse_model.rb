@@ -100,10 +100,32 @@ class TestParseModelConstriant < Test::Unit::TestCase
   end
   def test_parse_acceptance4
   	contents = "validates_acceptance_of :terms_of_service"
- 	ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+ 	  ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
     c = parse_validate_constraint_function("Person", "validates_acceptance_of",ast[0][1])
   	assert_equal 1, c.length
   	assert_equal [], c[0]&.accept_condition
   	assert_equal c[0]&.class.name, 'Acceptance_constraint'
   end
+  def test_parse_nested_class
+    contents = "class TopicInvite < ActiveRecord::Base
+                    class B
+                    end
+                    belongs_to :topic
+                    belongs_to :invite
+
+                    validates_presence_of :topic_id
+                    validates_presence_of :invite_id
+
+                    validates_uniqueness_of :topic_id, scope: :invite_id
+                  end"
+    load_validate_api
+    ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+    $cur_class = File_class.new("file")
+    $classes = []
+    $module_name = ""
+    parse_model_constraint_file(ast) 
+    cons = $cur_class.getConstraints 
+    puts "#{$cur_class.class_name}"    
+    puts "c #{cons.size}"
+  end     
 end

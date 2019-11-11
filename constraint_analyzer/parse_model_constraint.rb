@@ -16,7 +16,7 @@ def parse_model_constraint_file(ast)
   if ast.type.to_s == "class"
     c1 = ast.children[0]
     c2 = ast.children[1]
-    if c1 and c1.type.to_s == "const_ref"
+    if c1 and c1.type.to_s == "const_ref" and c2 and (c2.type.to_s == "var_ref" or c2.type.to_s == "const_path_ref")
       # puts "c1.source #{c1.source} class_name #{$cur_class.class_name}"
       if $cur_class.class_name
         $classes << $cur_class.dup

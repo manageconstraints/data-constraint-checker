@@ -120,7 +120,7 @@ class Version_class
     end
 
     # extract the constraints from the active record file
-    @activerecord_files = @files.select { |key, x| x.is_activerecord }
+    @activerecord_files = @files.select { |key, x| x.is_activerecord and x.getColumns.size > 0}
   end
 
   def get_activerecord_files
