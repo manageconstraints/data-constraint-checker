@@ -8,7 +8,7 @@ def parse_sql(ast)
       query_node = string_literal_node[0]
       if query_node&.type.to_s == "string_content"
         sql = query_node.source
-        if sql.start_with? "<-"
+        if sql.start_with? "<"
           sql = handle_cross_line_string(sql)
         end
         return parse_sql_string(sql)
@@ -40,11 +40,23 @@ def parse_sql_string(sql)
   alter_query = tree["AlterTableStmt"]
   if alter_query
   end
+  insert_query = tree["InsertStmt"]
+  begin
+      table_name = insert_query["relation"]["RangeVar"]["relname"]
+  rescue
+  end
+  begin
+    insert_query['cols'].each do |col|
+      col_name = col["ResTarget"]["name"]
+      columns << col_name
+    end
+  rescue
+  end
   return table_name, columns
 end
 
 def handle_cross_line_string(sql)
-  if sql.start_with? "<-"
+  if sql.start_with? "<"
     sql = sql.lines[1...-1].join
     begin
       PgQuery.parse(sql)
