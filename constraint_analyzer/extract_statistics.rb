@@ -1,4 +1,37 @@
-
+def count_average_commits_between_releases(directory)
+  tags = `cd #{directory}; git tag -l --sort version:refname`
+  app_name = directory.split("/")[-1]
+  commits = tags.lines.reverse.map { |x| x.strip }
+  if commits&.length > 10
+    f = open("../log/#{app_name}_commits.txt", 'w')
+    v1 = commits[0]
+    total = 0
+    cnt = 0
+    sizes = []
+    for i in 1...commits.length
+      v2 = commits[i]
+      csize = `cd #{directory}; git log --pretty=oneline ^#{v2} #{v1}`.lines.size
+      f.write("#{v2} #{v1} #{csize}\n")       
+      v1 = v2
+      total += csize
+      sizes << csize
+      cnt += 1
+    end
+    average = 0 
+    average = total/cnt if cnt > 0
+    f.write("average: #{average} median: #{median(sizes)}\n")
+    f.close
+  end
+end
+def median(array)
+  ascend = array.sort
+  length = array.length
+  if length % 2 != 0
+    return ascend[(length + 1) / 2.0]
+  else
+    return (ascend[length/2.0] +  ascend[(length + 2)/2.0]) / 2.0
+  end
+end
 def extract_commits(directory, interval = 5, tag_unit = true)
   # reset to the most up to date commit
   puts "cd #{directory}; git checkout master"
@@ -36,6 +69,14 @@ def current_version_constraints_num(application_dir, commit = "master")
   version = Version_class.new(application_dir, commit)
   version.build
   version.column_stats
+  total_constraints = version.activerecord_files.map{|k,v| v.getConstraints.map{|k1,v1| v1} }.reduce(:+)
+  tables = total_constraints.select{|v| v.type == Constraint::DB}.group_by{|v| v.table} 
+  tables.each do |table, tables|
+    puts "table #{table} #{tables.size}"
+    if tables.size > 0
+      puts "#{tables[0].to_string}"
+    end
+  end
   puts "Latest Version Constraint Breakdown: #{version.loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num} columnstats: #{version.column_stats}"
 end
 

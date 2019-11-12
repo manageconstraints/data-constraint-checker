@@ -1,5 +1,5 @@
 class Version_class
-  attr_accessor :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num, :loc
+  attr_accessor :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num, :loc, :activerecord_files
 
   def initialize(app_dir, commit)
     @app_dir = app_dir
@@ -120,7 +120,15 @@ class Version_class
     end
 
     # extract the constraints from the active record file
-    @activerecord_files = @files.select { |key, x| x.is_activerecord and x.getColumns.size > 0}
+    @activerecord_files = @files.select { |key, x| x.is_activerecord }
+    # @activerecord_files.each do |k,v|
+    #   puts "#{k} #{v.getColumns.size}" 
+    # end
+    # @activerecord_files = @files.select { |key, x| x.is_activerecord and x.getColumns.size > 0}
+    # puts " ======== "
+    @activerecord_files.each do |k,v|
+      puts "#{k} #{v.getColumns.size}" 
+    end
   end
 
   def get_activerecord_files
