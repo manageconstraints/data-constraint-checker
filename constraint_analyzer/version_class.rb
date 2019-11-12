@@ -199,6 +199,14 @@ class Version_class
 				column = file.getColumns[v.column]
 
 				next if !column or column.is_deleted or model_cons[k2]
+                if (v.is_a?Length_constraint or v.is_a?Presence_constraint)  
+                  inclusion_key = k2.gsub(/Length_constraint|Presence_constraint/, "Inclusion_constraint")
+                  if model_cons[inclusion_key] and !model_cons[inclusion_key].range.nil?
+                    # do not consider constraint to be absent
+                    puts "Found replacement: #{inclusion_key}"
+                    next
+                  end
+                end
 
 				if (v.instance_of?Uniqueness_constraint or v.instance_of?Presence_constraint) and column.auto_increment
 					db_present_model_absent << {:name => k, :category => :self_satisfied, :value => v}
@@ -278,9 +286,9 @@ class Version_class
 		# end
 		# puts "absent_constraint\t#{@app_dir}\tdb_present_model_absent\tnot_accessed_total\t#{not_accessed_total}"
 
-		#db_present_model_absent.each do |v|
-		#	puts "absent_check\t#{@app_dir}\tdb_present_model_absent\t#{v[:category]}\t#{v[:name]}"
-		#end
+		db_present_model_absent.each do |v|
+			puts "absent_check\t#{@app_dir}\tdb_present_model_absent\t#{v[:category]}\t#{v[:name]}"
+		end
 
 		model_present_db_absent.each do |v|
 			puts "absent_check\t#{@app_dir}\tmodel_present_db_absent\t#{v[:category]}\t#{v[:name]}"

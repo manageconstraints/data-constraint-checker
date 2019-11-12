@@ -244,7 +244,7 @@ def parse_validates(table, funcname, ast)
             cur_value = cur_value_ast.source
             columns.each do |c|
               constraint = Inclusion_constraint.new(table, c, type)
-              constraint.range = cur_value
+              constraint.parse_range(cur_value_ast)
               constraint.parse(dic)
               constraints << constraint
             end

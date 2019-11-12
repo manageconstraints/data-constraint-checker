@@ -161,12 +161,16 @@ end
 
 class Inclusion_constraint < Constraint
   attr_accessor :range
+  
+  def parse_range(node)
+    @range = handle_array_node(node) 
+  end
 
   def parse(dic)
     super
     if dic["in"]
       range = dic["in"].source
-      self.range = range
+      self.range = handle_array_node(dic["in"])
     end
   end
 
