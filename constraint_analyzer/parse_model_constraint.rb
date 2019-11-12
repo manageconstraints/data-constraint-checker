@@ -14,8 +14,17 @@ def parse_model_constraint_file(ast)
     end
   end
   if ast.type.to_s == "class"
-    c1 = ast.children[0]
-    c2 = ast.children[1]
+    c1 = ast.children[0] # Class name
+    c2 = ast.children[1] # Upper class name
+    c3 = ast.children[2] # Class body
+    if $cur_class.class_name and !has_constraints(c3) 
+      placeholder_class = File_class.new($cur_class.filename.dup)
+      placeholder_class.class_name = $module_name + c1.source
+      placeholder_class.ast = $cur_class.ast.dup
+      placeholder_class.contents = $cur_class.contents.dup
+      $classes << placeholder_class
+      return
+    end
     if c1 and c1.type.to_s == "const_ref"
       # puts "c1.source #{c1.source} class_name #{$cur_class.class_name}"
       if $cur_class.class_name
@@ -28,7 +37,6 @@ def parse_model_constraint_file(ast)
     end
     # puts"filename: #{$cur_class.filename} "
     # puts"classname: #{$cur_class.class_name} upper_class_name: #{$cur_class.upper_class_name}"
-    c3 = ast.children[2]
     if c3
       parse_model_constraint_file(c3)
     end
@@ -51,6 +59,28 @@ def parse_model_constraint_file(ast)
   if ast.type.to_s == "def"
     funcname = ast[0].source
     $cur_class.addFunction(funcname, ast)
+  end
+end
+
+def has_constraints(ast)
+  return false if ast.nil? 
+  if ast.type.to_s == "list"
+    ast.children.map{|child| has_constraints(child)}.any?
+  end
+  if ast.type.to_s == "module"
+    if ast[1] and ast[1].type.to_s == "list"
+      ast[1].children.map{|child| has_constraints(child)}.any?
+    end
+  end
+  if ast.type.to_s == "class"
+    c3 = ast.children[2] # Class body
+    return has_constraints(c3) 
+  end
+  if ast.type.to_s == "command"
+    funcname = ast[0].source
+    if $validate_apis and $validate_apis.include? funcname
+      return true
+    end
   end
 end
 
