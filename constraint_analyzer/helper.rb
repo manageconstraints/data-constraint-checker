@@ -112,4 +112,3 @@ def is_number(obj)
   return true if obj =~ /\A\d+\Z/
   true if Float(obj) rescue false
 end
-

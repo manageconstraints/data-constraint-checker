@@ -3,7 +3,7 @@ def count_average_commits_between_releases(directory)
   app_name = directory.split("/")[-1]
   commits = tags.lines.reverse.map { |x| x.strip }
   if commits&.length > 10
-    f = open("../log/#{app_name}_commits.txt", 'w')
+    f = open("../log/#{app_name}_commits.txt", "w")
     v1 = commits[0]
     total = 0
     cnt = 0
@@ -11,27 +11,29 @@ def count_average_commits_between_releases(directory)
     for i in 1...commits.length
       v2 = commits[i]
       csize = `cd #{directory}; git log --pretty=oneline ^#{v2} #{v1}`.lines.size
-      f.write("#{v2} #{v1} #{csize}\n")       
+      f.write("#{v2} #{v1} #{csize}\n")
       v1 = v2
       total += csize
       sizes << csize
       cnt += 1
     end
-    average = 0 
-    average = total/cnt if cnt > 0
+    average = 0
+    average = total / cnt if cnt > 0
     f.write("average: #{average} median: #{median(sizes)}\n")
     f.close
   end
 end
+
 def median(array)
   ascend = array.sort
   length = array.length
   if length % 2 != 0
     return ascend[(length + 1) / 2.0]
   else
-    return (ascend[length/2.0] +  ascend[(length + 2)/2.0]) / 2.0
+    return (ascend[length / 2.0] + ascend[(length + 2) / 2.0]) / 2.0
   end
 end
+
 def extract_commits(directory, interval = 5, tag_unit = true)
   # reset to the most up to date commit
   puts "cd #{directory}; git checkout master"
@@ -69,8 +71,8 @@ def current_version_constraints_num(application_dir, commit = "master")
   version = Version_class.new(application_dir, commit)
   version.build
   version.column_stats
-  total_constraints = version.activerecord_files.map{|k,v| v.getConstraints.map{|k1,v1| v1} }.reduce(:+)
-  tables = total_constraints.select{|v| v.type == Constraint::DB}.group_by{|v| v.table} 
+  total_constraints = version.activerecord_files.map { |k, v| v.getConstraints.map { |k1, v1| v1 } }.reduce(:+)
+  tables = total_constraints.select { |v| v.type == Constraint::DB }.group_by { |v| v.table }
   tables.each do |table, tables|
     puts "table #{table} #{tables.size}"
     if tables.size > 0
@@ -108,39 +110,38 @@ def first_last_version_comparison_on_num(application_dir)
 end
 
 def api_breakdown(application_dir)
-	commit = "master"
-	app_name = application_dir.split("/")[-1]
-	output = open("../log/api_breakdown_#{app_name}.log", 'w')
-	# `cd #{application_dir}; git checkout -f #{commit}`
-	# version = Version_class.new(application_dir, commit)
-	`cd #{application_dir}; git stash; git pull; git checkout master`
-	versions = extract_commits(application_dir, 1, false)
-	if versions.length <= 0
-		puts "No versions"
-		return
-	end
-	version = versions[0]
-	version.build
-	db_constraints = version.getDbConstraints
-	model_constraints = version.getModelConstraints
-	html_constraints = version.getHtmlConstraints
+  commit = "master"
+  app_name = application_dir.split("/")[-1]
+  output = open("../log/api_breakdown_#{app_name}.log", "w")
+  # `cd #{application_dir}; git checkout -f #{commit}`
+  # version = Version_class.new(application_dir, commit)
+  `cd #{application_dir}; git stash; git pull; git checkout master`
+  versions = extract_commits(application_dir, 1, false)
+  if versions.length <= 0
+    puts "No versions"
+    return
+  end
+  version = versions[0]
+  version.build
+  db_constraints = version.getDbConstraints
+  model_constraints = version.getModelConstraints
+  html_constraints = version.getHtmlConstraints
 
-	# get all types of constraints
-	constraint_classes = Constraint.descendants
-	db_dic = api_type_breakdown(db_constraints)
-	model_dic = api_type_breakdown(model_constraints)
-	html_dic = api_type_breakdown(html_constraints)
-	# output the result to log file
-	output.write("=======START BREAKDOWN of API\n")
-	output.write("constraint_type #db #model #html\n")
-	output.write("Layer_breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n"
-)
-	output.write("constraint_type #{version.total_constraints_num} #{db_constraints.size} #{model_constraints.size} #{html_constraints.size}\n")
-	constraint_classes.each do |constraint_class|
-		output.write("#{constraint_class} #{db_dic[constraint_class]} #{model_dic[constraint_class]} #{html_dic[constraint_class]}\n")
-	end
-	output.write("=======FINISH BREAKDOWN of API\n")
-	output.close
+  # get all types of constraints
+  constraint_classes = Constraint.descendants
+  db_dic = api_type_breakdown(db_constraints)
+  model_dic = api_type_breakdown(model_constraints)
+  html_dic = api_type_breakdown(html_constraints)
+  # output the result to log file
+  output.write("=======START BREAKDOWN of API\n")
+  output.write("constraint_type #db #model #html\n")
+  output.write("Layer_breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n")
+  output.write("constraint_type #{version.total_constraints_num} #{db_constraints.size} #{model_constraints.size} #{html_constraints.size}\n")
+  constraint_classes.each do |constraint_class|
+    output.write("#{constraint_class} #{db_dic[constraint_class]} #{model_dic[constraint_class]} #{html_dic[constraint_class]}\n")
+  end
+  output.write("=======FINISH BREAKDOWN of API\n")
+  output.close
 end
 
 def custom_error_msg_info(application_dir)
