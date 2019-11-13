@@ -107,3 +107,9 @@ def code_change(folder, commit1, commit2)
   end
   return file, insertion, deletion
 end
+
+def is_number(obj)
+  return true if obj =~ /\A\d+\Z/
+  true if Float(obj) rescue false
+end
+

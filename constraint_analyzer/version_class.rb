@@ -215,6 +215,14 @@ class Version_class
                     next
                   end
                 end
+                if (v.is_a?Numericality_constraint)  
+                  inclusion_key = k2.gsub("Numericality_constraint", "Inclusion_constraint")
+                  if model_cons[inclusion_key] and !model_cons[inclusion_key].range.nil? and model_cons[inclusion_key].range.all? { |v| is_number(v) }
+                    # do not consider constraint to be absent
+                    puts "Found replacement: #{inclusion_key}"
+                    next
+                  end
+                end
 
 				if (v.instance_of?Uniqueness_constraint or v.instance_of?Presence_constraint) and column.auto_increment
 					db_present_model_absent << {:name => k, :category => :self_satisfied, :value => v}
@@ -246,7 +254,7 @@ class Version_class
 					next
 				elsif !column
 					next
-                elsif v.instance_of?Presence_constraint and v.has_cond
+                elsif v.has_cond
                     next
 				end
 
