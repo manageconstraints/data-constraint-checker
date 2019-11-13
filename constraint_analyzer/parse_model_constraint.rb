@@ -247,6 +247,9 @@ def parse_validates(table, funcname, ast)
               constraint.parse_range(cur_value_ast)
               constraint.parse(dic)
               constraints << constraint
+              if cur_value_ast.type.to_s == "array"
+               constraint.range = cur_value
+              end
             end
           end
           if cur_constr == "exclusion"
