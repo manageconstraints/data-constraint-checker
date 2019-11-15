@@ -323,3 +323,18 @@ def find_mismatch_oneversion(directory, commit = "master")
   version.build
   version.compare_self
 end
+
+def count_non_destroy(directory, commit = "master")
+  `cd #{directory}; git checkout #{commit}`
+  version = Version_class.new(directory, commit)
+  version.build
+  nda = version.find_non_destroy_assoc
+  cwcf = version.class_with_custom_function
+  app_name = directory.split("/")[-1]
+  output = open("../log/destroy#{app_name}.log")
+  nda.each do |k1, k2|
+    output.write("#{k1} #{k2}\n")
+  end
+  output.close
+  puts "non_destroy_assocs #{nda.size} cwcf: #{cwcf.size} #{version.activerecord_files.size}"
+end

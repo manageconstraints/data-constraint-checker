@@ -124,9 +124,9 @@ class Version_class
     # end
     # @activerecord_files = @files.select { |key, x| x.is_activerecord and x.getColumns.size > 0}
     # puts " ======== "
-    @activerecord_files.each do |k, v|
-      puts "#{k} #{v.getColumns.size}"
-    end
+    # @activerecord_files.each do |k, v|
+    #   puts "#{k} #{v.getColumns.size}"
+    # end
   end
 
   def get_activerecord_files
@@ -498,4 +498,44 @@ class Version_class
       @loc = 0
     end
   end
+  def find_non_destroy_assoc
+    non_destroy_assocs = [] 
+    @activerecord_files.each do |key, file|
+      no_destroy_tables = file.has_many_classes.select{|k, v| not v}.map{|k,v| k}
+      puts "no_destroy_tables: #{no_destroy_tables.size}"
+      no_destroy_tables.each do |column|
+        class_name = convert_tablename(column)
+        class_class = @activerecord_files[class_name] ||  @activerecord_files["Spree"+class_name]
+        # puts "class_name: #{class_name}"
+        # puts @activerecord_files.keys
+        if class_class
+          if key.include?"Spree"
+            key = key[5..-1]
+          end
+          p_c_k = "#{class_name}-#{key.downcase}-#{Presence_constraint}-#{Constraint::MODEL}"
+          p_c_k2 = "Spree" + p_c_k
+          # puts "p_c_k #{p_c_k}"
+          # puts "#{class_class.getConstraints.map{|k,v| k}}"
+          if class_class.getConstraints[p_c_k] || class_class.getConstraints[p_c_k2]
+            non_destroy_assocs << [key, column]
+            # puts "#{p_c_k} #{non_destroy_assocs.size}"
+          end
+        end
+      end
+    end
+    return non_destroy_assocs
+  end
+  def class_with_custom_function
+    cwcf = {}
+    cnt = 0
+    @activerecord_files.each do |key, file|
+      size = file.getConstraints.select { |k,v| v.instance_of?Customized_constraint or v.instance_of?Function_constraint }.size
+      if size > 0
+        cwcf[key] = size
+        cnt += 1
+      end
+    end
+    return cwcf
+  end
 end
+

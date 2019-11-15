@@ -1,5 +1,5 @@
 class File_class
-  attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord, :is_deleted, :indices, :contents, :functions
+  attr_accessor :filename, :class_name, :upper_class_name, :ast, :is_activerecord, :is_deleted, :indices, :contents, :functions, :has_many_classes
 
   def initialize(filename)
     @filename = filename
@@ -15,6 +15,7 @@ class File_class
     @instance_var_refs = []
     @contents = ""
     @functions = {}
+    @has_many_classes = {}
   end
 
   def addFunction(funcname, ast)
@@ -26,7 +27,14 @@ class File_class
       printFunction(k, v)
     end
   end
-
+  def addHasMany(column, dic)
+    if dic["dependent"]
+      has_many_classes[column] = true
+    else
+      has_many_classes[column] = false
+    end
+    puts "#{column} #{has_many_classes[column]}"
+  end
   def printFunction(k, v)
     puts "====start of function #{k}===="
     puts "#{v.source}"

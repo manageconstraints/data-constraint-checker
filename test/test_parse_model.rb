@@ -117,6 +117,9 @@ class TestParseModelConstriant < Test::Unit::TestCase
                     validates_presence_of :invite_id
 
                     validates_uniqueness_of :topic_id, scope: :invite_id
+                    has_many :attachments, dependent: :destroy
+                    has_many :users
+                    belongs_to :test, optional: true
                   end"
     load_validate_api
     ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
@@ -127,5 +130,9 @@ class TestParseModelConstriant < Test::Unit::TestCase
     cons = $cur_class.getConstraints 
     puts "#{$cur_class.class_name}"    
     puts "c #{cons.size}"
+    assert_equal 2, $cur_class.has_many_classes.size
+    assert_equal true, $cur_class.has_many_classes["attachments"]
+    assert_equal false, $cur_class.has_many_classes["users"]
+    
   end     
 end
