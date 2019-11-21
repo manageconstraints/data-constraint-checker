@@ -73,7 +73,13 @@ OptionParser.new do |opts|
   opts.on("--count-destory", "please specify whether you want to count the destroy") do |v|
     options[:destroy] = true
   end
+  opts.on("--custom-change", "please specify whether you want to check the custom function") do |v|
+    options[:custom_change] = true
+  end
 end.parse!
+
+$read_html = true
+$read_db = true
 
 if options[:app]
   application_dir = options[:app]
@@ -91,6 +97,16 @@ if options[:tva] and options[:app] and interval
     traverse_all_versions(application_dir, interval, true)
   end
 end
+
+if options[:custom_change] and options[:app] and interval
+  puts "traverse to see custom change  options[:commit_unit] #{options[:commit_unit]}"
+  if options[:commit_unit]
+    traverse_for_custom_validation(application_dir, interval, false)
+  else
+    traverse_for_custom_validation(application_dir, interval, true)
+  end
+end
+
 if options[:single] and options[:app]
   find_mismatch_oneversion(options[:app])
 end

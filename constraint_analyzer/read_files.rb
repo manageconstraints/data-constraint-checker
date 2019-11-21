@@ -104,23 +104,26 @@ def read_constraint_files(application_dir = nil, version = "")
   # puts "********migration_files:********"
   # puts migration_files
   cnt = 0
-  migration_files.each do |filename|
-    file = open(filename)
-    contents = file.read
-    file.close
-    begin
-      ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
-      $cur_class = File_class.new(filename)
-      $cur_class.ast = ast
-      parse_db_constraint_file(ast)
-      cnt += 1
-    rescue
+  if $read_db
+    migration_files.each do |filename|
+      file = open(filename)
+      contents = file.read
+      file.close
+      begin
+        ast = YARD::Parser::Ruby::RubyParser.parse(contents).root
+        $cur_class = File_class.new(filename)
+        $cur_class.ast = ast
+        parse_db_constraint_file(ast)
+        cnt += 1
+      rescue
+      end
     end
   end
   # puts "finished handle migration files #{migration_files.length} #{cnt}"
-
   begin
-    read_html_file_ast(view_files)
+    if $read_html
+      read_html_file_ast(view_files)
+    end
   rescue
   end
   return model_classes

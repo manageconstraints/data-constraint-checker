@@ -197,7 +197,37 @@ def traverse_constraints_code_curve(application_dir, interval, tag_unit = true)
   end
   output.close
 end
-
+def traverse_for_custom_validation(application_dir, interval, tag_unit = true)
+  $read_db = false
+  $read_html = false
+  versions = extract_commits(application_dir, interval, tag_unit)
+  puts "versions.length: #{versions.length}"
+  return if versions.length <= 0
+  app_name = application_dir.split("/")[-1]
+  versions[0].build
+  output_customchange = open("../log/customchange_#{app_name}.log", "w")
+  c1 = c2 = c3 = c4 = 0
+  s1 = s2 = s3 = s4 = 0
+  for i in 1...versions.length
+    new_version = versions[i - 1]
+    version = versions[i]
+    version.build
+    cf, af, df = new_version.compare_custom_constriants(version)
+    s1 += cf.size
+    s2 += af.size
+    s3 += df.size
+    c1 += 1 if cf.size > 0
+    c2 += 1 if af.size > 0
+    c3 += 1 if df.size > 0
+    c4 += 1 if cf.size > 0 || af.size > 0 || df.size > 0
+  end
+  s4 = s1 + s2 + s3
+  contents = "#{c1} #{c2} #{c3} #{c4}\n"
+  contents += "#{s1} #{s2} #{s3} #{s4}\n"
+  puts contents
+  output_customchange.write(contents)
+  output_customchange.close
+end
 def traverse_all_versions(application_dir, interval, tag_unit = true)
   versions = extract_commits(application_dir, interval, tag_unit)
   puts "versions.length: #{versions.length}"
@@ -327,3 +357,4 @@ def count_non_destroy(directory, commit = "master")
   output.close
   puts "non_destroy_assocs #{nda.size} cwcf: #{cwcf.size} #{version.activerecord_files.size}"
 end
+

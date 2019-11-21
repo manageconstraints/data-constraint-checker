@@ -143,6 +143,41 @@ class Version_class
     end
   end
 
+  def compare_custom_constriants(old_version)
+    changed_functions = {}
+    added_functions = {}
+    deleted_functions = {}
+    old_functions = {}
+    new_functions = {}
+    @activerecord_files.each do |key, file|
+      file.functions.each do |fn, ast|
+        new_functions[fn] = ast
+      end
+      old_file = old_version.get_activerecord_files[key]
+      next unless old_file
+      old_file.functions.each do |fn, ast|
+        old_functions[fn] = ast
+      end
+    end
+    new_functions.each do |fn, ast|
+      if old_functions[fn]
+        if old_functions[fn].source != ast.source
+          changed_functions[fn] = ast
+          puts "====origin===="
+          puts old_functions[fn].source
+          puts "====new======="
+          puts ast.source 
+          puts "====end======="
+        end
+      else
+        added_functions[fn] = ast
+      end
+    end
+    deleted_functions = old_functions.select{|k,v| not new_functions[k]}
+
+    return changed_functions, added_functions, deleted_functions
+  end
+
   def compare_constraints(old_version)
     newly_added_constraints = []
     changed_constraints = []
