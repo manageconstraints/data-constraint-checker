@@ -95,6 +95,7 @@ def handle_change_column(ast, is_deleted = false)
   table_class = $dangling_classes[class_name] if !table_class
   if !table_class
     table_class = File_class.new("")
+    table_class.is_activerecord = true
     $dangling_classes[class_name] = table_class
   end
   if is_deleted
@@ -150,6 +151,7 @@ def handle_create_table(ast)
             table_class = $dangling_classes[class_name] if !table_class
             if !table_class
               table_class = File_class.new("")
+              table_class.is_activerecord = true
               $dangling_classes[class_name] = table_class
             end
             dic = extract_hash_from_list(column_ast.children[-1])
@@ -203,6 +205,7 @@ def handle_change_column_null(ast)
     table_class = $dangling_classes[class_name] if !table_class
     if !table_class
       table_class = File_class.new("")
+      table_class.is_activerecord = true
       $dangling_classes[class_name] = table_class
     end
     if ast[1][1].type.to_s == "symbol_literal"
@@ -238,6 +241,7 @@ def handle_reversible(ast)
     table_class = $dangling_classes[class_name] if !table_class
     if !table_class
       table_class = File_class.new("")
+      table_class.is_activerecord = true
       $dangling_classes[class_name] = table_class
     end
     # puts "table_name : #{table_name}" if $debug_mode
@@ -402,6 +406,7 @@ def handle_add_index(ast)
   table_class = $model_classes[class_name] || $dangling_classes[class_name]
   if !table_class
     table_class = File_class.new("")
+    table_class.is_activerecord = true
     $dangling_classes[class_name] = table_class
   end
 

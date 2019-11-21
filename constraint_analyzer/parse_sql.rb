@@ -12,7 +12,7 @@ def parse_sql(ast)
           sql = handle_cross_line_string(sql)
         end
         if sql.downcase["alter table"]
-          ast = parse_alter_query(sql) 
+          ast = parse_alter_query(sql)
           parse_db_constraint_file(ast)
         end
         return parse_sql_string(sql)
@@ -46,8 +46,8 @@ def parse_sql_string(sql)
   if insert_query = tree["InsertStmt"]
     type = "insert"
     begin
-        table_name = insert_query["relation"]["RangeVar"]["relname"]
-        insert_query['cols'].each do |col|
+      table_name = insert_query["relation"]["RangeVar"]["relname"]
+      insert_query["cols"].each do |col|
         col_name = col["ResTarget"]["name"]
         columns << col_name
       end

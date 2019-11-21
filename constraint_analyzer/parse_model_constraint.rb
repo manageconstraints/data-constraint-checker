@@ -16,7 +16,7 @@ def parse_model_constraint_file(ast)
   if ast.type.to_s == "class"
     c1 = ast.children[0]
     c2 = ast.children[1]
-    if c1 and c1.type.to_s == "const_ref"
+    if c1 and c1.type.to_s == "const_ref" and c2 and (c2.type.to_s == "var_ref" or c2.type.to_s == "const_path_ref")
       # puts "c1.source #{c1.source} class_name #{$cur_class.class_name}"
       if $cur_class.class_name
         $classes << $cur_class.dup
@@ -45,6 +45,46 @@ def parse_model_constraint_file(ast)
       if key_field
         # puts "foreign key: #{key_field}"
         $cur_class.addForeignKey(key_field)
+      end
+    end
+    if funcname == "has_many" || funcname == "belongs_to" 
+      columns = []
+      dic = {}
+      puts "has_many #{ast.type}"
+      ast[1].children.each do |child|
+        if child.type.to_s == "symbol_literal"
+          column = handle_symbol_literal_node(child)
+          columns << column
+        end
+        # puts"child.type.to_s #{child.type.to_s} #{child.source}"
+        if child.type.to_s == "list"
+          child.each do |c|
+            if c.type.to_s == "assoc"
+              key, value = handle_assoc_node(c)
+              if key and value
+                dic[key] = value
+              end
+            end
+          end
+        end
+      end
+      if funcname == "has_many"
+        columns.each do |column|
+          puts "#{column} #{dic}"
+          $cur_class.addHasMany(column, dic)
+        end
+      end
+      if funcname == "belongs_to"
+        cs = []
+        columns.each do |column|
+          unless dic["optional"]&.source == "true"
+            type = Constraint::MODEL
+            constraint = Presence_constraint.new($cur_class.class_name, column, type, nil, nil)
+            cs << constraint
+            $cur_class.addConstraints(cs) if cs.length > 0
+          end
+        end
+
       end
     end
   end
@@ -181,6 +221,21 @@ def parse_validate_constraint_function(table, funcname, ast)
   return constraints
 end
 
+def list_contains_conditional(list_node)
+  result = false
+  list_node.each do |child|
+    if child.type.to_s == "assoc"
+      cur_key, cur_value = handle_assoc_node(child)
+      # puts "cur_constr #{cur_constr}"
+      if cur_key == "if" or cur_key == "unless"
+        result = true
+      end
+    end
+  end
+
+  return result
+end
+
 def parse_validates(table, funcname, ast)
   type = "validate"
   constraints = []
@@ -194,6 +249,8 @@ def parse_validates(table, funcname, ast)
       columns << column
     end
     if child.type.to_s == "list"
+      # first check for conditional
+      has_conditional = list_contains_conditional(child)
       child.each do |c|
         node = c
         if node.type.to_s == "assoc"
@@ -209,6 +266,7 @@ def parse_validates(table, funcname, ast)
               columns.each do |c|
                 constraint = Presence_constraint.new(table, c, type)
                 constraint.parse(dic)
+                constraint.has_cond = has_conditional
                 constraints << constraint
               end
             end
@@ -226,9 +284,12 @@ def parse_validates(table, funcname, ast)
             cur_value = cur_value_ast.source
             columns.each do |c|
               constraint = Inclusion_constraint.new(table, c, type)
-              constraint.range = cur_value
+              constraint.parse_range(cur_value_ast)
               constraint.parse(dic)
               constraints << constraint
+              if cur_value_ast.type.to_s == "array"
+                constraint.range = cur_value
+              end
             end
           end
           if cur_constr == "exclusion"
@@ -351,3 +412,4 @@ def parse_validates_each(table, type, ast)
   # puts "create parse_validates_each constriants #{constraints.size} #{constraints[0].column}-#{constraints[0].class.name}-#{type}" if constraints.size > 0
   constraints
 end
+

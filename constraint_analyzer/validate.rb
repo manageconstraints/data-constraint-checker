@@ -2,7 +2,7 @@ class Constraint
   DB = "db"
   MODEL = "validate"
   HTML = "html"
-  attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column, :custom_error_msg
+  attr_accessor :table, :column, :type, :if_cond, :unless_cond, :allow_nil, :allow_blank, :is_new_column, :custom_error_msg, :has_cond
   #type: model from validate function / db migration file
   def initialize(table, column, type, allow_nil = false, allow_blank = false)
     @column = column
@@ -14,6 +14,7 @@ class Constraint
     @allow_nil = allow_nil
     @is_new_column = false
     @custom_error_msg = false
+    @has_cond = false
   end
 
   def is_same(old_constraint)
@@ -25,7 +26,7 @@ class Constraint
 
   def is_same_notype(old_constraint)
     if old_constraint.class == self.class
-      @table == old_constraint.table and @column == old_constraint.column and @if_cond == old_constraint.if_cond and @unless_cond == old_constraint.unless_cond and @allow_blank == old_constraint.allow_blank and @allow_nil == old_constraint.allow_nil
+      @table == old_constraint.table and @column == old_constraint.column and @allow_blank == old_constraint.allow_blank and @allow_nil == old_constraint.allow_nil
       return true
     end
     return false
@@ -161,11 +162,15 @@ end
 class Inclusion_constraint < Constraint
   attr_accessor :range
 
+  def parse_range(node)
+    @range = handle_array_node(node)
+  end
+
   def parse(dic)
     super
     if dic["in"]
       range = dic["in"].source
-      self.range = range
+      self.range = handle_array_node(dic["in"])
     end
   end
 
@@ -342,38 +347,45 @@ class Numericality_constraint < Constraint
 end
 
 class Confirmation_constraint < Constraint
-	attr_accessor :case_sensitive
-	def initialize(table, column, type, allow_nil=false, allow_blank=false)
-		super(table, column, type, allow_nil, allow_blank)
-		@case_sensitive = true
-	end
-	def is_child_same(old_constraint)
-		if old_constraint.case_sensitive == @case_sensitive
-			return true
-		end
-		return false
-	end
-	def is_same(old_constraint)
-		return (super and is_child_same(old_constraint))
-	end
-	def is_same_notype(old_constraint)
-		return (super and is_child_same(old_constraint))
-	end
-	def parse(dic)
-		super
-		if  dic["case_sensitive"]&.source == "false"
-			self.case_sensitive = false
-		else
-			self.case_sensitive = true
-		end
-		# puts "self case case_sensitive #{self.case_sensitive}"
-	end
-	def self_print
-		puts to_string
-	end
-	def to_string
-		puts "#{super} #{self.case_sensitive}"
-	end
+  attr_accessor :case_sensitive
+
+  def initialize(table, column, type, allow_nil = false, allow_blank = false)
+    super(table, column, type, allow_nil, allow_blank)
+    @case_sensitive = true
+  end
+
+  def is_child_same(old_constraint)
+    if old_constraint.case_sensitive == @case_sensitive
+      return true
+    end
+    return false
+  end
+
+  def is_same(old_constraint)
+    return (super and is_child_same(old_constraint))
+  end
+
+  def is_same_notype(old_constraint)
+    return (super and is_child_same(old_constraint))
+  end
+
+  def parse(dic)
+    super
+    if dic["case_sensitive"]&.source == "false"
+      self.case_sensitive = false
+    else
+      self.case_sensitive = true
+    end
+    # puts "self case case_sensitive #{self.case_sensitive}"
+  end
+
+  def self_print
+    puts to_string
+  end
+
+  def to_string
+    puts "#{super} #{self.case_sensitive}"
+  end
 end
 
 class Acceptance_constraint < Constraint
@@ -418,4 +430,13 @@ class Function_constraint < Constraint
 end
 
 class Customized_constraint < Constraint
+end
+
+class HasMany_constraint < Constraint
+  attr_accessor :dependent
+  def parse(dic)
+    if dic["dependent"]
+      self.dependent = true
+    end
+  end 
 end
