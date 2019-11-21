@@ -215,18 +215,7 @@ def traverse_all_versions(application_dir, interval, tag_unit = true)
   end
   output_html_constraints = open("#{log_dir}/html_constraints.log", "w")
   cnt = 0
-  sum1 = 0
-  sum2 = 0
-  sum3 = 0
-  sum4 = 0
-  sum5 = 0
-  sum6 = 0
-  sum7 = 0
-  sum8 = 0
-  sumh1 = 0
-  sumh2 = 0
-  sumh3 = 0
-  sumh4 = 0
+  sum1 = sum2 = sum3 = sum4 = sum5 = sum6 = sum7 = sum8 = sumh1 = sumh2 = sumh3 = sumh4 = 0
   count1 = count2 = count3 = count4 = count5 = count6 = count7 = count8 = counth1 = counth2 = counth3 = counth4 = 0
   start = Time.now
   for i in 1...versions.length
@@ -331,7 +320,7 @@ def count_non_destroy(directory, commit = "master")
   nda = version.find_non_destroy_assoc
   cwcf = version.class_with_custom_function
   app_name = directory.split("/")[-1]
-  output = open("../log/destroy#{app_name}.log")
+  output = open("../log/destroy#{app_name}.log", "w")
   nda.each do |k1, k2|
     output.write("#{k1} #{k2}\n")
   end
