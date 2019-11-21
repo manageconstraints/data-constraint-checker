@@ -155,11 +155,6 @@ class Version_class
       if old_functions[fn]
         if old_functions[fn].source != ast.source
           changed_functions[fn] = ast
-          puts "====origin===="
-          puts old_functions[fn].source
-          puts "====new======="
-          puts ast.source 
-          puts "====end======="
         end
       else
         added_functions[fn] = ast

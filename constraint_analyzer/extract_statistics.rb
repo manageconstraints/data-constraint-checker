@@ -222,8 +222,8 @@ def traverse_for_custom_validation(application_dir, interval, tag_unit = true)
     c4 += 1 if cf.size > 0 || af.size > 0 || df.size > 0
   end
   s4 = s1 + s2 + s3
-  contents = "#{c1} #{c2} #{c3} #{c4}\n"
-  contents += "#{s1} #{s2} #{s3} #{s4}\n"
+  contents = "#{versions.length} #{c1} #{c2} #{c3} #{c4}\n"
+  contents += "#{versions.length} #{s1} #{s2} #{s3} #{s4}\n"
   puts contents
   output_customchange.write(contents)
   output_customchange.close
