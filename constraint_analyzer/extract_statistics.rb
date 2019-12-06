@@ -1,3 +1,19 @@
+require 'rubygems'
+require 'write_xlsx'
+
+# Create a new Excel workbook
+def write_to_sheet(worksheet, api_data, format)
+  col = row = 0
+  # puts "api_data #{api_data.size}"
+  for row in 0...api_data.size
+    contents = api_data[row]
+    # puts "contents : #{contents.size}"
+    for col in 0...contents.length
+      # puts "contents[col #{contents[col]}"
+      worksheet.write(row, col, contents[col], format)
+    end
+  end
+end
 def count_average_commits_between_releases(directory)
   tags = `cd #{directory}; git tag -l --sort version:refname`
   app_name = directory.split("/")[-1]
@@ -208,6 +224,7 @@ def traverse_for_custom_validation(application_dir, interval, tag_unit = true)
   output_customchange = open("../log/customchange_#{app_name}.log", "w")
   c1 = c2 = c3 = c4 = 0
   s1 = s2 = s3 = s4 = 0
+  results = []
   for i in 1...versions.length
     new_version = versions[i - 1]
     version = versions[i]
@@ -216,6 +233,9 @@ def traverse_for_custom_validation(application_dir, interval, tag_unit = true)
     s1 += cf.size
     s2 += af.size
     s3 += df.size
+    results += cf.map{|k,v| [version.commit, new_version.commit, v[0].source, v[1].source]}
+    results += af.map{|k,v| [version.commit, new_version.commit, "", v.source]}
+    results += df.map{|k,v| [version.commit, new_version.commit, v.source, ""]}
     c1 += 1 if cf.size > 0
     c2 += 1 if af.size > 0
     c3 += 1 if df.size > 0
@@ -227,6 +247,13 @@ def traverse_for_custom_validation(application_dir, interval, tag_unit = true)
   puts contents
   output_customchange.write(contents)
   output_customchange.close
+
+  workbook = WriteXLSX.new("../output/compare-custom-#{app_name}.xlsx")
+  format = workbook.add_format 
+  worksheet = workbook.add_worksheet("compare")
+  format.set_align('left')
+  write_to_sheet(worksheet, results, format)
+  workbook.close
 end
 def traverse_all_versions(application_dir, interval, tag_unit = true)
   versions = extract_commits(application_dir, interval, tag_unit)

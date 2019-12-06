@@ -37,6 +37,13 @@ def parse_controller_file(ast)
         $no_resuce_num += 1
       end
     end
-    #end
+    ast.children.each do |child|
+      parse_controller_file(child)
+    end
+  end
+  if ast.type.to_s == "if"
+    $if_output.write("===========================\n")
+    $if_output.write($fn + "\n")
+    $if_output.write(ast.source + "\n")  
   end
 end

@@ -154,7 +154,7 @@ class Version_class
     new_functions.each do |fn, ast|
       if old_functions[fn]
         if old_functions[fn].source != ast.source
-          changed_functions[fn] = ast
+          changed_functions[fn] = [old_functions[fn], ast]
         end
       else
         added_functions[fn] = ast

@@ -76,6 +76,10 @@ OptionParser.new do |opts|
   opts.on("--custom-change", "please specify whether you want to check the custom function") do |v|
     options[:custom_change] = true
   end
+  opts.on("--if-checking", "please specify whether you want to check the custom function") do |v|
+    options[:if_checking] = true
+  end
+  
 end.parse!
 
 $read_html = true
@@ -148,4 +152,11 @@ end
 
 if options[:destroy] and application_dir
   count_non_destroy(application_dir)
+end
+if options[:if_checking] and application_dir
+  $read_html = false
+  $read_db = false
+  $if_output = open("../log/ifcheck.txt", "a")
+  version = Version_class.new(application_dir, "master")
+  version.build
 end
