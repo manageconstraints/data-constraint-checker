@@ -94,6 +94,7 @@ if options[:interval]
   interval = options[:interval].to_i
 end
 if options[:tva] and options[:app] and interval
+  $read_html = false
   puts "travese_all_versions start options[:commit_unit] #{options[:commit_unit]}"
   if options[:commit_unit]
     traverse_all_versions(application_dir, interval, false)
