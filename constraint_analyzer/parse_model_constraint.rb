@@ -81,7 +81,7 @@ def parse_model_constraint_file(ast)
             type = Constraint::MODEL
             constraint = Presence_constraint.new($cur_class.class_name, column, type, nil, nil)
             cs << constraint
-            $cur_class.addConstraints(cs) if cs.length > 0
+            #$cur_class.addConstraints(cs) if cs.length > 0
           end
         end
 
