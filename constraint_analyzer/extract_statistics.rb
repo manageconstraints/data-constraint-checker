@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'write_xlsx'
 require 'date'
-
+require 'yaml'
 # Create a new Excel workbook
 def write_to_sheet(worksheet, api_data, format)
   col = row = 0
@@ -282,7 +282,17 @@ def traverse_all_versions(application_dir, interval, tag_unit = true)
   puts "versions.length: #{versions.length}"
   return if versions.length <= 0
   app_name = application_dir.split("/")[-1]
-  versions[0].build
+  version_his_folder = "../log/vhf_#{app_name}/"
+  if not File.exist? version_his_folder
+    `mkdir #{version_his_folder}`
+  end
+  yaml_version = version_his_folder+versions[0].commit.gsub("/","-")
+  if File.exist?(yaml_version)
+    versions[0] = YAML.load(File.read(yaml_version))
+  else
+    versions[0].build
+    File.open(yaml_version, 'w') { |f| f.write(YAML.dump(versions[0])) }
+  end
   output = open("../log/output_#{app_name}.log", "w")
   output_diff_codechange = open("../log/codechange_#{app_name}.log", "w")
   log_dir = "../log/#{app_name}_log/"
@@ -301,7 +311,13 @@ def traverse_all_versions(application_dir, interval, tag_unit = true)
     puts "=============#{i} out of #{versions.length}============="
     new_version = versions[i - 1]
     version = versions[i]
-    version.build
+    yaml_version = version_his_folder+version.commit.gsub("/","-")
+    if File.exist?(yaml_version)
+      version = YAML.load(File.read(yaml_version))
+    else
+      version.build
+      File.open(yaml_version, 'w') { |f| f.write(YAML.dump(version)) }
+    end
     ncs, ccs, eccs, nccs, nmhcs = new_version.compare_constraints(version)
     # nmhcs => not matched html constraints with previous html/validate constraints
     if ncs.length > 0 or ccs.length > 0
