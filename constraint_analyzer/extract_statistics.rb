@@ -1,3 +1,20 @@
+require 'rubygems'
+require 'write_xlsx'
+require 'date'
+
+# Create a new Excel workbook
+def write_to_sheet(worksheet, api_data, format)
+  col = row = 0
+  # puts "api_data #{api_data.size}"
+  for row in 0...api_data.size
+    contents = api_data[row]
+    # puts "contents : #{contents.size}"
+    for col in 0...contents.length
+      # puts "contents[col #{contents[col]}"
+      worksheet.write(row, col, contents[col], format)
+    end
+  end
+end
 def count_average_commits_between_releases(directory)
   tags = `cd #{directory}; git tag -l --sort version:refname`
   app_name = directory.split("/")[-1]
@@ -39,7 +56,9 @@ def extract_commits(directory, interval = 5, tag_unit = true)
   puts "cd #{directory}; git checkout master"
   `cd #{directory}; git checkout master`
   puts "directory #{directory}"
-  tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
+  # tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
+  tags = `cd #{directory}; git tag -l --sort version:refname`
+  puts tags
   if tag_unit
     commits = tags.lines.reverse.map { |x| x.strip }
   end
@@ -64,6 +83,15 @@ def extract_commits(directory, interval = 5, tag_unit = true)
   end
   puts "versions.length: #{versions.length}"
   return versions
+end
+def get_tags_before_certain_date(commit,directory)
+  tags = `cd #{directory}; git for-each-ref  --sort version:refname  --format="%(refname:short) | %(creatordate)" refs/tags/*`
+  tags = tags&.lines.map{|x| x.strip.split("|")}
+  tags = tags&.map{|a1, a2| [a1, Date.parse(a2).to_date]}
+  commit_time_str = `cd #{directory};  git show -s --format=%ci #{commit}`
+  commit_time = Date.parse(commit_time_str).to_date
+  puts "tags #{tags.size}"
+  tags.select{|a1, a2| a2 <= commit_time}.map{|a1, a2| a1}
 end
 
 def current_version_constraints_num(application_dir, commit = "master")
@@ -197,7 +225,48 @@ def traverse_constraints_code_curve(application_dir, interval, tag_unit = true)
   end
   output.close
 end
+def traverse_for_custom_validation(application_dir, interval, tag_unit = true)
+  $read_db = false
+  $read_html = false
+  versions = extract_commits(application_dir, interval, tag_unit)
+  puts "versions.length: #{versions.length}"
+  return if versions.length <= 0
+  app_name = application_dir.split("/")[-1]
+  versions[0].build
+  output_customchange = open("../log/customchange_#{app_name}.log", "w")
+  c1 = c2 = c3 = c4 = 0
+  s1 = s2 = s3 = s4 = 0
+  results = []
+  for i in 1...versions.length
+    new_version = versions[i - 1]
+    version = versions[i]
+    version.build
+    cf, af, df = new_version.compare_custom_constriants(version)
+    s1 += cf.size
+    s2 += af.size
+    s3 += df.size
+    results += cf.map{|k,v| [version.commit, new_version.commit, v[0].source, v[1].source]}
+    results += af.map{|k,v| [version.commit, new_version.commit, "", v.source]}
+    results += df.map{|k,v| [version.commit, new_version.commit, v.source, ""]}
+    c1 += 1 if cf.size > 0
+    c2 += 1 if af.size > 0
+    c3 += 1 if df.size > 0
+    c4 += 1 if cf.size > 0 || af.size > 0 || df.size > 0
+  end
+  s4 = s1 + s2 + s3
+  contents = "#{versions.length} #{c1} #{c2} #{c3} #{c4}\n"
+  contents += "#{versions.length} #{s1} #{s2} #{s3} #{s4}\n"
+  puts contents
+  output_customchange.write(contents)
+  output_customchange.close
 
+  workbook = WriteXLSX.new("../output/compare-custom-#{app_name}.xlsx")
+  format = workbook.add_format 
+  worksheet = workbook.add_worksheet("compare")
+  format.set_align('left')
+  write_to_sheet(worksheet, results, format)
+  workbook.close
+end
 def traverse_all_versions(application_dir, interval, tag_unit = true)
   versions = extract_commits(application_dir, interval, tag_unit)
   puts "versions.length: #{versions.length}"
@@ -327,3 +396,4 @@ def count_non_destroy(directory, commit = "master")
   output.close
   puts "non_destroy_assocs #{nda.size} cwcf: #{cwcf.size} #{version.activerecord_files.size}"
 end
+

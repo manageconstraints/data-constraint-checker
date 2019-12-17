@@ -1,5 +1,5 @@
 class Version_class
-  attr_accessor :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num, :loc, :activerecord_files
+  attr_accessor :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num, :loc, :activerecord_files, :validation_functions
 
   def initialize(app_dir, commit)
     @app_dir = app_dir
@@ -14,6 +14,7 @@ class Version_class
     @model_constraints = []
     @html_constraints = []
     @loc = 0
+    @validation_functions = {}
   end
 
   def getDbConstraints
@@ -141,6 +142,27 @@ class Version_class
         # puts"\t#{column.column_name}"
       end
     end
+  end
+
+  def compare_custom_constriants(old_version)
+    changed_functions = {}
+    added_functions = {}
+    deleted_functions = {}
+    old_functions = old_version.validation_functions.map{|k,v| [k, v[1]]}.to_h
+    new_functions = self.validation_functions.map{|k,v| [k, v[1]]}.to_h
+
+    new_functions.each do |fn, ast|
+      if old_functions[fn]
+        if old_functions[fn].source != ast.source
+          changed_functions[fn] = [old_functions[fn], ast]
+        end
+      else
+        added_functions[fn] = ast
+      end
+    end
+    deleted_functions = old_functions.select{|k,v| not new_functions[k]}
+
+    return changed_functions, added_functions, deleted_functions
   end
 
   def compare_constraints(old_version)
@@ -443,10 +465,10 @@ class Version_class
       self.calculate_loc
     rescue
     end
+    self.extract_validate_functions
     puts "@active_files : #{@activerecord_files.size}"
   end
-
-  def print_validate_functions
+  def extract_validate_functions
     all_functions = {}
     @activerecord_files.each do |key, file|
       functions = file.functions
@@ -454,25 +476,30 @@ class Version_class
         all_functions[k] = v
       end
     end
-    contents = ""
     @activerecord_files.each do |key, file|
-      ast = file.ast
       file.getConstraints.each do |k, constraint|
         if constraint.type == Constraint::MODEL
           if constraint.instance_of? Function_constraint
             funcname = constraint.funcname
-            k = funcname
-            v = all_functions[k]
+            v = all_functions[funcname]
             if v
-              file.printFunction(k, v)
-              contents += "====start of function #{k}====\n"
-              contents += "in file: #{file.filename}\n"
-              contents += "#{v.source}\n"
-              contents += "====end of function #{k}====\n"
+              self.validation_functions[funcname] = [file, v]
             end
           end
         end
       end
+    end
+
+  end
+  def print_validate_functions
+    contents = ""
+    self.validation_functions.each do |k,value|
+      file = value[0]
+      v = value[1]
+      contents += "====start of function #{k}====\n"
+      contents += "in file: #{file.filename}\n"
+      contents += "#{v.source}\n"
+      contents += "====end of function #{k}====\n"
     end
     return contents
   end
