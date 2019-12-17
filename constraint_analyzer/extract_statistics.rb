@@ -314,7 +314,7 @@ def traverse_all_versions(application_dir, interval, tag_unit = true)
     version = versions[i]
     yaml_version = version_his_folder+version.commit.gsub("/","-")
     if File.exist?(yaml_version)
-      version = YAML.load(File.read(yaml_version))
+      version = versions[i] = YAML.load(File.read(yaml_version))
     else
       version.build
       version.clean
