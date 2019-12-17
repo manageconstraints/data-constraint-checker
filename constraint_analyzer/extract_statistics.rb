@@ -56,9 +56,11 @@ def extract_commits(directory, interval = 5, tag_unit = true)
   puts "cd #{directory}; git checkout master"
   `cd #{directory}; git checkout master`
   puts "directory #{directory}"
-  # tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
-  tags = `cd #{directory}; git tag -l --sort version:refname`
-  puts tags
+
+  tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
+  app_version_size = {"discourse"=>"316", "lobsters"=>"19", "gitlabhq"=>"1040", "redmine"=>"159", "spree"=>"261", "ror_ecommerce"=>"31", "fulcrum"=>"7", "tracks"=>"26", "onebody"=>"39", "diaspora"=>"86", "falling-fruit"=>"12", "openstreetmap-website"=>"95"}
+  app_name = directory.split("/")[-1]
+  version_size = app_version_size[app_name].to_i
   if tag_unit
     commits = tags.lines.reverse.map { |x| x.strip }
   end
@@ -81,6 +83,7 @@ def extract_commits(directory, interval = 5, tag_unit = true)
     end
     i += 1
   end
+  versions = versions.reverse[0...version_size].reverse
   puts "versions.length: #{versions.length}"
   return versions
 end
