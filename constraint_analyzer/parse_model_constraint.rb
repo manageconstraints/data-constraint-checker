@@ -47,6 +47,46 @@ def parse_model_constraint_file(ast)
         $cur_class.addForeignKey(key_field)
       end
     end
+    if funcname == "has_many" || funcname == "belongs_to" 
+      columns = []
+      dic = {}
+      puts "has_many #{ast.type}"
+      ast[1].children.each do |child|
+        if child.type.to_s == "symbol_literal"
+          column = handle_symbol_literal_node(child)
+          columns << column
+        end
+        # puts"child.type.to_s #{child.type.to_s} #{child.source}"
+        if child.type.to_s == "list"
+          child.each do |c|
+            if c.type.to_s == "assoc"
+              key, value = handle_assoc_node(c)
+              if key and value
+                dic[key] = value
+              end
+            end
+          end
+        end
+      end
+      if funcname == "has_many"
+        columns.each do |column|
+          puts "#{column} #{dic}"
+          $cur_class.addHasMany(column, dic)
+        end
+      end
+      if funcname == "belongs_to"
+        cs = []
+        columns.each do |column|
+          unless dic["optional"]&.source == "true"
+            type = Constraint::MODEL
+            constraint = Presence_constraint.new($cur_class.class_name, column, type, nil, nil)
+            cs << constraint
+            $cur_class.addConstraints(cs) if cs.length > 0
+          end
+        end
+
+      end
+    end
   end
   if ast.type.to_s == "def"
     funcname = ast[0].source
@@ -372,3 +412,4 @@ def parse_validates_each(table, type, ast)
   # puts "create parse_validates_each constriants #{constraints.size} #{constraints[0].column}-#{constraints[0].class.name}-#{type}" if constraints.size > 0
   constraints
 end
+

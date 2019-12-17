@@ -1,5 +1,5 @@
 class Version_class
-  attr_accessor :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num, :loc, :activerecord_files
+  attr_accessor :app_dir, :commit, :total_constraints_num, :db_constraints_num, :model_constraints_num, :html_constraints_num, :loc, :activerecord_files, :validation_functions
 
   def initialize(app_dir, commit)
     @app_dir = app_dir
@@ -14,6 +14,7 @@ class Version_class
     @model_constraints = []
     @html_constraints = []
     @loc = 0
+    @validation_functions = {}
   end
 
   def getDbConstraints
@@ -124,9 +125,9 @@ class Version_class
     # end
     # @activerecord_files = @files.select { |key, x| x.is_activerecord and x.getColumns.size > 0}
     # puts " ======== "
-    @activerecord_files.each do |k, v|
-      puts "#{k} #{v.getColumns.size}"
-    end
+    # @activerecord_files.each do |k, v|
+    #   puts "#{k} #{v.getColumns.size}"
+    # end
   end
 
   def get_activerecord_files
@@ -141,6 +142,27 @@ class Version_class
         # puts"\t#{column.column_name}"
       end
     end
+  end
+
+  def compare_custom_constriants(old_version)
+    changed_functions = {}
+    added_functions = {}
+    deleted_functions = {}
+    old_functions = old_version.validation_functions.map{|k,v| [k, v[1]]}.to_h
+    new_functions = self.validation_functions.map{|k,v| [k, v[1]]}.to_h
+
+    new_functions.each do |fn, ast|
+      if old_functions[fn]
+        if old_functions[fn].source != ast.source
+          changed_functions[fn] = [old_functions[fn], ast]
+        end
+      else
+        added_functions[fn] = ast
+      end
+    end
+    deleted_functions = old_functions.select{|k,v| not new_functions[k]}
+
+    return changed_functions, added_functions, deleted_functions
   end
 
   def compare_constraints(old_version)
@@ -443,10 +465,10 @@ class Version_class
       self.calculate_loc
     rescue
     end
+    self.extract_validate_functions
     puts "@active_files : #{@activerecord_files.size}"
   end
-
-  def print_validate_functions
+  def extract_validate_functions
     all_functions = {}
     @activerecord_files.each do |key, file|
       functions = file.functions
@@ -454,25 +476,30 @@ class Version_class
         all_functions[k] = v
       end
     end
-    contents = ""
     @activerecord_files.each do |key, file|
-      ast = file.ast
       file.getConstraints.each do |k, constraint|
         if constraint.type == Constraint::MODEL
           if constraint.instance_of? Function_constraint
             funcname = constraint.funcname
-            k = funcname
-            v = all_functions[k]
+            v = all_functions[funcname]
             if v
-              file.printFunction(k, v)
-              contents += "====start of function #{k}====\n"
-              contents += "in file: #{file.filename}\n"
-              contents += "#{v.source}\n"
-              contents += "====end of function #{k}====\n"
+              self.validation_functions[funcname] = [file, v]
             end
           end
         end
       end
+    end
+
+  end
+  def print_validate_functions
+    contents = ""
+    self.validation_functions.each do |k,value|
+      file = value[0]
+      v = value[1]
+      contents += "====start of function #{k}====\n"
+      contents += "in file: #{file.filename}\n"
+      contents += "#{v.source}\n"
+      contents += "====end of function #{k}====\n"
     end
     return contents
   end
@@ -498,4 +525,44 @@ class Version_class
       @loc = 0
     end
   end
+  def find_non_destroy_assoc
+    non_destroy_assocs = [] 
+    @activerecord_files.each do |key, file|
+      no_destroy_tables = file.has_many_classes.select{|k, v| not v}.map{|k,v| k}
+      puts "no_destroy_tables: #{no_destroy_tables.size}"
+      no_destroy_tables.each do |column|
+        class_name = convert_tablename(column)
+        class_class = @activerecord_files[class_name] ||  @activerecord_files["Spree"+class_name]
+        # puts "class_name: #{class_name}"
+        # puts @activerecord_files.keys
+        if class_class
+          if key.include?"Spree"
+            key = key[5..-1]
+          end
+          p_c_k = "#{class_name}-#{key.downcase}-#{Presence_constraint}-#{Constraint::MODEL}"
+          p_c_k2 = "Spree" + p_c_k
+          # puts "p_c_k #{p_c_k}"
+          # puts "#{class_class.getConstraints.map{|k,v| k}}"
+          if class_class.getConstraints[p_c_k] || class_class.getConstraints[p_c_k2]
+            non_destroy_assocs << [key, column]
+            # puts "#{p_c_k} #{non_destroy_assocs.size}"
+          end
+        end
+      end
+    end
+    return non_destroy_assocs
+  end
+  def class_with_custom_function
+    cwcf = {}
+    cnt = 0
+    @activerecord_files.each do |key, file|
+      size = file.getConstraints.select { |k,v| v.instance_of?Customized_constraint or v.instance_of?Function_constraint }.size
+      if size > 0
+        cwcf[key] = size
+        cnt += 1
+      end
+    end
+    return cwcf
+  end
 end
+

@@ -69,8 +69,21 @@ OptionParser.new do |opts|
   end
   opts.on("--count-commits", "please specify whether you want to count the average commits") do |v|
     options[:count_commits] = true
+  end  
+  opts.on("--count-destory", "please specify whether you want to count the destroy") do |v|
+    options[:destroy] = true
   end
+  opts.on("--custom-change", "please specify whether you want to check the custom function") do |v|
+    options[:custom_change] = true
+  end
+  opts.on("--if-checking", "please specify whether you want to check the custom function") do |v|
+    options[:if_checking] = true
+  end
+  
 end.parse!
+
+$read_html = true
+$read_db = true
 
 if options[:app]
   application_dir = options[:app]
@@ -88,6 +101,16 @@ if options[:tva] and options[:app] and interval
     traverse_all_versions(application_dir, interval, true)
   end
 end
+
+if options[:custom_change] and options[:app] and interval
+  puts "traverse to see custom change  options[:commit_unit] #{options[:commit_unit]}"
+  if options[:commit_unit]
+    traverse_for_custom_validation(application_dir, interval, false)
+  else
+    traverse_for_custom_validation(application_dir, interval, true)
+  end
+end
+
 if options[:single] and options[:app]
   find_mismatch_oneversion(options[:app])
 end
@@ -125,4 +148,15 @@ end
 
 if options[:count_commits] and application_dir
   count_average_commits_between_releases(application_dir)
+end
+
+if options[:destroy] and application_dir
+  count_non_destroy(application_dir)
+end
+if options[:if_checking] and application_dir
+  $read_html = false
+  $read_db = false
+  $if_output = open("../log/ifcheck.txt", "a")
+  version = Version_class.new(application_dir, "master")
+  version.build
 end
