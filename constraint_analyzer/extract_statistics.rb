@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'write_xlsx'
+require 'date'
 
 # Create a new Excel workbook
 def write_to_sheet(worksheet, api_data, format)
@@ -55,7 +56,9 @@ def extract_commits(directory, interval = 5, tag_unit = true)
   puts "cd #{directory}; git checkout master"
   `cd #{directory}; git checkout master`
   puts "directory #{directory}"
-  tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
+  # tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
+  tags = `cd #{directory}; git tag -l --sort version:refname`
+  puts tags
   if tag_unit
     commits = tags.lines.reverse.map { |x| x.strip }
   end
@@ -80,6 +83,15 @@ def extract_commits(directory, interval = 5, tag_unit = true)
   end
   puts "versions.length: #{versions.length}"
   return versions
+end
+def get_tags_before_certain_date(commit,directory)
+  tags = `cd #{directory}; git for-each-ref  --sort version:refname  --format="%(refname:short) | %(creatordate)" refs/tags/*`
+  tags = tags&.lines.map{|x| x.strip.split("|")}
+  tags = tags&.map{|a1, a2| [a1, Date.parse(a2).to_date]}
+  commit_time_str = `cd #{directory};  git show -s --format=%ci #{commit}`
+  commit_time = Date.parse(commit_time_str).to_date
+  puts "tags #{tags.size}"
+  tags.select{|a1, a2| a2 <= commit_time}.map{|a1, a2| a1}
 end
 
 def current_version_constraints_num(application_dir, commit = "master")

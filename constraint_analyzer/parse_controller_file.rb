@@ -41,7 +41,7 @@ def parse_controller_file(ast)
       parse_controller_file(child)
     end
   end
-  if ast.type.to_s == "if"
+  if ["if", "unless"].include?ast.type.to_s
     $if_output.write("===========================\n")
     $if_output.write($fn + "\n")
     $if_output.write(ast.source + "\n")  
