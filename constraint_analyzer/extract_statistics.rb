@@ -318,6 +318,7 @@ def traverse_all_versions(application_dir, interval, tag_unit = true)
       version.build
       File.open(yaml_version, 'w') { |f| f.write(YAML.dump(version)) }
     end
+    puts "Duration of reading: #{Time.now - start}"
     ncs, ccs, eccs, nccs, nmhcs = new_version.compare_constraints(version)
     # nmhcs => not matched html constraints with previous html/validate constraints
     if ncs.length > 0 or ccs.length > 0

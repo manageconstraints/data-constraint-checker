@@ -458,7 +458,11 @@ class Version_class
     end
     return num_column, num_column_has_constraints
   end
-
+  def clean
+    @activerecord_files.each do |key, file|
+      file.ast = nil
+    end
+  end
   def build
     self.extract_files
     self.annotate_model_class
