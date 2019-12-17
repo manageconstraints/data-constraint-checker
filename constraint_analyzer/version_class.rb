@@ -459,8 +459,16 @@ class Version_class
     return num_column, num_column_has_constraints
   end
   def clean
+    @files = nil
+    @validation_functions = nil
     @activerecord_files.each do |key, file|
       file.ast = nil
+      file.functions = nil
+      file.contents = nil
+      file&.getColumns.each do |name, column|
+        column.file_class&.ast = nil
+        column.prev_column&.file_class&.ast = nil
+      end
     end
   end
   def build

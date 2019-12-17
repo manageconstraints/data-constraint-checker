@@ -291,6 +291,7 @@ def traverse_all_versions(application_dir, interval, tag_unit = true)
     versions[0] = YAML.load(File.read(yaml_version))
   else
     versions[0].build
+    versions[0].clean
     File.open(yaml_version, 'w') { |f| f.write(YAML.dump(versions[0])) }
   end
   output = open("../log/output_#{app_name}.log", "w")
@@ -316,6 +317,7 @@ def traverse_all_versions(application_dir, interval, tag_unit = true)
       version = YAML.load(File.read(yaml_version))
     else
       version.build
+      version.clean
       File.open(yaml_version, 'w') { |f| f.write(YAML.dump(version)) }
     end
     puts "Duration of reading: #{Time.now - start}"
