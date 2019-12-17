@@ -53,8 +53,8 @@ end
 
 def extract_commits(directory, interval = 5, tag_unit = true)
   # reset to the most up to date commit
-  puts "cd #{directory}; git checkout master"
-  `cd #{directory}; git checkout master`
+  puts "cd #{directory}; git checkout -f master"
+  `cd #{directory}; git checkout -f master`
   puts "directory #{directory}"
 
   tags = `cd #{directory}; git for-each-ref --sort=taggerdate --format '%(refname)' refs/tags`
@@ -98,7 +98,7 @@ def get_tags_before_certain_date(commit,directory)
 end
 
 def current_version_constraints_num(application_dir, commit = "master")
-  `cd #{application_dir}; git checkout #{commit}`
+  `cd #{application_dir}; git checkout -f #{commit}`
   version = Version_class.new(application_dir, commit)
   version.build
   version.column_stats
@@ -110,11 +110,13 @@ def current_version_constraints_num(application_dir, commit = "master")
       puts "#{tables[0].to_string}"
     end
   end
+  commit_hash = `cd #{application_dir}; git rev-parse HEAD`
+  puts "commit_hash: #{commit_hash}"
   puts "Latest Version Constraint Breakdown: #{version.loc} #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num} columnstats: #{version.column_stats}"
 end
 
 def print_validate_functions(application_dir, commit = "master")
-  `cd #{application_dir}; git checkout #{commit}`
+  `cd #{application_dir}; git checkout -f #{commit}`
   version = Version_class.new(application_dir, commit)
   version.build
   contents = version.print_validate_functions
@@ -126,7 +128,7 @@ def print_validate_functions(application_dir, commit = "master")
 end
 
 def first_last_version_comparison_on_num(application_dir)
-  `cd #{application_dir}; git stash; git checkout master`
+  `cd #{application_dir}; git stash; git checkout -f master`
   versions = extract_commits(application_dir, 1, false)
   if versions.length <= 0
     puts "No versions"
@@ -147,13 +149,15 @@ def api_breakdown(application_dir)
   # `cd #{application_dir}; git checkout -f #{commit}`
   # version = Version_class.new(application_dir, commit)
   # `cd #{application_dir}; git stash; git pull; git checkout master`
-  `cd #{application_dir}; git stash;  git checkout master`
-  versions = extract_commits(application_dir, 1, false)
-  if versions.length <= 0
-    puts "No versions"
-    return
-  end
-  version = versions[0]
+  `cd #{application_dir}; git stash;  git checkout -f master`
+  version = Version_class.new(application_dir, commit)
+  
+  # versions = extract_commits(application_dir, 1, false)
+  # if versions.length <= 0
+  #   puts "No versions"
+  #   return
+  # end
+  # version = versions[0]
   version.build
   db_constraints = version.getDbConstraints
   model_constraints = version.getModelConstraints
@@ -165,6 +169,8 @@ def api_breakdown(application_dir)
   model_dic = api_type_breakdown(model_constraints)
   html_dic = api_type_breakdown(html_constraints)
   # output the result to log file
+  commit_hash =  `cd #{application_dir}; git rev-parse HEAD`
+  output.write("commit_hash #{commit_hash}")
   output.write("=======START BREAKDOWN of API\n")
   output.write("constraint_type #db #model #html\n")
   output.write("Layer_breakdown: #{version.total_constraints_num} #{version.db_constraints_num} #{version.model_constraints_num} #{version.html_constraints_num}\n")
@@ -380,14 +386,14 @@ end
 
 # in latest version
 def find_mismatch_oneversion(directory, commit = "master")
-  `cd #{directory}; git checkout #{commit}`
+  `cd #{directory}; git checkout -f #{commit}`
   version = Version_class.new(directory, commit)
   version.build
   version.compare_self
 end
 
 def count_non_destroy(directory, commit = "master")
-  `cd #{directory}; git checkout #{commit}`
+  `cd #{directory}; git checkout -f #{commit}`
   version = Version_class.new(directory, commit)
   version.build
   nda = version.find_non_destroy_assoc
